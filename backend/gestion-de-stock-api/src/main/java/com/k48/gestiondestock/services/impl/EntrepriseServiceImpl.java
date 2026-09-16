@@ -47,9 +47,15 @@ public class EntrepriseServiceImpl implements EntrepriseService {
       log.error("Entreprise is not valid {}", dto);
       throw new InvalidEntityException("L'entreprise n'est pas valide", ErrorCodes.ENTREPRISE_NOT_VALID, errors);
     }
+    final boolean creation = dto.getId() == null;
     EntrepriseDto savedEntreprise = EntrepriseDto.fromEntity(
         entrepriseRepository.save(EntrepriseDto.toEntity(dto))
     );
+
+    // L'administrateur n'est cree qu'a l'inscription : une modification ne doit pas en creer un second
+    if (!creation) {
+      return savedEntreprise;
+    }
 
     UtilisateurDto utilisateur = fromEntreprise(savedEntreprise);
 

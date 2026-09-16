@@ -10,6 +10,7 @@ import com.k48.gestiondestock.services.MvtStkService;
 import com.k48.gestiondestock.validator.MvtStkValidator;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,8 @@ public class MvtStkServiceImpl implements MvtStkService {
       return BigDecimal.valueOf(-1);
     }
     articleService.findById(idArticle);
-    return repository.stockReelArticle(idArticle);
+    // Sans mouvement, la somme SQL vaut NULL : le stock est alors de 0
+    return Optional.ofNullable(repository.stockReelArticle(idArticle)).orElse(BigDecimal.ZERO);
   }
 
   @Override
