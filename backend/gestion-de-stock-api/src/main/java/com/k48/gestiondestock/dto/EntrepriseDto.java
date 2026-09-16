@@ -1,31 +1,46 @@
 package com.k48.gestiondestock.dto;
 
-import com.k48.gestiondestock.model.Entreprise;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.k48.gestiondestock.model.Entreprise;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(description = "Entreprise utilisatrice de l'application")
 public class EntrepriseDto {
 
+  @Schema(description = "Identifiant (laisser vide pour une création)", example = "1")
   private Integer id;
 
+  @Schema(example = "K48 Distribution", requiredMode = Schema.RequiredMode.REQUIRED)
   private String nom;
 
+  @Schema(example = "Distribution de matériel informatique", requiredMode = Schema.RequiredMode.REQUIRED)
   private String description;
 
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   private AdresseDto adresse;
 
+  @Schema(description = "Numéro d'identification fiscale", example = "M012345678901A", requiredMode = Schema.RequiredMode.REQUIRED)
   private String codeFiscal;
 
+  @Schema(description = "URL du logo, renseignée par l'endpoint Photos (à renvoyer telle quelle lors d'une modification)")
   private String photo;
 
+  @Schema(description = "Email de l'entreprise, utilisé comme identifiant de l'administrateur créé", example = "contact@k48.com", requiredMode = Schema.RequiredMode.REQUIRED)
   private String email;
 
+  @Schema(description = "Numéro de téléphone", example = "+237 690 00 00 00", requiredMode = Schema.RequiredMode.REQUIRED)
   private String numTel;
 
+  @Schema(description = "Site web", example = "https://www.k48.com")
   private String steWeb;
 
 

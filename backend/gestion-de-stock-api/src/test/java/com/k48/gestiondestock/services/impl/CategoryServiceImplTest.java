@@ -9,21 +9,18 @@ import com.k48.gestiondestock.exception.EntityNotFoundException;
 import com.k48.gestiondestock.exception.ErrorCodes;
 import com.k48.gestiondestock.exception.InvalidEntityException;
 import com.k48.gestiondestock.services.CategoryService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
-public class CategoryServiceImplTest {
+class CategoryServiceImplTest {
 
   @Autowired
   private CategoryService service;
 
   @Test
-  public void shouldSaveCategoryWithSuccess() {
+  void shouldSaveCategoryWithSuccess() {
     CategoryDto expectedCategory = CategoryDto.builder()
         .code("Cat test")
         .designation("Designation test")
@@ -40,7 +37,7 @@ public class CategoryServiceImplTest {
   }
 
   @Test
-  public void shouldUpdateCategoryWithSuccess() {
+  void shouldUpdateCategoryWithSuccess() {
     CategoryDto expectedCategory = CategoryDto.builder()
         .code("Cat test")
         .designation("Designation test")
@@ -62,7 +59,7 @@ public class CategoryServiceImplTest {
   }
 
   @Test
-  public void shouldThrowInvalidEntityException() {
+  void shouldThrowInvalidEntityException() {
     CategoryDto expectedCategory = CategoryDto.builder().build();
 
     InvalidEntityException expectedException = assertThrows(InvalidEntityException.class, () -> service.save(expectedCategory));
@@ -73,16 +70,16 @@ public class CategoryServiceImplTest {
   }
 
   @Test
-  public void shouldThrowEntityNotFoundException() {
+  void shouldThrowEntityNotFoundException() {
     EntityNotFoundException expectedException = assertThrows(EntityNotFoundException.class, () -> service.findById(0));
 
     assertEquals(ErrorCodes.CATEGORY_NOT_FOUND, expectedException.getErrorCode());
     assertEquals("Aucune category avec l'ID = 0 n' ete trouve dans la BDD", expectedException.getMessage());
   }
 
-  @Test(expected = EntityNotFoundException.class)
-  public void shouldThrowEntityNotFoundException2() {
-    service.findById(0);
+  @Test
+  void shouldThrowEntityNotFoundException2() {
+    assertThrows(EntityNotFoundException.class, () -> service.findById(0));
   }
 
 }

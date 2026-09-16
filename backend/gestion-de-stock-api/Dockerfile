@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---- Build ----
-FROM maven:3.9-eclipse-temurin-11 AS build
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
@@ -9,7 +9,7 @@ COPY src ./src
 RUN --mount=type=cache,target=/root/.m2 mvn -B -DskipTests package
 
 # ---- Runtime ----
-FROM eclipse-temurin:11-jre
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 RUN groupadd --system spring && useradd --system --gid spring spring
 COPY --from=build /app/target/*.jar app.jar

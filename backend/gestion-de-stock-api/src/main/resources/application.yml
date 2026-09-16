@@ -1,24 +1,25 @@
 # Les valeurs sont lues depuis les variables d'environnement (voir .env.example a la racine du depot).
 # Syntaxe : ${VARIABLE:valeur_par_defaut} ; sans valeur par defaut, la variable est obligatoire.
 spring:
+  application:
+    name: gestion-de-stock-api
   datasource:
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:gestionstock}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=UTC
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
-  ## Specify DBMS
   jpa:
-    database: MYSQL
     show-sql: ${JPA_SHOW_SQL:false}
-    properties:
-      hibernate:
-        session_factory:
-          interceptor: com.k48.gestiondestock.interceptor.Interceptor
-
+    # Garde la session Hibernate ouverte pendant la requete HTTP : les DTO lisent des relations "lazy" hors transaction
+    open-in-view: true
     # Hibernate DDL Auto (create, create-drop, update, validate, none)
     hibernate:
       ddl-auto: ${JPA_DDL_AUTO:update}
-      dialect: org.hibernate.dialect.MySQL5Dialect
+    # Les crochets conservent les "_" dans les noms de proprietes Hibernate
+    properties:
+      "[hibernate.jdbc.time_zone]": UTC
+      # Filtre multi-entreprise ajoute a chaque SELECT
+      "[hibernate.session_factory.statement_inspector]": com.k48.gestiondestock.interceptor.EntrepriseStatementInspector
 
   # Pret pour le futur module de mailing (Mailpit en local)
   mail:
@@ -28,12 +29,30 @@ spring:
 server:
   port: ${SERVER_PORT:8081}
 
+# Documentation OpenAPI : /swagger-ui.html (interface) et /v3/api-docs (JSON)
+# SWAGGER_ENABLED=false pour masquer la documentation en production
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:true}
+    path: /v3/api-docs
+  default-produces-media-type: application/json
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:true}
+    path: /swagger-ui.html
+    # Garde le jeton saisi dans "Authorize" apres un rechargement de la page
+    persist-authorization: true
+    display-request-duration: true
+    operations-sorter: method
+    tags-sorter: alpha
+
 jwt:
-  # Cle encodee en base64 (ex : openssl rand -base64 64)
+  # Cle encodee en base64, au moins 32 octets (ex : openssl rand -base64 48)
   secret: ${JWT_SECRET}
   expiration-ms: ${JWT_EXPIRATION_MS:36000000}
 
 app:
+  # Remplace par la version du pom.xml lors du build Maven
+  version: "@project.version@"
   cors:
     # Liste separee par des virgules (ex : http://localhost:4200,http://localhost:3000)
     allowed-origins: ${CORS_ALLOWED_ORIGINS:*}

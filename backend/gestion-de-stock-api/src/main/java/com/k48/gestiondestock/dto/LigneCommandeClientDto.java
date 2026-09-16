@@ -1,26 +1,37 @@
 package com.k48.gestiondestock.dto;
 
-import com.k48.gestiondestock.model.LigneCommandeClient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.k48.gestiondestock.model.LigneCommandeClient;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(description = "Ligne d'une commande client")
 public class LigneCommandeClientDto {
 
+  @Schema(description = "Identifiant (laisser vide pour une création)", example = "1")
   private Integer id;
 
+  @Schema(description = "Article commandé (seul son identifiant est nécessaire)")
   private ArticleDto article;
 
   @JsonIgnore
   private CommandeClientDto commandeClient;
 
+  @Schema(description = "Quantité commandée", example = "2")
   private BigDecimal quantite;
 
+  @Schema(description = "Prix unitaire appliqué", example = "11925")
   private BigDecimal prixUnitaire;
 
+  @Schema(description = "Identifiant de l'entreprise propriétaire", example = "1")
   private Integer idEntreprise;
 
   public static LigneCommandeClientDto fromEntity(LigneCommandeClient ligneCommandeClient) {

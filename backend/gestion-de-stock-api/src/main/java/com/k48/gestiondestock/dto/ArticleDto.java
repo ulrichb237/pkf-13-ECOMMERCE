@@ -1,30 +1,45 @@
 package com.k48.gestiondestock.dto;
 
 import com.k48.gestiondestock.model.Article;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(description = "Article du catalogue")
 public class ArticleDto {
 
+  @Schema(description = "Identifiant (laisser vide pour une création)", example = "1")
   private Integer id;
 
+  @Schema(description = "Code unique de l'article", example = "ART-001", requiredMode = Schema.RequiredMode.REQUIRED)
   private String codeArticle;
 
+  @Schema(description = "Libellé de l'article", example = "Clavier sans fil", requiredMode = Schema.RequiredMode.REQUIRED)
   private String designation;
 
+  @Schema(description = "Prix unitaire hors taxes", example = "10000", requiredMode = Schema.RequiredMode.REQUIRED)
   private BigDecimal prixUnitaireHt;
 
+  @Schema(description = "Taux de TVA en pourcentage", example = "19.25", requiredMode = Schema.RequiredMode.REQUIRED)
   private BigDecimal tauxTva;
 
+  @Schema(description = "Prix unitaire toutes taxes comprises", example = "11925", requiredMode = Schema.RequiredMode.REQUIRED)
   private BigDecimal prixUnitaireTtc;
 
+  @Schema(description = "URL de la photo, renseignée par l'endpoint Photos (à renvoyer telle quelle lors d'une modification)")
   private String photo;
 
+  @Schema(description = "Catégorie de l'article (seul son identifiant est nécessaire)", requiredMode = Schema.RequiredMode.REQUIRED)
   private CategoryDto category;
 
+  @Schema(description = "Identifiant de l'entreprise propriétaire", example = "1")
   private Integer idEntreprise;
 
   public static ArticleDto fromEntity(Article article) {

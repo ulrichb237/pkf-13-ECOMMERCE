@@ -48,8 +48,8 @@ public class ArticleController implements ArticleApi {
   }
 
   @Override
-  public List<LigneCommandeClientDto> findHistoriaueCommandeClient(Integer idArticle) {
-    return articleService.findHistoriaueCommandeClient(idArticle);
+  public List<LigneCommandeClientDto> findHistoriqueCommandeClient(Integer idArticle) {
+    return articleService.findHistoriqueCommandeClient(idArticle);
   }
 
   @Override

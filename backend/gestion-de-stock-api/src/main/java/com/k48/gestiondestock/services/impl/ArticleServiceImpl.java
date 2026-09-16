@@ -104,7 +104,7 @@ public class ArticleServiceImpl implements ArticleService {
   }
 
   @Override
-  public List<LigneCommandeClientDto> findHistoriaueCommandeClient(Integer idArticle) {
+  public List<LigneCommandeClientDto> findHistoriqueCommandeClient(Integer idArticle) {
     return commandeClientRepository.findAllByArticleId(idArticle).stream()
         .map(LigneCommandeClientDto::fromEntity)
         .collect(Collectors.toList());

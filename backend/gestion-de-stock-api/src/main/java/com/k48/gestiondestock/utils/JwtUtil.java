@@ -3,11 +3,13 @@ package com.k48.gestiondestock.utils;
 import com.k48.gestiondestock.model.auth.ExtendedUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -41,7 +43,12 @@ public class JwtUtil {
   }
 
   private Claims extractAllClaims(String token) {
-    return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+    return Jwts.parser().verifyWith(signingKey()).build().parseSignedClaims(token).getPayload();
+  }
+
+  // La cle JWT_SECRET est encodee en base64 et doit faire au moins 256 bits (32 octets)
+  private SecretKey signingKey() {
+    return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
   }
 
   private Boolean isTokenExpired(String token) {
@@ -55,12 +62,12 @@ public class JwtUtil {
 
   private String createToken(Map<String, Object> claims, ExtendedUser userDetails) {
 
-    return Jwts.builder().setClaims(claims)
-        .setSubject(userDetails.getUsername())
-        .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+    return Jwts.builder().claims(claims)
+        .subject(userDetails.getUsername())
+        .issuedAt(new Date(System.currentTimeMillis()))
+        .expiration(new Date(System.currentTimeMillis() + expirationMs))
         .claim("idEntreprise", userDetails.getIdEntreprise().toString())
-        .signWith(SignatureAlgorithm.HS256, secretKey).compact();
+        .signWith(signingKey(), Jwts.SIG.HS256).compact();
   }
 
   public Boolean validateToken(String token, UserDetails userDetails) {

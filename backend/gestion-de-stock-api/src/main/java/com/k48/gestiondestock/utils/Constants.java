@@ -2,22 +2,29 @@ package com.k48.gestiondestock.utils;
 
 public interface Constants {
 
-  String APP_ROOT = "gestiondestock/v1";
+  String API_V1 = "/api/v1";
 
-  String COMMANDE_FOURNISSEUR_ENDPOINT = APP_ROOT + "/commandesfournisseurs";
-  String CREATE_COMMANDE_FOURNISSEUR_ENDPOINT = COMMANDE_FOURNISSEUR_ENDPOINT + "/create";
-  String FIND_COMMANDE_FOURNISSEUR_BY_ID_ENDPOINT = COMMANDE_FOURNISSEUR_ENDPOINT + "/{idCommandeFournisseur}";
-  String FIND_COMMANDE_FOURNISSEUR_BY_CODE_ENDPOINT = COMMANDE_FOURNISSEUR_ENDPOINT + "/filter/{codeCommandeFournisseur}";
-  String FIND_ALL_COMMANDE_FOURNISSEUR_ENDPOINT = COMMANDE_FOURNISSEUR_ENDPOINT + "/all";
-  String DELETE_COMMANDE_FOURNISSEUR_ENDPOINT = COMMANDE_FOURNISSEUR_ENDPOINT + "/delete/{idCommandeFournisseur}";
+  String ARTICLES_ENDPOINT = API_V1 + "/articles";
 
-  String ENTREPRISE_ENDPOINT = APP_ROOT + "/entreprises";
+  String AUTHENTIFICATION_ENDPOINT = API_V1 + "/authentification";
 
-  String FOURNISSEUR_ENDPOINT = APP_ROOT + "/fournisseurs";
+  String CATEGORIES_ENDPOINT = API_V1 + "/categories";
 
-  String UTILISATEUR_ENDPOINT = APP_ROOT + "/utilisateurs";
+  String CLIENTS_ENDPOINT = API_V1 + "/clients";
 
-  String VENTES_ENDPOINT = APP_ROOT + "/ventes";
+  String COMMANDES_CLIENTS_ENDPOINT = API_V1 + "/commandes-clients";
 
-  String AUTHENTICATION_ENDPOINT = APP_ROOT + "/auth";
+  String COMMANDES_FOURNISSEURS_ENDPOINT = API_V1 + "/commandes-fournisseurs";
+
+  String ENTREPRISES_ENDPOINT = API_V1 + "/entreprises";
+
+  String FOURNISSEURS_ENDPOINT = API_V1 + "/fournisseurs";
+
+  String MOUVEMENTS_STOCK_ENDPOINT = API_V1 + "/mouvements-stock";
+
+  String PHOTOS_ENDPOINT = API_V1 + "/photos";
+
+  String UTILISATEURS_ENDPOINT = API_V1 + "/utilisateurs";
+
+  String VENTES_ENDPOINT = API_V1 + "/ventes";
 }

@@ -1,21 +1,32 @@
 package com.k48.gestiondestock.dto;
 
 import com.k48.gestiondestock.model.Adresse;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(description = "Adresse postale")
 public class AdresseDto {
 
+  @Schema(description = "Numéro et rue", example = "12 rue des Palmiers", requiredMode = Schema.RequiredMode.REQUIRED)
   private String adresse1;
 
+  @Schema(description = "Complément d'adresse", example = "Bâtiment B")
   private String adresse2;
 
+  @Schema(example = "Douala", requiredMode = Schema.RequiredMode.REQUIRED)
   private String ville;
 
+  @Schema(description = "Code postal", example = "00237")
   private String codePostale;
 
+  @Schema(example = "Cameroun", requiredMode = Schema.RequiredMode.REQUIRED)
   private String pays;
 
   public static AdresseDto fromEntity(Adresse adresse) {

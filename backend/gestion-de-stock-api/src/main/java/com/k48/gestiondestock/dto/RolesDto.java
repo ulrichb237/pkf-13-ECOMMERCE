@@ -1,16 +1,24 @@
 package com.k48.gestiondestock.dto;
 
-import com.k48.gestiondestock.model.Roles;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.k48.gestiondestock.model.Roles;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(description = "Rôle attribué à un utilisateur")
 public class RolesDto {
 
+  @Schema(description = "Identifiant", example = "1")
   private Integer id;
 
+  @Schema(description = "Nom du rôle", example = "ADMIN")
   private String roleName;
 
   @JsonIgnore

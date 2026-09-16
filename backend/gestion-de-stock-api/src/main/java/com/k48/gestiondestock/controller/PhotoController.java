@@ -19,7 +19,7 @@ public class PhotoController implements PhotoApi {
   }
 
   @Override
-  public Object savePhoto(String context, Integer id, MultipartFile photo, String title) throws IOException, FlickrException {
-    return strategyPhotoContext.savePhoto(context, id, photo.getInputStream(), title);
+  public Object savePhoto(String contexte, Integer id, String titre, MultipartFile fichier) throws IOException, FlickrException {
+    return strategyPhotoContext.savePhoto(contexte, id, fichier.getInputStream(), titre);
   }
 }

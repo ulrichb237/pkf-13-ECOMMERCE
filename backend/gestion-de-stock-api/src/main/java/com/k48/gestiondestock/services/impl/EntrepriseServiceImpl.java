@@ -14,7 +14,7 @@ import com.k48.gestiondestock.validator.EntrepriseValidator;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

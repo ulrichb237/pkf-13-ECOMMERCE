@@ -1,88 +1,79 @@
 package com.k48.gestiondestock.config;
 
+import static com.k48.gestiondestock.utils.Constants.AUTHENTIFICATION_ENDPOINT;
+import static com.k48.gestiondestock.utils.Constants.ENTREPRISES_ENDPOINT;
+
 import com.k48.gestiondestock.services.auth.ApplicationUserDetailsService;
-import java.util.Arrays;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
+@Configuration
 @EnableWebSecurity
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-
-  @Autowired
-  private ApplicationUserDetailsService applicationUserDetailsService;
-
-  @Autowired
-  private ApplicationRequestFilter applicationRequestFilter;
+public class SecurityConfiguration {
 
   @Value("${app.cors.allowed-origins}")
   private List<String> allowedOrigins;
 
-  @Override
-  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    auth.userDetailsService(applicationUserDetailsService)
-    .passwordEncoder(passwordEncoder())
-    ;
-  }
-
-  @Override
-  protected void configure(HttpSecurity http) throws Exception {
-    http.addFilterBefore(corsFilter(), SessionManagementFilter.class)
-        .csrf().disable()
-        .authorizeRequests().antMatchers("/**/authenticate",
-        "/**/entreprises/create",
-        "/v2/api-docs",
-        "/swagger-resources",
-        "/swagger-resources/**",
-        "/configuration/ui",
-        "/configuration/security",
-        "/swagger-ui.html",
-        "/webjars/**",
-        "/v3/api-docs/**",
-        "/swagger-ui/**").permitAll()
-        .anyRequest().authenticated()
-        .and().sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-    ;
-
-    http.addFilterBefore(applicationRequestFilter, UsernamePasswordAuthenticationFilter.class);
+  // Les dependances sont injectees en parametres des methodes @Bean pour eviter une reference circulaire
+  // (ApplicationRequestFilter -> UtilisateurService -> PasswordEncoder -> SecurityConfiguration)
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http, ApplicationRequestFilter applicationRequestFilter) throws Exception {
+    http
+        .cors(Customizer.withDefaults())
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(HttpMethod.POST, AUTHENTIFICATION_ENDPOINT + "/connexion", ENTREPRISES_ENDPOINT).permitAll()
+            .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/error").permitAll()
+            .anyRequest().authenticated())
+        // Sans jeton valide, l'API repond 401 (et non 403)
+        .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+        .addFilterBefore(applicationRequestFilter, UsernamePasswordAuthenticationFilter.class);
+    return http.build();
   }
 
   @Bean
-  public CorsFilter corsFilter() {
-    final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+  public CorsConfigurationSource corsConfigurationSource() {
     final CorsConfiguration config = new CorsConfiguration();
     config.setAllowCredentials(true);
     // En production, definir CORS_ALLOWED_ORIGINS avec la liste des origines autorisees
     config.setAllowedOriginPatterns(allowedOrigins);
-    config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization"));
-    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH"));
+    config.setAllowedHeaders(List.of("Origin", "Content-Type", "Accept", "Authorization"));
+    config.setAllowedMethods(List.of("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH"));
+    final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", config);
-    // some comment here
-    return new CorsFilter(source);
+    return source;
   }
 
   @Bean
-  public AuthenticationManager customAuthenticationManager() throws Exception {
-    return authenticationManagerBean();
+  public AuthenticationManager authenticationManager(ApplicationUserDetailsService applicationUserDetailsService,
+      PasswordEncoder passwordEncoder) {
+    DaoAuthenticationProvider provider = new DaoAuthenticationProvider(applicationUserDetailsService);
+    provider.setPasswordEncoder(passwordEncoder);
+    return new ProviderManager(provider);
   }
 
   @Bean
-  public PasswordEncoder passwordEncoder() {
+  public static PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
 }
