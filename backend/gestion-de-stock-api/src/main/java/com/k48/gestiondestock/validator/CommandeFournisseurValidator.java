@@ -23,7 +23,7 @@ public class CommandeFournisseurValidator {
     if (dto.getDateCommande() == null) {
       errors.add("Veuillez renseigner la date de la commande");
     }
-    if (!StringUtils.hasLength(dto.getEtatCommande().toString())) {
+    if (dto.getEtatCommande() == null) {
       errors.add("Veuillez renseigner l'etat de la commande");
     }
     if (dto.getFournisseur() == null || dto.getFournisseur().getId() == null) {

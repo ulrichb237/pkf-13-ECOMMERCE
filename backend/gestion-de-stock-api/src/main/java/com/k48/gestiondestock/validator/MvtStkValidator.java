@@ -4,7 +4,6 @@ import com.k48.gestiondestock.dto.MvtStkDto;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.util.StringUtils;
 
 public class MvtStkValidator {
 
@@ -27,7 +26,7 @@ public class MvtStkValidator {
     if (dto.getArticle() == null || dto.getArticle().getId() == null) {
       errors.add("Veuillez renseigner l'article");
     }
-    if (!StringUtils.hasLength(dto.getTypeMvt().name())) {
+    if (dto.getTypeMvt() == null) {
       errors.add("Veuillez renseigner le type du mouvement");
     }
 
