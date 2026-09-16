@@ -1,0 +1,7 @@
+# Variables d'environnement (contient des secrets)
+.env
+
+### IDE ###
+.idea/
+.vscode/
+*.iml

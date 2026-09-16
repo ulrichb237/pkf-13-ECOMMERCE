@@ -1,0 +1,48 @@
+# Les valeurs sont lues depuis les variables d'environnement (voir .env.example a la racine du depot).
+# Syntaxe : ${VARIABLE:valeur_par_defaut} ; sans valeur par defaut, la variable est obligatoire.
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:gestionstock}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=UTC
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  ## Specify DBMS
+  jpa:
+    database: MYSQL
+    show-sql: ${JPA_SHOW_SQL:false}
+    properties:
+      hibernate:
+        session_factory:
+          interceptor: com.bouali.gestiondestock.interceptor.Interceptor
+
+    # Hibernate DDL Auto (create, create-drop, update, validate, none)
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+      dialect: org.hibernate.dialect.MySQL5Dialect
+
+  # Pret pour le futur module de mailing (Mailpit en local)
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+
+server:
+  port: ${SERVER_PORT:8081}
+
+jwt:
+  # Cle encodee en base64 (ex : openssl rand -base64 64)
+  secret: ${JWT_SECRET}
+  expiration-ms: ${JWT_EXPIRATION_MS:36000000}
+
+app:
+  cors:
+    # Liste separee par des virgules (ex : http://localhost:4200,http://localhost:3000)
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:*}
+  entreprise:
+    # Mot de passe attribue a l'utilisateur admin cree avec une entreprise
+    default-password: ${ENTREPRISE_DEFAULT_PASSWORD}
+
+flickr:
+  apiKey: ${FLICKR_API_KEY}
+  apiSecret: ${FLICKR_API_SECRET}
+  appKey: ${FLICKR_APP_KEY}
+  appSecret: ${FLICKR_APP_SECRET}
