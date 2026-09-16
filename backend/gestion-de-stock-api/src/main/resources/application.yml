@@ -13,7 +13,7 @@ spring:
     properties:
       hibernate:
         session_factory:
-          interceptor: com.bouali.gestiondestock.interceptor.Interceptor
+          interceptor: com.k48.gestiondestock.interceptor.Interceptor
 
     # Hibernate DDL Auto (create, create-drop, update, validate, none)
     hibernate:

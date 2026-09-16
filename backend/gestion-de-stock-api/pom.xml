@@ -8,13 +8,15 @@
     <version>2.4.2</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
-  <groupId>com.bouali</groupId>
+  <groupId>com.k48</groupId>
   <artifactId>gestiondestock</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>API_Gestion_de_stock</name>
   <description>API de gestion de stock</description>
   <properties>
     <java.version>11</java.version>
+    <!-- La version fournie par Spring Boot 2.4.2 (1.18.16) ne compile pas avec un JDK 17+ -->
+    <lombok.version>1.18.46</lombok.version>
   </properties>
   <dependencies>
     <dependency>
@@ -102,7 +104,7 @@
             <apiSource>
               <springmvc>true</springmvc>
               <locations>
-                <location>com.bouali.gestiondestock.controller.api</location>
+                <location>com.k48.gestiondestock.controller.api</location>
               </locations>
               <basePath>http://localhost:8081</basePath>
               <info>
@@ -110,9 +112,7 @@
                 <version>${project.version}</version>
                 <description>Swagger Api documentation for Gestion de stock application</description>
                 <contact>
-                  <email>bouali.social@gmail.com</email>
-                  <name>Ali Bouali</name>
-                  <url>https://www.udemy.com/user/bouali-ali/</url>
+                  <name>K48</name>
                 </contact>
               </info>
               <outputPath>${project.build.directory}</outputPath>
