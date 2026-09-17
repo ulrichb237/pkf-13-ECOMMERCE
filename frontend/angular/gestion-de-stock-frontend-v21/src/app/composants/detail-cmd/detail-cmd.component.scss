@@ -1,0 +1,31 @@
+/* Edition de quantite inline */
+.qte-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.qte-input {
+  min-height: 28px;
+  width: 64px;
+  padding: 2px 6px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.qte-btn {
+  min-width: 44px;
+  /* indique que la quantite est cliquable */
+  border-bottom: 1px dashed var(--clr-hairline-input);
+}
+
+.qte-btn:disabled {
+  color: var(--clr-ink);
+  cursor: default;
+  border-bottom: none;
+}
+
+.cmd-ligne-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

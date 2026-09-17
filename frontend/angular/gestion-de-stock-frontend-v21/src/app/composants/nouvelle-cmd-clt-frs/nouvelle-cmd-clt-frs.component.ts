@@ -1,6 +1,6 @@
 import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnInit, signal} from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {CltfrsService} from '../../services/cltfrs/cltfrs.service';
 import {ArticleDto} from '../../../gs-api/src/models/article-dto';
@@ -30,8 +30,9 @@ export class NouvelleCmdCltFrsComponent implements OnInit {
   quantite = '';
   codeCommande = '';
 
-  lignesCommande: Array<any> = [];
-  totalCommande = 0;
+  /** Lignes locales de la commande en creation (signal, recree a chaque mutation) */
+  readonly lignesCommande = signal<Array<any>>([]);
+  readonly totalCommande = signal(0);
   articleNotYetSelected = false;
   errorMsg: string = '';
 
@@ -91,32 +92,47 @@ export class NouvelleCmdCltFrsComponent implements OnInit {
     this.findAllArticles();
   }
 
+  /** Retire une ligne locale (avant enregistrement de la commande) */
+  retirerLigne(ligne: LigneCommandeClientDto): void {
+    this.lignesCommande.update(list => list.filter(l => l !== ligne));
+    this.calculerTotalCommande();
+  }
+
+  /** Met a jour la quantite d'une ligne locale (avant enregistrement) */
+  majQuantiteLigne(event: { ligne: LigneCommandeClientDto; quantite: number }): void {
+    event.ligne.quantite = event.quantite;
+    // Nouvelle reference de tableau pour la reactivite OnPush
+    this.lignesCommande.update(list => [...list]);
+    this.calculerTotalCommande();
+  }
+
   calculerTotalCommande(): void {
-    this.totalCommande = 0;
-    this.lignesCommande.forEach(ligne => {
+    let total = 0;
+    this.lignesCommande().forEach(ligne => {
       if (ligne.prixUnitaire && ligne.quantite) {
-        this.totalCommande += +ligne.prixUnitaire * +ligne.quantite;
+        total += +ligne.prixUnitaire * +ligne.quantite;
       }
     });
+    this.totalCommande.set(total);
   }
 
   private checkLigneCommande(): void {
-    const ligneCmdAlreadyExists = this.lignesCommande.find(lig => lig.article?.codeArticle === this.searchedArticle.codeArticle);
-    if (ligneCmdAlreadyExists) {
-      this.lignesCommande.forEach(lig => {
-        if (lig && lig.article?.codeArticle === this.searchedArticle.codeArticle) {
-          // @ts-ignore
-          lig.quantite = lig.quantite + +this.quantite;
-        }
-      });
-    } else {
+    this.lignesCommande.update(list => {
+      const ligneCmdAlreadyExists = list.find(lig => lig.article?.codeArticle === this.searchedArticle.codeArticle);
+      if (ligneCmdAlreadyExists) {
+        return list.map(lig =>
+          lig.article?.codeArticle === this.searchedArticle.codeArticle
+            ? { ...lig, quantite: +lig.quantite! + +this.quantite }
+            : lig
+        );
+      }
       const ligneCmd: LigneCommandeClientDto = {
         article: this.searchedArticle,
         prixUnitaire: this.searchedArticle.prixUnitaireTtc,
         quantite: +this.quantite
       };
-      this.lignesCommande.push(ligneCmd);
-    }
+      return [...list, ligneCmd];
+    });
   }
 
   selectArticleClick(article: ArticleDto): void {
@@ -158,7 +174,7 @@ export class NouvelleCmdCltFrsComponent implements OnInit {
         // est interprete comme des secondes et rejete par MySQL pour ventes/mouvements
         dateCommande: new Date().toISOString(),
         etatCommande: 'EN_PREPARATION',
-        ligneCommandeClients: this.lignesCommande
+        ligneCommandeClients: this.lignesCommande()
       };
     } else if (this.origin === 'fournisseur') {
       return  {
@@ -167,7 +183,7 @@ export class NouvelleCmdCltFrsComponent implements OnInit {
         // Voir remarque ci-dessus : date ISO-8601 attendue par le backend
         dateCommande: new Date().toISOString(),
         etatCommande: 'EN_PREPARATION',
-        ligneCommandeFournisseurs: this.lignesCommande
+        ligneCommandeFournisseurs: this.lignesCommande()
       };
     }
   }

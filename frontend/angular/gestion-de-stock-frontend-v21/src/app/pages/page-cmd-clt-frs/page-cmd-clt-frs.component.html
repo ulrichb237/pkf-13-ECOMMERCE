@@ -23,9 +23,12 @@
     <div class="card-cmd-body" *ngIf="commandesOuvertes().has(cmd.id)">
       <app-detail-cmd
         *ngFor="let ligne of mapLignesCommande().get(cmd.id); track ligne.id"
+        #ligneRef
         [ligneCommande]="ligne"
         [origin]="origin"
+        [modifiable]="estModifiable(cmd)"
         (suppressionLigne)="supprimerLigneCommande($event)"
+        (quantiteModifiee)="enregistrerRefLigne(ligne.id, ligneRef); modifierQuantiteLigne($event)"
       ></app-detail-cmd>
       <div class="empty-state empty-state-sm" *ngIf="!mapLignesCommande().get(cmd.id)?.length">
         Aucune ligne dans cette commande

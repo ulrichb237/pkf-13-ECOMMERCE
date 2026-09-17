@@ -60,19 +60,19 @@
 | `/api/v1/commandes-clients/code/{codeCommande}` | GET | ⚠️ Non consommé (recherche par code non implémentée) |
 | `/api/v1/commandes-clients/{idCommande}/lignes` | GET | Accordéon page `commandesclient` |
 | `/api/v1/commandes-clients/{idCommande}/etat/{etatCommande}` | PATCH | **Page `commandesclient`** — bouton « Valider » sur les commandes EN_PREPARATION, « Livrer » sur les VALIDÉES (confirmation inline, toasts) |
-| `/api/v1/commandes-clients/{idCommande}/lignes/{idLigne}/quantite/{quantite}` | PATCH | Service applicatif — UI d'édition de ligne à venir |
+| `/api/v1/commandes-clients/{idCommande}/lignes/{idLigne}/quantite/{quantite}` | PATCH | Page `commandesclient` — édition de quantité inline (clic sur la quantité) |
 | `/api/v1/commandes-clients/{idCommande}/client/{idClient}` | PATCH | Service applicatif — UI de réaffectation client à venir |
-| `/api/v1/commandes-clients/{idCommande}/lignes/{idLigne}/article/{idArticle}` | PATCH | Service applicatif — UI de remplacement d'article à venir |
+| `/api/v1/commandes-clients/{idCommande}/lignes/{idLigne}/article/{idArticle}` | PATCH | ⚠️ Non consommé (remplacement d'article non exposé dans l'UI) |
 | `/api/v1/commandes-clients/{idCommande}/lignes/{idLigne}` | DELETE | Page `commandesclient` (suppression ligne) |
 | `/api/v1/commandes-clients/{idCommande}` | DELETE | Page `commandesclient` (dialog de confirmation) |
 
 ## Commandes fournisseurs (11)
 
-Symétrique des commandes clients : POST/GET/DELETE et **PATCH état** (workflow
-Valider → Livrer) consommés par les pages `nouvellecommandefrs` /
-`commandesfournisseur` ; les 3 PATCH restants (quantité, fournisseur, article)
-sont câblés dans le service applicatif mais sans UI dédiée pour le moment ;
-`{idCommande}` GET et `/code/{code}` non consommés.
+Symétrique des commandes clients : POST/GET/DELETE, **PATCH état** (workflow
+Valider → Livrer) et **PATCH quantité** (édition inline) consommés par les
+pages `nouvellecommandefrs` / `commandesfournisseur` ; les 2 PATCH restants
+(fournisseur, article) sont câblés dans le service applicatif mais sans UI
+dédiée pour le moment ; `{idCommande}` GET et `/code/{code}` non consommés.
 
 ## Workflow d'état des commandes (UI ajoutée le 17/09)
 

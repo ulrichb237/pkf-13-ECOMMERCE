@@ -51,12 +51,15 @@
   </div>
 
   <div class="card custom-border p-3 mt-2 lignes-scroll">
-    <app-detail-cmd *ngFor="let ligne of lignesCommande" [ligneCommande]="ligne"></app-detail-cmd>
-    <div class="empty-state empty-state-sm" *ngIf="!lignesCommande.length">Aucune ligne ajoutee</div>
+    <app-detail-cmd *ngFor="let ligne of lignesCommande(); track ligne.article?.codeArticle"
+                    [ligneCommande]="ligne"
+                    (suppressionLigne)="retirerLigne($event)"
+                    (quantiteModifiee)="majQuantiteLigne($event)"></app-detail-cmd>
+    <div class="empty-state empty-state-sm" *ngIf="!lignesCommande().length">Aucune ligne ajoutee</div>
   </div>
 
   <div class="card custom-border p-3 mt-2 text-right">
-    <h3 class="tnum" style="margin:0">Total de la commande : {{ totalCommande }} €</h3>
+    <h3 class="tnum" style="margin:0">Total de la commande : {{ totalCommande() }} €</h3>
   </div>
 
   <div class="form-actions mt-2">

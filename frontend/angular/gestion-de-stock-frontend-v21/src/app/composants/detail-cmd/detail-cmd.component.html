@@ -1,26 +1,50 @@
 <div class="cmd-ligne">
   <span class="cmd-ligne-cell">{{ ligneCommande().article?.codeArticle }}</span>
   <span class="cmd-ligne-cell">{{ ligneCommande().article?.designation }}</span>
-  <span class="cmd-ligne-cell tnum">{{ ligneCommande().quantite }}</span>
+
+  <!-- Quantite : inline editable si la commande est modifiable -->
+  <span class="cmd-ligne-cell tnum">
+    @if (quantiteEnEdition() !== null) {
+      <span class="qte-edit">
+        <input type="number" class="form-control qte-input" min="1"
+               [(ngModel)]="quantiteEditValue" name="quantiteEdit"
+               [disabled]="operationEnCours()"
+               (keyup.enter)="validerQuantite()" (keyup.escape)="annulerEditionQuantite()">
+        <button type="button" class="btn-link" (click)="validerQuantite()"
+                [disabled]="operationEnCours()" aria-label="Valider la quantite">OK</button>
+        <button type="button" class="btn-link" (click)="annulerEditionQuantite()"
+                aria-label="Annuler la modification">X</button>
+      </span>
+    } @else {
+      <button type="button" class="btn-link qte-btn" [disabled]="!modifiable() || operationEnCours()"
+              (click)="debuterEditionQuantite()" aria-label="Modifier la quantite">
+        {{ ligneCommande().quantite }}
+      </button>
+    }
+  </span>
+
   <span class="cmd-ligne-cell tnum">{{ ligneCommande().prixUnitaire }} €</span>
   <span class="cmd-ligne-cell tnum">
     @if (ligneCommande().prixUnitaire && ligneCommande().quantite) {
       {{ +ligneCommande().prixUnitaire! * +ligneCommande().quantite! }} €
     }
   </span>
+
   <span class="cmd-ligne-cell cmd-ligne-actions">
-    <ng-container *ngIf="!confirmationVisible; else confirmBloc">
-      <button type="button" class="btn-link btn-link-danger" (click)="demanderConfirmation()"
-              aria-label="Supprimer la ligne">
-        Supprimer
-      </button>
-    </ng-container>
-    <ng-template #confirmBloc>
-      <span class="cmd-ligne-confirm">
-        Supprimer ?
-        <button type="button" class="btn-link" (click)="annulerConfirmation()">Non</button>
-        <button type="button" class="btn-link btn-link-danger" (click)="supprimerLigne()">Oui</button>
-      </span>
-    </ng-template>
+    @if (modifiable()) {
+      <ng-container *ngIf="!confirmationVisible; else confirmBloc">
+        <button type="button" class="btn-link btn-link-danger" (click)="demanderConfirmation()"
+                [disabled]="operationEnCours()" aria-label="Supprimer la ligne">
+          Supprimer
+        </button>
+      </ng-container>
+      <ng-template #confirmBloc>
+        <span class="cmd-ligne-confirm">
+          Supprimer ?
+          <button type="button" class="btn-link" (click)="annulerConfirmation()">Non</button>
+          <button type="button" class="btn-link btn-link-danger" (click)="supprimerLigne()">Oui</button>
+        </span>
+      </ng-template>
+    }
   </span>
 </div>

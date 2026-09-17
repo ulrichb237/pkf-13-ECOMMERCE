@@ -5,6 +5,7 @@ import {CmdcltfrsService} from '../../services/cmdcltfrs/cmdcltfrs.service';
 import {CommandeClientDto} from '../../../gs-api/src/models/commande-client-dto';
 import {LigneCommandeClientDto} from '../../../gs-api/src/models/ligne-commande-client-dto';
 import { NotificationService } from '../../services/notification/notification.service';
+import { Observable } from 'rxjs';
 
 import { BouttonActionComponent } from '../../composants/boutton-action/boutton-action.component';
 
@@ -41,6 +42,10 @@ export class PageCmdCltFrsComponent implements OnInit, OnDestroy {
   readonly commandeEtatMenuOuvert = signal<number | null>(null);
   /** changement d'etat en cours (desactive les boutons) */
   readonly changementEtatEnCours = signal(false);
+  /** PATCH/DELETE de ligne en cours : idLigne -> composant detail-cmd a debloquer */
+  private lignesEnCours = new Map<number, DetailCmdComponent>();
+  /** derniere commande dont on a ouvert une ligne (contexte des actions ligne) */
+  private dernierIdCommandeOuvert: number | null = null;
 
   constructor(
     private router: Router,
@@ -83,7 +88,7 @@ export class PageCmdCltFrsComponent implements OnInit, OnDestroy {
   supprimerLigneCommande(ligne: LigneCommandeClientDto): void {
     // Le backend ne renvoie pas la commande parente dans la ligne (fromEntity
     // ne la peuple pas) : on la deduit de la commande ouverte dans l'accordeon.
-    const idCommande = [...this.commandesOuvertes()][0];
+    const idCommande = [...this.commandesOuvertes()][0] ?? this.dernierIdCommandeOuvert;
     if (!ligne.id || !idCommande) {
       return;
     }
@@ -105,6 +110,7 @@ export class PageCmdCltFrsComponent implements OnInit, OnDestroy {
     if (!idCommande) {
       return;
     }
+    this.dernierIdCommandeOuvert = idCommande;
     const nouveau = new Set(this.commandesOuvertes());
     if (nouveau.has(idCommande)) {
       nouveau.delete(idCommande);
@@ -112,6 +118,49 @@ export class PageCmdCltFrsComponent implements OnInit, OnDestroy {
       nouveau.add(idCommande);
     }
     this.commandesOuvertes.set(nouveau);
+  }
+
+  /** La commande est-elle editable ? (regle backend : LIVREE = non modifiable) */
+  estModifiable(cmd: any): boolean {
+    return cmd?.etatCommande !== 'LIVREE';
+  }
+
+  /** Reference enregistree par la ligne pour la debloquer apres le PATCH */
+  enregistrerRefLigne(ligneId: number | undefined, composant: DetailCmdComponent): void {
+    if (ligneId) {
+      this.lignesEnCours.set(ligneId, composant);
+    }
+  }
+
+  /** PATCH quantite d'une ligne (clients OU fournisseurs) */
+  modifierQuantiteLigne(event: { ligne: LigneCommandeClientDto; quantite: number }): void {
+    const ligne = event.ligne;
+    const idCommande = [...this.commandesOuvertes()][0] ?? this.dernierIdCommandeOuvert;
+    if (!ligne.id || !idCommande) {
+      return;
+    }
+    // Typage explicite : les Observable client/fournisseur ont des generiques
+    // differents et leur union rend .subscribe() non appelable (TS2349)
+    const requete: Observable<unknown> = this.origin === 'client'
+      ? this.cmdCltFrsService.updateQuantiteCommandeClient(idCommande, ligne.id, event.quantite)
+      : this.cmdCltFrsService.updateQuantiteCommandeFournisseur(idCommande, ligne.id, event.quantite);
+    requete.subscribe(() => {
+      this.notificationService.success('Quantite modifiee');
+      this.finOperationLigne(ligne.id);
+      this.findLignesCommande(idCommande);
+    }, (error: any) => {
+      this.errorMsg.set(CmdcltfrsService.errorMsg(error));
+      this.finOperationLigne(ligne.id);
+    });
+  }
+
+  /** Debloque le composant ligne apres une operation (succes ou echec) */
+  private finOperationLigne(ligneId?: number): void {
+    const ref = ligneId ? this.lignesEnCours.get(ligneId) : undefined;
+    ref?.finOperation();
+    if (ligneId) {
+      this.lignesEnCours.delete(ligneId);
+    }
   }
 
   /** Affiche la confirmation de suppression (remplace la modale Bootstrap) */
