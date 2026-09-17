@@ -1,26 +1,6 @@
 import { Routes } from '@angular/router';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { PageLoginComponent } from './pages/page-login/page-login.component';
-import { PageInscriptionComponent } from './pages/page-inscription/page-inscription.component';
-import { PageDashboardComponent } from './pages/page-dashboard/page-dashboard.component';
-import { PageStatistiquesComponent } from './pages/page-statistiques/page-statistiques.component';
-import { PageArticleComponent } from './pages/articles/page-article/page-article.component';
-import { NouvelArticleComponent } from './pages/articles/nouvel-article/nouvel-article.component';
-import { PageMvtstkComponent } from './pages/mvtstk/page-mvtstk/page-mvtstk.component';
-import { PageVentesComponent } from './pages/ventes/page-ventes/page-ventes.component';
-import { NouvelleVenteComponent } from './pages/ventes/nouvelle-vente/nouvelle-vente.component';
-import { PageClientComponent } from './pages/client/page-client/page-client.component';
-import { PageFournisseurComponent } from './pages/fournisseur/page-fournisseur/page-fournisseur.component';
-import { NouveauCltFrsComponent } from './composants/nouveau-clt-frs/nouveau-clt-frs.component';
-import { PageCmdCltFrsComponent } from './pages/page-cmd-clt-frs/page-cmd-clt-frs.component';
-import { NouvelleCmdCltFrsComponent } from './composants/nouvelle-cmd-clt-frs/nouvelle-cmd-clt-frs.component';
-import { PageCategoriesComponent } from './pages/categories/page-categories/page-categories.component';
-import { NoouvelleCategoryComponent } from './pages/categories/noouvelle-category/noouvelle-category.component';
-import { PageUtilisateurComponent } from './pages/utilisateur/page-utilisateur/page-utilisateur.component';
-import { NouvelUtilisateurComponent } from './pages/utilisateur/nouvel-utilisateur/nouvel-utilisateur.component';
-import { PageProfilComponent } from './pages/profil/page-profil/page-profil.component';
-import { ChangerMotDePasseComponent } from './pages/profil/changer-mot-de-passe/changer-mot-de-passe.component';
 
 /**
  * Guard fonctionnel (best practice Angular >= 15) : remplace
@@ -34,46 +14,43 @@ export const authGuard = (): boolean | ReturnType<Router['parseUrl']> => {
   return router.parseUrl('/login');
 };
 
+/**
+ * Lazy loading systematique via loadComponent (recommandation officielle
+ * du MCP Angular / guide best practices) : chaque page est un chunk separe,
+ * charge a la premiere navigation. Le guard est reevalue a chaque niveau.
+ */
 export const routes: Routes = [
-  {
-    path: 'login',
-    component: PageLoginComponent
-  },
-  {
-    path: 'inscrire',
-    component: PageInscriptionComponent
-  },
+  { path: 'login', loadComponent: () => import('./pages/page-login/page-login.component').then(m => m.PageLoginComponent) },
+  { path: 'inscrire', loadComponent: () => import('./pages/page-inscription/page-inscription.component').then(m => m.PageInscriptionComponent) },
   {
     path: '',
-    component: PageDashboardComponent,
+    loadComponent: () => import('./pages/page-dashboard/page-dashboard.component').then(m => m.PageDashboardComponent),
     canActivate: [authGuard],
     children: [
-      { path: 'statistiques', component: PageStatistiquesComponent, canActivate: [authGuard] },
-      { path: 'articles', component: PageArticleComponent, canActivate: [authGuard] },
-      { path: 'nouvelarticle', component: NouvelArticleComponent, canActivate: [authGuard] },
-      { path: 'nouvelarticle/:idArticle', component: NouvelArticleComponent, canActivate: [authGuard] },
-      { path: 'mvtstk', component: PageMvtstkComponent, canActivate: [authGuard] },
-      { path: 'ventes', component: PageVentesComponent, canActivate: [authGuard] },
-      { path: 'nouvellevelle', component: NouvelleVenteComponent, canActivate: [authGuard] },
-      {
-        path: 'clients', component: PageClientComponent, canActivate: [authGuard]
-      },
-      { path: 'nouveauclient', component: NouveauCltFrsComponent, canActivate: [authGuard], data: { origin: 'client' } },
-      { path: 'nouveauclient/:id', component: NouveauCltFrsComponent, canActivate: [authGuard], data: { origin: 'client' } },
-      { path: 'commandesclient', component: PageCmdCltFrsComponent, canActivate: [authGuard], data: { origin: 'client' } },
-      { path: 'nouvellecommandeclt', component: NouvelleCmdCltFrsComponent, canActivate: [authGuard], data: { origin: 'client' } },
-      { path: 'fournisseurs', component: PageFournisseurComponent, canActivate: [authGuard] },
-      { path: 'nouveaufournisseur', component: NouveauCltFrsComponent, canActivate: [authGuard], data: { origin: 'fournisseur' } },
-      { path: 'nouveaufournisseur/:id', component: NouveauCltFrsComponent, canActivate: [authGuard], data: { origin: 'fournisseur' } },
-      { path: 'commandesfournisseur', component: PageCmdCltFrsComponent, canActivate: [authGuard], data: { origin: 'fournisseur' } },
-      { path: 'nouvellecommandefrs', component: NouvelleCmdCltFrsComponent, canActivate: [authGuard], data: { origin: 'fournisseur' } },
-      { path: 'categories', component: PageCategoriesComponent, canActivate: [authGuard] },
-      { path: 'nouvellecategorie', component: NoouvelleCategoryComponent, canActivate: [authGuard] },
-      { path: 'nouvellecategorie/:idCategory', component: NoouvelleCategoryComponent, canActivate: [authGuard] },
-      { path: 'utilisateurs', component: PageUtilisateurComponent, canActivate: [authGuard] },
-      { path: 'nouvelutilisateur', component: NouvelUtilisateurComponent, canActivate: [authGuard] },
-      { path: 'profil', component: PageProfilComponent, canActivate: [authGuard] },
-      { path: 'changermotdepasse', component: ChangerMotDePasseComponent, canActivate: [authGuard] }
+      { path: 'statistiques', loadComponent: () => import('./pages/page-statistiques/page-statistiques.component').then(m => m.PageStatistiquesComponent), canActivate: [authGuard] },
+      { path: 'articles', loadComponent: () => import('./pages/articles/page-article/page-article.component').then(m => m.PageArticleComponent), canActivate: [authGuard] },
+      { path: 'nouvelarticle', loadComponent: () => import('./pages/articles/nouvel-article/nouvel-article.component').then(m => m.NouvelArticleComponent), canActivate: [authGuard] },
+      { path: 'nouvelarticle/:idArticle', loadComponent: () => import('./pages/articles/nouvel-article/nouvel-article.component').then(m => m.NouvelArticleComponent), canActivate: [authGuard] },
+      { path: 'mvtstk', loadComponent: () => import('./pages/mvtstk/page-mvtstk/page-mvtstk.component').then(m => m.PageMvtstkComponent), canActivate: [authGuard] },
+      { path: 'ventes', loadComponent: () => import('./pages/ventes/page-ventes/page-ventes.component').then(m => m.PageVentesComponent), canActivate: [authGuard] },
+      { path: 'nouvellevelle', loadComponent: () => import('./pages/ventes/nouvelle-vente/nouvelle-vente.component').then(m => m.NouvelleVenteComponent), canActivate: [authGuard] },
+      { path: 'clients', loadComponent: () => import('./pages/client/page-client/page-client.component').then(m => m.PageClientComponent), canActivate: [authGuard] },
+      { path: 'nouveauclient', loadComponent: () => import('./composants/nouveau-clt-frs/nouveau-clt-frs.component').then(m => m.NouveauCltFrsComponent), canActivate: [authGuard], data: { origin: 'client' } },
+      { path: 'nouveauclient/:id', loadComponent: () => import('./composants/nouveau-clt-frs/nouveau-clt-frs.component').then(m => m.NouveauCltFrsComponent), canActivate: [authGuard], data: { origin: 'client' } },
+      { path: 'commandesclient', loadComponent: () => import('./pages/page-cmd-clt-frs/page-cmd-clt-frs.component').then(m => m.PageCmdCltFrsComponent), canActivate: [authGuard], data: { origin: 'client' } },
+      { path: 'nouvellecommandeclt', loadComponent: () => import('./composants/nouvelle-cmd-clt-frs/nouvelle-cmd-clt-frs.component').then(m => m.NouvelleCmdCltFrsComponent), canActivate: [authGuard], data: { origin: 'client' } },
+      { path: 'fournisseurs', loadComponent: () => import('./pages/fournisseur/page-fournisseur/page-fournisseur.component').then(m => m.PageFournisseurComponent), canActivate: [authGuard] },
+      { path: 'nouveaufournisseur', loadComponent: () => import('./composants/nouveau-clt-frs/nouveau-clt-frs.component').then(m => m.NouveauCltFrsComponent), canActivate: [authGuard], data: { origin: 'fournisseur' } },
+      { path: 'nouveaufournisseur/:id', loadComponent: () => import('./composants/nouveau-clt-frs/nouveau-clt-frs.component').then(m => m.NouveauCltFrsComponent), canActivate: [authGuard], data: { origin: 'fournisseur' } },
+      { path: 'commandesfournisseur', loadComponent: () => import('./pages/page-cmd-clt-frs/page-cmd-clt-frs.component').then(m => m.PageCmdCltFrsComponent), canActivate: [authGuard], data: { origin: 'fournisseur' } },
+      { path: 'nouvellecommandefrs', loadComponent: () => import('./composants/nouvelle-cmd-clt-frs/nouvelle-cmd-clt-frs.component').then(m => m.NouvelleCmdCltFrsComponent), canActivate: [authGuard], data: { origin: 'fournisseur' } },
+      { path: 'categories', loadComponent: () => import('./pages/categories/page-categories/page-categories.component').then(m => m.PageCategoriesComponent), canActivate: [authGuard] },
+      { path: 'nouvellecategorie', loadComponent: () => import('./pages/categories/noouvelle-category/noouvelle-category.component').then(m => m.NoouvelleCategoryComponent), canActivate: [authGuard] },
+      { path: 'nouvellecategorie/:idCategory', loadComponent: () => import('./pages/categories/noouvelle-category/noouvelle-category.component').then(m => m.NoouvelleCategoryComponent), canActivate: [authGuard] },
+      { path: 'utilisateurs', loadComponent: () => import('./pages/utilisateur/page-utilisateur/page-utilisateur.component').then(m => m.PageUtilisateurComponent), canActivate: [authGuard] },
+      { path: 'nouvelutilisateur', loadComponent: () => import('./pages/utilisateur/nouvel-utilisateur/nouvel-utilisateur.component').then(m => m.NouvelUtilisateurComponent), canActivate: [authGuard] },
+      { path: 'profil', loadComponent: () => import('./pages/profil/page-profil/page-profil.component').then(m => m.PageProfilComponent), canActivate: [authGuard] },
+      { path: 'changermotdepasse', loadComponent: () => import('./pages/profil/changer-mot-de-passe/changer-mot-de-passe.component').then(m => m.ChangerMotDePasseComponent), canActivate: [authGuard] }
     ]
   }
 ];

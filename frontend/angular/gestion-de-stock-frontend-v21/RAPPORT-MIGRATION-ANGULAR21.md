@@ -204,9 +204,17 @@ cd frontend/angular/gestion-de-stock-frontend-v21
 npm start        # = node node_modules/@angular/cli/bin/ng.js serve
 ```
 
+### Lazy loading appliqué (recommandation MCP Angular)
+Toutes les routes utilisent désormais `loadComponent` (`app.routes.ts`) : chaque page
+est un chunk séparé chargé à la première navigation.
+- Build dev : **37 chunks JS** (main + lazy pages + chunks partagés), 0 erreur
+- Le guide `get_best_practices` du MCP liste le lazy loading comme règle officielle — point désormais conforme
+- Note ops : sur cette machine, esbuild peut panic (Go runtime) si trop de parallélisme —
+  utiliser `GOMAXPROCS=2` (déjà intégré aux scripts de test documentés)
+
 ### Reste à faire (dette migratoire recommandée)
 1. `ng update @angular/core@22 @angular/cli@22` après passage Node ≥ 24.15
-2. Lazy loading des routes (`loadComponent`)
+2. ~~Lazy loading des routes (`loadComponent`)~~ ✅ **fait** (37 chunks)
 3. Migration signals + OnPush page par page (plan MCP §7.2)
 4. Templates `@if/@for`, formulaires réactifs, `NgOptimizedImage`
 5. **Votre validation** sur le bug backend §8 pour que je l'applique
