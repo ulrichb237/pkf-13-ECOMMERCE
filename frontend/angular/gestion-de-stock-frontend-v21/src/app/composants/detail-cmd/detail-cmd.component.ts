@@ -1,4 +1,5 @@
-import {Component, Input, OnInit} from '@angular/core';
+import { NgIf, NgFor } from '@angular/common';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {LigneCommandeClientDto} from '../../../gs-api/src/models/ligne-commande-client-dto';
 
 @Component({
@@ -10,10 +11,17 @@ export class DetailCmdComponent implements OnInit {
 
   @Input()
   ligneCommande: LigneCommandeClientDto = {};
+  @Input()
+  origin = 'client';
+  @Output()
+  suppressionLigne = new EventEmitter<LigneCommandeClientDto>();
 
   constructor() { }
 
   ngOnInit(): void {
   }
 
+  supprimerLigne(): void {
+    this.suppressionLigne.emit(this.ligneCommande);
+  }
 }

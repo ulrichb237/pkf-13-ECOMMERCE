@@ -13,12 +13,97 @@
     </div>
   </div>
   <div class="col m-3">
+    <div class="text-center text-muted p-3" *ngIf="!listArticle.length && !errorMsg">
+      Aucun article enregistre
+    </div>
     <app-detail-article
       *ngFor="let article of listArticle"
       [articleDto]="article"
       (suppressionResult)="handleSuppression($event)"
+      (detailsResult)="voirDetails($event)"
     >
     </app-detail-article>
+  </div>
+
+  <!-- Modal Details article : 3 historiques -->
+  <div class="modal fade" id="modalDetailsArticle" tabindex="-1" role="dialog" aria-labelledby="modalDetailsArticleLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalDetailsArticleLabel">
+            <i class="far fa-list-alt" aria-hidden="true"></i>&nbsp;{{ articleSelectionne.designation }} ({{ articleSelectionne.codeArticle }})
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" data-toggle="tab" data-target="#tabVentes" type="button" role="tab" aria-selected="true">
+                Ventes ({{ historiqueVentes.length }})
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-toggle="tab" data-target="#tabCmdClt" type="button" role="tab" aria-selected="false">
+                Commandes clients ({{ historiqueCmdClient.length }})
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-toggle="tab" data-target="#tabCmdFrs" type="button" role="tab" aria-selected="false">
+                Commandes fournisseurs ({{ historiqueCmdFournisseur.length }})
+              </button>
+            </li>
+          </ul>
+          <div class="tab-content mt-2">
+            <div class="tab-pane fade show active" id="tabVentes" role="tabpanel">
+              <div class="alert alert-info" *ngIf="!historiqueVentes.length">Aucune vente pour cet article.</div>
+              <table class="table" *ngIf="historiqueVentes.length">
+                <thead><tr><th>Date</th><th>Quantite</th><th>Prix unitaire</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let l of historiqueVentes">
+                    <td>{{ l.vente?.dateVente | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td>{{ l.quantite }}</td>
+                    <td>{{ l.prixUnitaire }} €</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="tab-pane fade" id="tabCmdClt" role="tabpanel">
+              <div class="alert alert-info" *ngIf="!historiqueCmdClient.length">Aucune commande client pour cet article.</div>
+              <table class="table" *ngIf="historiqueCmdClient.length">
+                <thead><tr><th>Date</th><th>Quantite</th><th>Prix unitaire</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let l of historiqueCmdClient">
+                    <td>{{ l.commandeClient?.dateCommande | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td>{{ l.quantite }}</td>
+                    <td>{{ l.prixUnitaire }} €</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="tab-pane fade" id="tabCmdFrs" role="tabpanel">
+              <div class="alert alert-info" *ngIf="!historiqueCmdFournisseur.length">Aucune commande fournisseur pour cet article.</div>
+              <table class="table" *ngIf="historiqueCmdFournisseur.length">
+                <thead><tr><th>Date</th><th>Quantite</th><th>Prix unitaire</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let l of historiqueCmdFournisseur">
+                    <td>{{ l.commandeFournisseur?.dateCommande | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td>{{ l.quantite }}</td>
+                    <td>{{ l.prixUnitaire }} €</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            <i class="fas fa-ban" aria-hidden="true"></i>&nbsp;Fermer
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="row mb-3" *ngIf="listArticle.length">
     <div class=" col-md-12 text-center">

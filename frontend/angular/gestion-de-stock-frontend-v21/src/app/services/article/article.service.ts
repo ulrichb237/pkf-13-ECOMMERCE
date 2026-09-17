@@ -41,4 +41,25 @@ export class ArticleService {
   findArticleByCode(codeArticle: string): Observable<ArticleDto> {
     return this.articleService.findByCodeArticle(codeArticle);
   }
+
+  findHistoriqueVentes(idArticle: number): Observable<any[]> {
+    if (idArticle) {
+      return this.articleService.findHistoriqueVentes(idArticle);
+    }
+    return of([]);
+  }
+
+  findHistoriqueCommandeClient(idArticle: number): Observable<any[]> {
+    if (idArticle) {
+      return this.articleService.findHistoriaueCommandeClient(idArticle);
+    }
+    return of([]);
+  }
+
+  findHistoriqueCommandeFournisseur(idArticle: number): Observable<any[]> {
+    if (idArticle) {
+      return this.articleService.findHistoriqueCommandeFournisseur(idArticle);
+    }
+    return of([]);
+  }
 }

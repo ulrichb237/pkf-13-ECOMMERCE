@@ -24,6 +24,11 @@ export class VentesServiceApp {
     return this.ventesService.save(venteDto);
   }
 
+  /** Extrait le message lisible d'une erreur HTTP du backend (ErrorDto). */
+  static errorMsg(error: any): string {
+    return error?.error?.message || error?.message || 'Une erreur est survenue';
+  }
+
   findAllVentes(): Observable<Array<VentesDto>> {
     return this.ventesService.findAll();
   }

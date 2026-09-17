@@ -21,6 +21,7 @@ export class PageVentesComponent implements OnInit {
 
   listVentes: Array<VentesDto> = [];
   errorMsg = '';
+  selectedVenteIdToDelete ? = -1;
 
   constructor(
     private router: Router,
@@ -40,7 +41,26 @@ export class PageVentesComponent implements OnInit {
     .subscribe(ventes => {
       this.listVentes = ventes;
     }, error => {
-      this.errorMsg = 'Erreur lors du chargement des ventes';
+      this.errorMsg = VentesServiceApp.errorMsg(error);
     });
+  }
+
+  selectVentePourSupprimer(id?: number): void {
+    this.selectedVenteIdToDelete = id;
+  }
+
+  annulerSuppressionVente(): void {
+    this.selectedVenteIdToDelete = -1;
+  }
+
+  confirmerEtSupprimerVente(): void {
+    if (this.selectedVenteIdToDelete !== -1) {
+      this.ventesService.deleteVente(this.selectedVenteIdToDelete)
+      .subscribe(() => {
+        this.findAllVentes();
+      }, error => {
+        this.errorMsg = VentesServiceApp.errorMsg(error);
+      });
+    }
   }
 }

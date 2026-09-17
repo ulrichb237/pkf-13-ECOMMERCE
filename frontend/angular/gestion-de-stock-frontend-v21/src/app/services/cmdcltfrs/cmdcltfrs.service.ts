@@ -13,6 +13,11 @@ import {LigneCommandeFournisseurDto} from '../../../gs-api/src/models/ligne-comm
 })
 export class CmdcltfrsService {
 
+  /** Extrait le message lisible d'une erreur HTTP du backend (ErrorDto). */
+  static errorMsg(error: any): string {
+    return error?.error?.message || error?.message || 'Une erreur est survenue';
+  }
+
   constructor(
     private commandeClientService: CommandesclientsService,
     private commandeFournisseurService: CommandefournisseurService,
@@ -49,5 +54,53 @@ export class CmdcltfrsService {
       return this.commandeFournisseurService.findAllLignesCommandesFournisseurByCommandeFournisseurId(idCmd);
     }
     return of();
+  }
+
+  deleteLigneCommandeClient(idCommande: number, idLigne: number): Observable<any> {
+    return this.commandeClientService.deleteLigneCommandeClient(idCommande, idLigne);
+  }
+
+  deleteLigneCommandeFournisseur(idCommande: number, idLigne: number): Observable<any> {
+    return this.commandeFournisseurService.deleteLigneCommandeFournisseur(idCommande, idLigne);
+  }
+
+  updateQuantiteCommandeClient(idCommande: number, idLigne: number, quantite: number): Observable<CommandeClientDto> {
+    return this.commandeClientService.updateQuantiteCommandeClient(idCommande, idLigne, quantite);
+  }
+
+  updateQuantiteCommandeFournisseur(idCommande: number, idLigne: number, quantite: number): Observable<CommandeFournisseurDto> {
+    return this.commandeFournisseurService.updateQuantiteCommandeFournisseur(idCommande, idLigne, quantite);
+  }
+
+  updateArticleCommandeClient(idCommande: number, idLigne: number, idArticle: number): Observable<CommandeClientDto> {
+    return this.commandeClientService.updateArticleCommandeClient(idCommande, idLigne, idArticle);
+  }
+
+  updateArticleCommandeFournisseur(idCommande: number, idLigne: number, idArticle: number): Observable<CommandeFournisseurDto> {
+    return this.commandeFournisseurService.updateArticleCommandeFournisseur(idCommande, idLigne, idArticle);
+  }
+
+  updateClient(idCommande: number, idClient: number): Observable<CommandeClientDto> {
+    return this.commandeClientService.updateClient(idCommande, idClient);
+  }
+
+  updateFournisseur(idCommande: number, idFournisseur: number): Observable<CommandeFournisseurDto> {
+    return this.commandeFournisseurService.updateFournisseur(idCommande, idFournisseur);
+  }
+
+  updateEtatCommandeClient(idCommande: number, etat: string): Observable<CommandeClientDto> {
+    return this.commandeClientService.updateEtatCommandeClient(idCommande, etat);
+  }
+
+  updateEtatCommandeFournisseur(idCommande: number, etat: string): Observable<CommandeFournisseurDto> {
+    return this.commandeFournisseurService.updateEtatCommandeFournisseur(idCommande, etat);
+  }
+
+  deleteCommandeClient(idCommande: number): Observable<any> {
+    return this.commandeClientService.delete(idCommande);
+  }
+
+  deleteCommandeFournisseur(idCommande: number): Observable<any> {
+    return this.commandeFournisseurService.delete(idCommande);
   }
 }

@@ -14,6 +14,8 @@ export class DetailArticleComponent implements OnInit {
   articleDto: ArticleDto = {};
   @Output()
   suppressionResult = new EventEmitter();
+  @Output()
+  detailsResult = new EventEmitter<ArticleDto>();
 
   constructor(
     private router: Router,
@@ -33,7 +35,7 @@ export class DetailArticleComponent implements OnInit {
       .subscribe(res => {
         this.suppressionResult.emit('success');
       }, error => {
-        this.suppressionResult.emit(error.error.error);
+        this.suppressionResult.emit(error?.error?.message || 'Erreur lors de la suppression de l article');
       });
   }
   }

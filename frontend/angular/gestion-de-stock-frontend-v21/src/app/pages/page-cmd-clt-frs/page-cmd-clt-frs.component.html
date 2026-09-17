@@ -12,6 +12,10 @@
     </div>
   </div>
   <div class="col m-3" >
+    <div class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</div>
+    <div class="text-center text-muted p-3" *ngIf="!listeCommandes.length && !errorMsg">
+      Aucune commande
+    </div>
     <div class="accordion" id="accordionExample" *ngFor="let cmd of listeCommandes">
       <div class="card">
         <div class="card-body" id="headingOne">
@@ -32,7 +36,12 @@
             <app-detail-cmd
             *ngFor="let ligne of mapLignesCommande.get(cmd.id)"
             [ligneCommande]="ligne"
+            [origin]="origin"
+            (suppressionLigne)="supprimerLigneCommande($event)"
             ></app-detail-cmd>
+            <div class="text-center text-muted p-2" *ngIf="!mapLignesCommande.get(cmd.id)?.length">
+              Aucune ligne dans cette commande
+            </div>
           </div>
         </div>
           <div class="card-footer">
@@ -41,8 +50,36 @@
                 <h5>{{mapLignesCommande.get(cmd.id).length}} lignes de commande</h5>
               </div>
               <div class="col-md-6 text-right">
-                <h5>Total commande: {{ calculerTotalCommande(cmd.id) }}</h5>
+                <h5>Total commande: {{ calculerTotalCommande(cmd.id) }}
+                  <button type="button" class="btn btn-link text-danger ml-3" data-toggle="modal"
+                          [attr.data-target]="'#modalDeleteCmd' + cmd.id"
+                          aria-label="Supprimer la commande">
+                    <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                  </button>
+                </h5>
               </div>
+            </div>
+          </div>
+          <!-- Modal confirmation suppression commande -->
+          <div class="modal fade" [attr.id]="'modalDeleteCmd' + cmd.id" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Confirmation</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  Supprimer la commande {{ cmd.code }} ?
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                  <button type="button" class="btn btn-danger" data-dismiss="modal" (click)="supprimerCommande(cmd.id)">Supprimer</button>
+                </div>
+              </div>
+            </div>
+          </div>
             </div>
           </div>
       </div>

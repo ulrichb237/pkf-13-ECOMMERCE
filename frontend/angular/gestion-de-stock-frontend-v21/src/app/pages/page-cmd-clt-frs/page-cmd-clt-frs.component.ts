@@ -39,18 +39,60 @@ export class PageCmdCltFrsComponent implements OnInit {
     this.findAllCommandes();
   }
 
+  errorMsg = '';
+
   findAllCommandes(): void {
+    this.errorMsg = '';
     if (this.origin === 'client') {
       this.cmdCltFrsService.findAllCommandesClient()
       .subscribe(cmd => {
         this.listeCommandes = cmd;
         this.findAllLignesCommande();
+      }, error => {
+        this.errorMsg = CmdcltfrsService.errorMsg(error);
       });
     } else if (this.origin === 'fournisseur') {
       this.cmdCltFrsService.findAllCommandesFournisseur()
       .subscribe(cmd => {
         this.listeCommandes = cmd;
         this.findAllLignesCommande();
+      }, error => {
+        this.errorMsg = CmdcltfrsService.errorMsg(error);
+      });
+    }
+  }
+
+  supprimerLigneCommande(ligne: LigneCommandeClientDto): void {
+    const idCommande = ligne.commandeClient?.id;
+    if (!ligne.id || !idCommande) {
+      return;
+    }
+    if (this.origin === 'client') {
+      this.cmdCltFrsService.deleteLigneCommandeClient(idCommande, ligne.id)
+      .subscribe(() => this.findLignesCommande(idCommande), error => {
+        this.errorMsg = CmdcltfrsService.errorMsg(error);
+      });
+    } else if (this.origin === 'fournisseur') {
+      this.cmdCltFrsService.deleteLigneCommandeFournisseur(idCommande, ligne.id)
+      .subscribe(() => this.findLignesCommande(idCommande), error => {
+        this.errorMsg = CmdcltfrsService.errorMsg(error);
+      });
+    }
+  }
+
+  supprimerCommande(id?: number): void {
+    if (!id) {
+      return;
+    }
+    if (this.origin === 'client') {
+      this.cmdCltFrsService.deleteCommandeClient(id)
+      .subscribe(() => this.findAllCommandes(), error => {
+        this.errorMsg = CmdcltfrsService.errorMsg(error);
+      });
+    } else if (this.origin === 'fournisseur') {
+      this.cmdCltFrsService.deleteCommandeFournisseur(id)
+      .subscribe(() => this.findAllCommandes(), error => {
+        this.errorMsg = CmdcltfrsService.errorMsg(error);
       });
     }
   }

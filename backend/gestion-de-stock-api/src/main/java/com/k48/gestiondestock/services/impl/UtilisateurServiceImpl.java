@@ -43,7 +43,10 @@ public class UtilisateurServiceImpl implements UtilisateurService {
       throw new InvalidEntityException("L'utilisateur n'est pas valide", ErrorCodes.UTILISATEUR_NOT_VALID, errors);
     }
 
-    if(userAlreadyExists(dto.getEmail())) {
+    // Fix : l'email doit etre unique, sauf s'il appartient a l'utilisateur
+    // que l'on est en train de modifier (meme id) — sinon la modification
+    // d'un utilisateur existant etait rejetee (UTILISATEUR_ALREADY_EXISTS).
+    if(emailAlreadyUsedByAnotherUser(dto.getEmail(), dto.getId())) {
       throw new InvalidEntityException("Un autre utilisateur avec le meme email existe deja", ErrorCodes.UTILISATEUR_ALREADY_EXISTS,
           Collections.singletonList("Un autre utilisateur avec le meme email existe deja dans la BDD"));
     }
@@ -58,9 +61,9 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     );
   }
 
-  private boolean userAlreadyExists(String email) {
+  private boolean emailAlreadyUsedByAnotherUser(String email, Integer id) {
     Optional<Utilisateur> user = utilisateurRepository.findUtilisateurByEmail(email);
-    return user.isPresent();
+    return user.isPresent() && !user.get().getId().equals(id);
   }
 
   @Override

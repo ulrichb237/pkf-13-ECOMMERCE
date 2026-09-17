@@ -39,14 +39,14 @@ export class DetailCltFrsComponent implements OnInit {
       .subscribe(res => {
         this.suppressionResult.emit('success');
       }, error => {
-        this.suppressionResult.emit(error.error.error);
+        this.suppressionResult.emit(CltfrsService.errorMsg(error));
       });
     } else if (this.origin === 'fournisseur') {
       this.cltFrsService.deleteFournisseur(this.clientFournisseur.id)
       .subscribe(res => {
         this.suppressionResult.emit('success');
       }, error => {
-        this.suppressionResult.emit(error.error.error);
+        this.suppressionResult.emit(CltfrsService.errorMsg(error));
       });
     }
   }

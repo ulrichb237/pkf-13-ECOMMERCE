@@ -12,6 +12,11 @@ import {FournisseurDto} from '../../../gs-api/src/models/fournisseur-dto';
 })
 export class CltfrsService {
 
+  /** Extrait le message lisible d'une erreur HTTP du backend (ErrorDto). */
+  static errorMsg(error: any): string {
+    return error?.error?.message || error?.message || 'Une erreur est survenue';
+  }
+
   constructor(
     private userService: UserService,
     private clientService: ClientsService,

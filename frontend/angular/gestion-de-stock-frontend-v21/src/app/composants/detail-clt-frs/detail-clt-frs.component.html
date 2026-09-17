@@ -53,7 +53,7 @@
         </button>
       </div>
       <div class="col-md-4">
-        <button type="button" class="btn btn-link ">
+        <button type="button" class="btn btn-link " data-toggle="modal" [attr.data-target]="'#modalDetailsCltFrs' + clientFournisseur.id">
           <i class="far fa-list-alt"></i>&nbsp;Details
         </button>
       </div>
@@ -71,10 +71,40 @@
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
-        </div>
-        <div class="modal-body">
+        </div>          <div class="modal-body">
           Etes vous-sur de vouloir supprimer ce {{ origin }}?
         </div>
+
+  <!-- Modal Details -->
+  <div class="modal fade" [attr.id]="'modalDetailsCltFrs' + clientFournisseur.id" tabindex="-1" role="dialog"
+       [attr.aria-labelledby]="'modalDetailsCltFrsLabel' + clientFournisseur.id" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" [attr.id]="'modalDetailsCltFrsLabel' + clientFournisseur.id">
+            <i class="far fa-list-alt" aria-hidden="true"></i>&nbsp;{{ clientFournisseur.nom }} {{ clientFournisseur.prenom }}
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <ul class="list-group">
+            <li class="list-group-item"><strong>Email :</strong> {{ clientFournisseur.mail || '—' }}</li>
+            <li class="list-group-item"><strong>Telephone :</strong> {{ clientFournisseur.numTel || '—' }}</li>
+            <li class="list-group-item"><strong>Adresse :</strong> {{ clientFournisseur.adresse?.adresse1 }} {{ clientFournisseur.adresse?.adresse2 }}</li>
+            <li class="list-group-item"><strong>Ville :</strong> {{ clientFournisseur.adresse?.codePostale }} {{ clientFournisseur.adresse?.ville }}</li>
+            <li class="list-group-item"><strong>Pays :</strong> {{ clientFournisseur.adresse?.pays || '—' }}</li>
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            <i class="fas fa-ban" aria-hidden="true"></i>&nbsp;Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">
             <i class="fas fa-ban"></i>&nbsp;Annuler</button>
