@@ -1,6 +1,6 @@
 import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ClientDto} from '../../../gs-api/src/models/client-dto';
 import {AdresseDto} from '../../../gs-api/src/models/adresse-dto';
@@ -10,6 +10,7 @@ import {PhotosService} from '../../../gs-api/src/services/photos.service';
 import SavePhotoParams = PhotosService.SavePhotoParams;
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgIf, NgFor, FormsModule],
   selector: 'app-nouveau-clt-frs',
   templateUrl: './nouveau-clt-frs.component.html',

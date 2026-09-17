@@ -1,33 +1,22 @@
-import { NgIf } from '@angular/common';
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {LoaderService} from './service/loader.service';
-import {Subscription} from 'rxjs';
-import {LoaderState} from './loader.model';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { LoaderService } from './service/loader.service';
 
 @Component({
-  imports: [NgIf],
   selector: 'app-loader',
-  templateUrl: './loader.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div [class.hidden]="!loaderService.visible()">
+      <div class="loader-overlay">
+        @if (loaderService.visible()) {
+          <div class="loader"></div>
+        }
+      </div>
+    </div>
+  `,
   styleUrls: ['./loader.component.scss']
 })
-export class LoaderComponent implements OnInit, OnDestroy {
+export class LoaderComponent {
 
-  show = false;
-  subscription: Subscription | undefined;
-
-  constructor(
-    private loaderService: LoaderService
-  ) { }
-
-  ngOnInit(): void {
-    this.subscription = this.loaderService.loaderState
-    .subscribe((state: LoaderState) => {
-      this.show = state.show;
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.subscription?.unsubscribe();
-  }
+  constructor(public loaderService: LoaderService) { }
 
 }

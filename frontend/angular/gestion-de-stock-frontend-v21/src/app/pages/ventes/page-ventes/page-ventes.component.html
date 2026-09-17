@@ -4,11 +4,11 @@
     <app-boutton-action (clickEvent)="nouvelleVente()"></app-boutton-action>
   </div>
 
-  <div class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</div>
+  <div class="alert alert-danger" *ngIf="errorMsg()">{{ errorMsg() }}</div>
 
-  <div class="empty-state" *ngIf="!listVentes.length && !errorMsg">Aucune vente enregistree</div>
+  <div class="empty-state" *ngIf="!listVentes().length && !errorMsg()">Aucune vente enregistree</div>
 
-  <ng-container *ngIf="listVentes.length">
+  <ng-container *ngIf="listVentes().length">
     <div class="data-table-head ventes-grid font-weight-bold">
       <span>Code vente</span>
       <span>Date</span>
@@ -16,14 +16,14 @@
       <span>Total lignes</span>
       <span></span>
     </div>
-    <div class="card ventes-row" *ngFor="let vente of listVentes">
+    <div class="card ventes-row" *ngFor="let vente of listVentes(); track vente.id">
       <div class="ventes-grid">
         <span class="tnum">{{ vente.code }}</span>
         <span class="tnum">{{ vente.dateVente | date:'dd/MM/yyyy HH:mm' }}</span>
         <span>{{ vente.commentaire }}</span>
         <span class="tnum">{{ vente.ligneVentes?.length || 0 }}</span>
         <span class="text-right">
-          <button type="button" class="btn-link btn-link-danger" (click)="selectVentePourSupprimer(vente.id)"
+          <button type="button" class="btn-link btn-link-danger" (click)="selectVentePourSupprimer(vente)"
                   aria-label="Supprimer la vente">Supprimer</button>
         </span>
       </div>
@@ -31,18 +31,19 @@
   </ng-container>
 
   <!-- Confirmation de suppression (remplace la modale Bootstrap) -->
-  <div class="dialog-backdrop" *ngIf="selectedVenteIdToDelete !== undefined && selectedVenteIdToDelete !== -1">
+  <div class="dialog-backdrop" *ngIf="venteASupprimer(); else pasDeDialog">
     <div class="dialog" role="dialog" aria-modal="true">
       <h3 class="dialog-title">Confirmation</h3>
-      <p>Supprimer cette vente ? Cette action est irreversible.</p>
+      <p>Supprimer la vente {{ venteASupprimer()?.code }} ? Cette action est irreversible.</p>
       <div class="dialog-actions">
         <button type="button" class="btn-pill btn-pill-secondary" (click)="annulerSuppressionVente()">Annuler</button>
         <button type="button" class="btn-pill btn-pill-danger" (click)="confirmerEtSupprimerVente()">Supprimer</button>
       </div>
     </div>
   </div>
+  <ng-template #pasDeDialog></ng-template>
 
-  <div class="page-pagination" *ngIf="listVentes.length">
+  <div class="page-pagination" *ngIf="listVentes().length">
     <app-pagination></app-pagination>
   </div>
 </div>

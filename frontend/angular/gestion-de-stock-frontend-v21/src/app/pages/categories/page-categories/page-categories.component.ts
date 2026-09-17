@@ -1,5 +1,5 @@
 import { NgIf, NgFor } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import {Router} from '@angular/router';
 import {CategoryDto} from '../../../../gs-api/src/models/category-dto';
 import {ArticleDto} from '../../../../gs-api/src/models/article-dto';
@@ -12,22 +12,20 @@ import { PaginationComponent } from '../../../composants/pagination/pagination.c
 @Component({
   imports: [NgIf, NgFor, BouttonActionComponent, PaginationComponent],
   selector: 'app-page-categories',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './page-categories.component.html',
   styleUrls: ['./page-categories.component.scss']
 })
 export class PageCategoriesComponent implements OnInit {
 
-  listCategories: Array<CategoryDto> = [];
-  selectedCatIdToDelete ? = -1;
-  errorMsgs = '';
-
-  /** Confirmation de suppression (remplace la modale Bootstrap) */
-  catASupprimer = false;
-  /** Visibilite du panneau details (remplace la modale Bootstrap) */
-  detailsVisibles = false;
-
-  articlesCategorie: Array<ArticleDto> = [];
-  codeCategorieSelectionnee = '';
+  /** Etat en signals : ecrits depuis les callbacks HTTP (zoneless-safe) */
+  readonly listCategories = signal<Array<CategoryDto>>([]);
+  readonly errorMsgs = signal('');
+  /** id de la categorie en attente de confirmation de suppression ; null = aucun dialog */
+  readonly catASupprimer = signal<CategoryDto | null>(null);
+  readonly detailsVisibles = signal(false);
+  readonly articlesCategorie = signal<Array<ArticleDto>>([]);
+  readonly codeCategorieSelectionnee = signal('');
 
   constructor(
     private router: Router,
@@ -39,24 +37,28 @@ export class PageCategoriesComponent implements OnInit {
   }
 
   voirDetails(categorie?: CategoryDto): void {
-    this.errorMsgs = '';
-    this.articlesCategorie = [];
-    this.codeCategorieSelectionnee = categorie?.code ? categorie.code : '';
-    this.detailsVisibles = true;
+    this.errorMsgs.set('');
+    this.articlesCategorie.set([]);
+    this.codeCategorieSelectionnee.set(categorie?.code ? categorie.code : '');
+    this.detailsVisibles.set(true);
     if (categorie?.id) {
       this.categoryService.findAllArticleByCategorie(categorie.id)
         .subscribe(articles => {
-          this.articlesCategorie = articles;
+          this.articlesCategorie.set(articles || []);
         }, error => {
-          this.errorMsgs = error.error.message;
+          this.errorMsgs.set(error?.error?.message || 'Erreur lors du chargement des articles');
         });
     }
+  }
+
+  fermerDetails(): void {
+    this.detailsVisibles.set(false);
   }
 
   findAllCategories(): void {
     this.categoryService.findAll()
     .subscribe(res => {
-      this.listCategories = res;
+      this.listCategories.set(res || []);
     });
   }
 
@@ -69,24 +71,23 @@ export class PageCategoriesComponent implements OnInit {
   }
 
   confirmerEtSupprimerCat(): void {
-    this.catASupprimer = false;
-    const id = this.selectedCatIdToDelete;
-    if (id !== undefined && id !== -1) {
-      this.categoryService.delete(id)
+    const categorie = this.catASupprimer();
+    this.catASupprimer.set(null);
+    if (categorie?.id) {
+      this.categoryService.delete(categorie.id)
       .subscribe(res => {
         this.findAllCategories();
       }, error => {
-        this.errorMsgs = error?.error?.message || 'Erreur lors de la suppression';
+        this.errorMsgs.set(error?.error?.message || 'Erreur lors de la suppression');
       });
     }
   }
 
   annulerSuppressionCat(): void {
-    this.selectedCatIdToDelete = -1;
+    this.catASupprimer.set(null);
   }
 
-  selectCatPourSupprimer(id?: number): void {
-    this.selectedCatIdToDelete = id;
-    this.catASupprimer = true;
+  selectCatPourSupprimer(categorie: CategoryDto): void {
+    this.catASupprimer.set(categorie);
   }
 }

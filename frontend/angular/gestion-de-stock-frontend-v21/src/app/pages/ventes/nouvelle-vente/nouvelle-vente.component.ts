@@ -1,7 +1,7 @@
 import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import {Router} from '@angular/router';
 import {VentesServiceApp} from '../../../services/ventes/ventes.service';
 import {ArticleService} from '../../../services/article/article.service';
@@ -10,6 +10,7 @@ import {LigneVenteDto} from '../../../../gs-api/src/models/ligne-vente-dto';
 import {VentesDto} from '../../../../gs-api/src/models/ventes-dto';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgIf, NgFor, FormsModule, RouterLink],
   selector: 'app-nouvelle-vente',
   templateUrl: './nouvelle-vente.component.html',

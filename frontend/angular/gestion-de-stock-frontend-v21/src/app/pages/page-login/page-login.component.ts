@@ -1,7 +1,7 @@
 import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {UserService} from '../../services/user/user.service';
 import {AuthenticationRequest} from '../../../gs-api/src/models/authentication-request';
 import {Router} from '@angular/router';
@@ -9,10 +9,11 @@ import {Router} from '@angular/router';
 @Component({
   imports: [NgIf, FormsModule, RouterLink],
   selector: 'app-page-login',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './page-login.component.html',
   styleUrls: ['./page-login.component.scss']
 })
-export class PageLoginComponent implements OnInit {
+export class PageLoginComponent {
 
   authenticationRequest: AuthenticationRequest = {};
   errorMessage = '';
@@ -21,9 +22,6 @@ export class PageLoginComponent implements OnInit {
     private userService: UserService,
     private router: Router
   ) { }
-
-  ngOnInit(): void {
-  }
 
   // tslint:disable-next-line:typedef
   login() {

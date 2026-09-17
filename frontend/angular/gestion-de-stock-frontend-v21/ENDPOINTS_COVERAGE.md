@@ -59,7 +59,7 @@
 | `/api/v1/commandes-clients/{idCommande}` | GET | ⚠️ Non consommé (le détail passe par `/lignes`) |
 | `/api/v1/commandes-clients/code/{codeCommande}` | GET | ⚠️ Non consommé (recherche par code non implémentée) |
 | `/api/v1/commandes-clients/{idCommande}/lignes` | GET | Accordéon page `commandesclient` |
-| `/api/v1/commandes-clients/{idCommande}/etat/{etatCommande}` | PATCH | Disponible dans le service applicatif (workflow EN_PREPARATION→VALIDEE→LIVREE) — UI de changement d'état à venir |
+| `/api/v1/commandes-clients/{idCommande}/etat/{etatCommande}` | PATCH | **Page `commandesclient`** — bouton « Valider » sur les commandes EN_PREPARATION, « Livrer » sur les VALIDÉES (confirmation inline, toasts) |
 | `/api/v1/commandes-clients/{idCommande}/lignes/{idLigne}/quantite/{quantite}` | PATCH | Service applicatif — UI d'édition de ligne à venir |
 | `/api/v1/commandes-clients/{idCommande}/client/{idClient}` | PATCH | Service applicatif — UI de réaffectation client à venir |
 | `/api/v1/commandes-clients/{idCommande}/lignes/{idLigne}/article/{idArticle}` | PATCH | Service applicatif — UI de remplacement d'article à venir |
@@ -68,10 +68,21 @@
 
 ## Commandes fournisseurs (11)
 
-Symétrique des commandes clients : POST/GET/DELETE consommés par les pages
-`nouvellecommandefrs` / `commandesfournisseur` ; les 4 PATCH (état, quantité,
-fournisseur, article) sont câblés dans le service applicatif mais sans UI
-dédiée pour le moment ; `{idCommande}` GET et `/code/{code}` non consommés.
+Symétrique des commandes clients : POST/GET/DELETE et **PATCH état** (workflow
+Valider → Livrer) consommés par les pages `nouvellecommandefrs` /
+`commandesfournisseur` ; les 3 PATCH restants (quantité, fournisseur, article)
+sont câblés dans le service applicatif mais sans UI dédiée pour le moment ;
+`{idCommande}` GET et `/code/{code}` non consommés.
+
+## Workflow d'état des commandes (UI ajoutée le 17/09)
+
+- Le bouton propose **uniquement l'état suivant** : EN_PREPARATION → VALIDEE →
+  LIVREE (les transitions sont dérivées de `etatsSuivants()`).
+- Une commande **LIVREE** n'affiche plus de bouton (règle backend :
+  `COMMANDE_CLIENT_NON_MODIFIABLE`) ; un tag « Livrée » s'affiche à la place.
+- La progression passe par une **confirmation inline** avant l'appel PATCH.
+- Rappel métier : la livraison d'une commande client **génère la sortie de
+  stock** côté backend ; la liste est rechargée après chaque transition.
 
 ## Entreprises (4)
 

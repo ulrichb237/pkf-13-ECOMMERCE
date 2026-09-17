@@ -3,31 +3,31 @@
     <h1>Gestion des mouvements de stock</h1>
   </div>
 
-  <div class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</div>
-  <div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="alert alert-danger" *ngIf="errorMsg()">{{ errorMsg() }}</div>
+  <div class="alert alert-success" *ngIf="successMsg()">{{ successMsg() }}</div>
 
-  <div class="empty-state" *ngIf="!listArticle.length && !errorMsg">Aucun article enregistre</div>
+  <div class="empty-state" *ngIf="!listArticle().length && !errorMsg()">Aucun article enregistre</div>
 
-  <div *ngFor="let article of listArticle" class="card">
+  <div *ngFor="let article of listArticle(); track article.id" class="card">
     <button type="button" class="card-cmd-header" (click)="basculerArticle(article.id)"
-            [attr.aria-expanded]="articlesOuverts.has(article.id!)">
+            [attr.aria-expanded]="articlesOuverts().has(article.id!)">
       <div class="mvt-article-head">
         <span class="tnum">{{ article.codeArticle }}</span>
         <span>{{ article.designation }}</span>
-        <span class="pill-tag-soft" *ngIf="stockReel.get(article.id!) !== undefined">
-          Stock : {{ stockReel.get(article.id!) }}
+        <span class="pill-tag-soft" *ngIf="mapStockReel().get(article.id!) !== undefined">
+          Stock : {{ mapStockReel().get(article.id!) }}
         </span>
       </div>
     </button>
 
-    <div class="card-cmd-body" *ngIf="articlesOuverts.has(article.id!)">
-      <div class="empty-state empty-state-sm" *ngIf="!mapMvtstk.get(article.id!)?.length">
+    <div class="card-cmd-body" *ngIf="articlesOuverts().has(article.id!)">
+      <div class="empty-state empty-state-sm" *ngIf="!mapMvtstk().get(article.id!)?.length">
         Aucun mouvement pour cet article
       </div>
-      <table class="data-table" *ngIf="mapMvtstk.get(article.id!)?.length">
+      <table class="data-table" *ngIf="mapMvtstk().get(article.id!)?.length">
         <thead><tr><th>Date</th><th>Quantite</th><th>Type</th><th>Source</th></tr></thead>
         <tbody>
-          <tr *ngFor="let mvt of mapMvtstk.get(article.id!)">
+          <tr *ngFor="let mvt of mapMvtstk().get(article.id!); track mvt.id">
             <td>{{ mvt.dateMvt | date:'dd/MM/yyyy HH:mm' }}</td>
             <td class="tnum">{{ mvt.quantite }}</td>
             <td>
@@ -48,7 +48,7 @@
         <label class="caption" for="articleMvt">Article</label>
         <select id="articleMvt" name="articleMvt" [(ngModel)]="selectedArticle">
           <option [ngValue]="null" disabled>Choisir un article</option>
-          <option *ngFor="let article of listArticle" [ngValue]="article">
+          <option *ngFor="let article of listArticle(); track article.id" [ngValue]="article">
             {{ article.codeArticle }} — {{ article.designation }}
           </option>
         </select>

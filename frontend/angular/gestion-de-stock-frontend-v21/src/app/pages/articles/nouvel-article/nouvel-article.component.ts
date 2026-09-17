@@ -1,6 +1,6 @@
 import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ArticleService} from '../../../services/article/article.service';
 import {ArticleDto} from '../../../../gs-api/src/models/article-dto';
@@ -10,6 +10,7 @@ import {PhotosService} from '../../../../gs-api/src/services/photos.service';
 import SavePhotoParams = PhotosService.SavePhotoParams;
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgIf, NgFor, FormsModule],
   selector: 'app-nouvel-article',
   templateUrl: './nouvel-article.component.html',

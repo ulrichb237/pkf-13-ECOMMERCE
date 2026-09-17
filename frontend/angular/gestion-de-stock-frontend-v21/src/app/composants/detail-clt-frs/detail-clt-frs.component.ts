@@ -1,23 +1,20 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {NgIf} from '@angular/common';
-import {ClientDto} from '../../../gs-api/src/models/client-dto';
-import {Router} from '@angular/router';
-import {CltfrsService} from '../../services/cltfrs/cltfrs.service';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ClientDto } from '../../../gs-api/src/models/client-dto';
+import { Router } from '@angular/router';
+import { CltfrsService } from '../../services/cltfrs/cltfrs.service';
+import { NotificationService } from '../../services/notification/notification.service';
 
 @Component({
-  imports: [NgIf],
   selector: 'app-detail-clt-frs',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './detail-clt-frs.component.html',
   styleUrls: ['./detail-clt-frs.component.scss']
 })
-export class DetailCltFrsComponent implements OnInit {
+export class DetailCltFrsComponent {
 
-  @Input()
-  origin = '';
-  @Input()
-  clientFournisseur: any = {};
-  @Output()
-  suppressionResult = new EventEmitter();
+  origin = input('');
+  clientFournisseur = input<any>({});
+  suppressionResult = output<string | 'success'>();
 
   /** Etat de la confirmation inline (remplace la modale Bootstrap) */
   confirmationVisible = false;
@@ -26,11 +23,9 @@ export class DetailCltFrsComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private cltFrsService: CltfrsService
+    private cltFrsService: CltfrsService,
+    private notificationService: NotificationService
   ) { }
-
-  ngOnInit(): void {
-  }
 
   demanderConfirmation(): void {
     this.confirmationVisible = true;
@@ -41,25 +36,27 @@ export class DetailCltFrsComponent implements OnInit {
   }
 
   modifierClientFournisseur(): void {
-    if (this.origin === 'client') {
-      this.router.navigate(['nouveauclient', this.clientFournisseur.id]);
-    } else if (this.origin === 'fournisseur') {
-      this.router.navigate(['nouveaufournisseur', this.clientFournisseur.id]);
+    if (this.origin() === 'client') {
+      this.router.navigate(['nouveauclient', this.clientFournisseur().id]);
+    } else if (this.origin() === 'fournisseur') {
+      this.router.navigate(['nouveaufournisseur', this.clientFournisseur().id]);
     }
   }
 
   confirmerEtSupprimer(): void {
     this.confirmationVisible = false;
-    if (this.origin === 'client') {
-      this.cltFrsService.deleteClient(this.clientFournisseur.id)
+    if (this.origin() === 'client') {
+      this.cltFrsService.deleteClient(this.clientFournisseur().id)
       .subscribe(res => {
+        this.notificationService.success('Client supprime');
         this.suppressionResult.emit('success');
       }, error => {
         this.suppressionResult.emit(CltfrsService.errorMsg(error));
       });
-    } else if (this.origin === 'fournisseur') {
-      this.cltFrsService.deleteFournisseur(this.clientFournisseur.id)
+    } else if (this.origin() === 'fournisseur') {
+      this.cltFrsService.deleteFournisseur(this.clientFournisseur().id)
       .subscribe(res => {
+        this.notificationService.success('Fournisseur supprime');
         this.suppressionResult.emit('success');
       }, error => {
         this.suppressionResult.emit(CltfrsService.errorMsg(error));

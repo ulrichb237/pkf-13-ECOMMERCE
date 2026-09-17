@@ -1,0 +1,31 @@
+/* Actions du footer de commande */
+.cmd-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+}
+
+.btn-sm-etat {
+  min-height: 30px;
+  padding: 4px 14px;
+  font-size: 14px;
+}
+
+/* Confirmation inline du changement d'etat */
+.etat-menu-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-sm);
+}
+
+.etat-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  padding: 4px 10px;
+  border: 1px solid var(--clr-hairline);
+  border-radius: var(--radius-pill);
+  background: var(--clr-canvas-soft);
+  font-size: 13px;
+  color: var(--clr-ink-mute);
+}

@@ -1,10 +1,12 @@
 <div class="cmd-ligne">
-  <span class="cmd-ligne-cell">{{ ligneCommande.article?.codeArticle }}</span>
-  <span class="cmd-ligne-cell">{{ ligneCommande.article?.designation }}</span>
-  <span class="cmd-ligne-cell tnum">{{ ligneCommande.quantite }}</span>
-  <span class="cmd-ligne-cell tnum">{{ ligneCommande.prixUnitaire }} €</span>
+  <span class="cmd-ligne-cell">{{ ligneCommande().article?.codeArticle }}</span>
+  <span class="cmd-ligne-cell">{{ ligneCommande().article?.designation }}</span>
+  <span class="cmd-ligne-cell tnum">{{ ligneCommande().quantite }}</span>
+  <span class="cmd-ligne-cell tnum">{{ ligneCommande().prixUnitaire }} €</span>
   <span class="cmd-ligne-cell tnum">
-    {{ ligneCommande.prixUnitaire && ligneCommande.quantite ? +ligneCommande.prixUnitaire * +ligneCommande.quantite : '' }} €
+    @if (ligneCommande().prixUnitaire && ligneCommande().quantite) {
+      {{ +ligneCommande().prixUnitaire! * +ligneCommande().quantite! }} €
+    }
   </span>
   <span class="cmd-ligne-cell cmd-ligne-actions">
     <ng-container *ngIf="!confirmationVisible; else confirmBloc">

@@ -2,41 +2,66 @@
   <div class="page-header">
     <h1>Commande {{origin}}s</h1>
     <app-boutton-action
-      [isImporterVisible]="false"
       (clickEvent)="nouvelleCommande()"
     ></app-boutton-action>
   </div>
 
-  <div class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</div>
-  <div class="empty-state" *ngIf="!listeCommandes.length && !errorMsg">
+  <div class="alert alert-danger" *ngIf="errorMsg()">{{ errorMsg() }}</div>
+  <div class="empty-state" *ngIf="!listeCommandes().length && !errorMsg()">
     Aucune commande
   </div>
 
-  <div *ngFor="let cmd of listeCommandes" class="card card-cmd">
+  <div *ngFor="let cmd of listeCommandes(); track cmd.id" class="card card-cmd">
     <button type="button" class="card-cmd-header" (click)="basculerAccordeon(cmd.id)"
-            [attr.aria-expanded]="commandesOuvertes.has(cmd.id)">
+            [attr.aria-expanded]="commandesOuvertes().has(cmd.id)">
       <app-detail-cmd-clt-frs
         [commande]="cmd"
         [origin]="origin"
       ></app-detail-cmd-clt-frs>
     </button>
 
-    <div class="card-cmd-body" *ngIf="commandesOuvertes.has(cmd.id)">
+    <div class="card-cmd-body" *ngIf="commandesOuvertes().has(cmd.id)">
       <app-detail-cmd
-        *ngFor="let ligne of mapLignesCommande.get(cmd.id)"
+        *ngFor="let ligne of mapLignesCommande().get(cmd.id); track ligne.id"
         [ligneCommande]="ligne"
         [origin]="origin"
         (suppressionLigne)="supprimerLigneCommande($event)"
       ></app-detail-cmd>
-      <div class="empty-state empty-state-sm" *ngIf="!mapLignesCommande.get(cmd.id)?.length">
+      <div class="empty-state empty-state-sm" *ngIf="!mapLignesCommande().get(cmd.id)?.length">
         Aucune ligne dans cette commande
       </div>
     </div>
 
     <div class="card-cmd-footer">
-      <span class="caption">{{ mapLignesCommande.get(cmd.id)?.length || 0 }} ligne(s) de commande</span>
-      <span class="caption tnum">
-        Total : {{ calculerTotalCommande(cmd.id) }} €
+      <span class="caption">{{ mapLignesCommande().get(cmd.id)?.length || 0 }} ligne(s) —
+        Total : <span class="tnum">{{ calculerTotalCommande(cmd.id) }} €</span>
+      </span>
+
+      <span class="cmd-footer-actions">
+        <!-- Workflow d'etat : le bouton propose l'etat suivant, masque si LIVREE -->
+        @if (etatsSuivants(cmd.etatCommande).length) {
+          <span class="etat-menu-wrap">
+            <button type="button" class="btn btn-secondary btn-sm-etat"
+                    (click)="ouvrirMenuEtat(cmd.id)"
+                    [disabled]="changementEtatEnCours()">
+              {{ cmd.etatCommande === 'EN_PREPARATION' ? 'Valider' : 'Livrer' }}
+            </button>
+            @if (commandeEtatMenuOuvert() === cmd.id) {
+              <span class="etat-confirm">
+                Confirmer :
+                <button type="button" class="btn-pill btn-pill-primary btn-sm-etat"
+                        [disabled]="changementEtatEnCours()"
+                        (click)="changerEtat(cmd, etatsSuivants(cmd.etatCommande)[0])">
+                  {{ etatsSuivants(cmd.etatCommande)[0] === 'VALIDEE' ? 'Valider la commande' : 'Marquer livree' }}
+                </button>
+                <button type="button" class="btn-link" (click)="ouvrirMenuEtat(cmd.id)">Annuler</button>
+              </span>
+            }
+          </span>
+        } @else {
+          <span class="pill-tag-soft" *ngIf="cmd.etatCommande === 'LIVREE'">Livree</span>
+        }
+
         <button type="button" class="btn-link btn-link-danger" (click)="demanderSuppressionCommande(cmd)"
                 aria-label="Supprimer la commande">
           Supprimer
@@ -46,18 +71,19 @@
   </div>
 
   <!-- Confirmation de suppression de commande (remplace la modale Bootstrap) -->
-  <div class="dialog-backdrop" *ngIf="commandeASupprimer" (click)="annulerSuppressionCommande()">
+  <div class="dialog-backdrop" *ngIf="commandeASupprimer(); else pasDeDialog" (click)="annulerSuppressionCommande()">
     <div class="dialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
       <h3 class="dialog-title">Confirmation</h3>
-      <p>Supprimer la commande {{ commandeASupprimer.code }} ?</p>
+      <p>Supprimer la commande {{ commandeASupprimer()?.code }} ?</p>
       <div class="dialog-actions">
         <button type="button" class="btn-pill btn-pill-secondary" (click)="annulerSuppressionCommande()">Annuler</button>
-        <button type="button" class="btn-pill btn-pill-danger" (click)="supprimerCommande(commandeASupprimer.id); commandeASupprimer = null">Supprimer</button>
+        <button type="button" class="btn-pill btn-pill-danger" (click)="supprimerCommande(commandeASupprimer()!.id); annulerSuppressionCommande()">Supprimer</button>
       </div>
     </div>
   </div>
+  <ng-template #pasDeDialog></ng-template>
 
-  <div class="page-pagination" *ngIf="listeCommandes.length">
+  <div class="page-pagination" *ngIf="listeCommandes().length">
     <app-pagination></app-pagination>
   </div>
 </div>

@@ -1,9 +1,8 @@
 import { DatePipe, NgFor, NgIf } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { ArticleService } from '../../services/article/article.service';
 import { VentesServiceApp } from '../../services/ventes/ventes.service';
 import { CmdcltfrsService } from '../../services/cmdcltfrs/cmdcltfrs.service';
-import { ArticleDto } from '../../../gs-api/src/models/article-dto';
 import { LigneVenteDto } from '../../../gs-api/src/models/ligne-vente-dto';
 import { LigneCommandeClientDto } from '../../../gs-api/src/models/ligne-commande-client-dto';
 import { LigneCommandeFournisseurDto } from '../../../gs-api/src/models/ligne-commande-fournisseur-dto';
@@ -16,22 +15,21 @@ import { LigneCommandeFournisseurDto } from '../../../gs-api/src/models/ligne-co
 @Component({
   imports: [NgIf, NgFor, DatePipe],
   selector: 'app-page-statistiques',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './page-statistiques.component.html',
   styleUrls: ['./page-statistiques.component.scss']
 })
 export class PageStatistiquesComponent implements OnInit {
 
-  listArticle: Array<ArticleDto> = [];
-  ventes: Array<VentesAggregees> = [];
-  lignesVentes: Array<LigneVenteDto> = [];
-  lignesCmdClient: Array<LigneCommandeClientDto> = [];
-  lignesCmdFournisseur: Array<LigneCommandeFournisseurDto> = [];
-  errorMsg = '';
+  /** Etat en signals : ecrits depuis les callbacks HTTP (zoneless-safe) */
+  readonly lignesVentes = signal<Array<LigneVenteDto>>([]);
+  readonly lignesCmdClient = signal<Array<LigneCommandeClientDto>>([]);
+  readonly lignesCmdFournisseur = signal<Array<LigneCommandeFournisseurDto>>([]);
+  readonly errorMsg = signal('');
 
   constructor(
     private articleService: ArticleService,
-    private ventesService: VentesServiceApp,
-    private cmdCltFrsService: CmdcltfrsService
+    private ventesService: VentesServiceApp
   ) { }
 
   ngOnInit(): void {
@@ -39,25 +37,13 @@ export class PageStatistiquesComponent implements OnInit {
   }
 
   chargerStatistiques(): void {
-    this.errorMsg = '';
+    this.errorMsg.set('');
     this.ventesService.findAllVentes().subscribe(ventes => {
       // Aplatit toutes les lignes de vente de toutes les ventes
-      this.lignesVentes = (ventes || []).flatMap(v => v.ligneVentes || []);
+      this.lignesVentes.set((ventes || []).flatMap(v => v.ligneVentes || []));
     }, error => {
-      this.errorMsg = VentesServiceApp.errorMsg(error);
+      this.errorMsg.set(VentesServiceApp.errorMsg(error));
     });
-  }
-
-  voirHistoriqueArticle(article: ArticleDto): void {
-    if (!article.id) {
-      return;
-    }
-    this.articleService.findHistoriqueVentes(article.id)
-      .subscribe(lignes => this.lignesVentes = lignes || []);
-    this.articleService.findHistoriqueCommandeClient(article.id)
-      .subscribe(lignes => this.lignesCmdClient = lignes || []);
-    this.articleService.findHistoriqueCommandeFournisseur(article.id)
-      .subscribe(lignes => this.lignesCmdFournisseur = lignes || []);
   }
 }
 

@@ -1,36 +1,31 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {DatePipe} from '@angular/common';
-import {ClientDto} from '../../../gs-api/src/models/client-dto';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { ClientDto } from '../../../gs-api/src/models/client-dto';
 
 @Component({
   imports: [DatePipe],
   selector: 'app-detail-cmd-clt-frs',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './detail-cmd-clt-frs.component.html',
   styleUrls: ['./detail-cmd-clt-frs.component.scss']
 })
-export class DetailCmdCltFrsComponent implements OnInit {
+export class DetailCmdCltFrsComponent {
 
-  @Input()
-  origin = '';
-  @Input()
+  origin = input('');
+  commande = input.required<any>();
 
-  commande: any = {};
-  cltFrs: ClientDto | undefined = {};
-
-  constructor() { }
-
-  ngOnInit(): void {
-    this.extractClientFournisseur();
-  }
+  /** Le client/fournisseur est derive de la commande et de l'origine */
+  cltFrs = computed<ClientDto | undefined>(() => {
+    const cmd = this.commande();
+    if (this.origin() === 'client') {
+      return cmd?.client;
+    }
+    if (this.origin() === 'fournisseur') {
+      return cmd?.fournisseur;
+    }
+    return undefined;
+  });
 
   modifierClick(): void {
-  }
-
-  extractClientFournisseur(): void {
-    if (this.origin === 'client') {
-      this.cltFrs = this.commande?.client;
-    } else if (this.origin === 'fournisseur') {
-      this.cltFrs = this.commande.fournisseur;
-    }
   }
 }

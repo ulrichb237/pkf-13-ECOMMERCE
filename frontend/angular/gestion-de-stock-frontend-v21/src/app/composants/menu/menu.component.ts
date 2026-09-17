@@ -1,15 +1,16 @@
-import { NgFor, NgClass } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { NgClass, NgFor } from '@angular/common';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {Menu} from './menu';
 import {Router} from '@angular/router';
 
 @Component({
   imports: [NgFor, NgClass],
   selector: 'app-menu',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './menu.component.html',
   styleUrls: ['./menu.component.scss']
 })
-export class MenuComponent implements OnInit {
+export class MenuComponent {
 
   public menuProperties: Array<Menu> = [
     {
@@ -120,10 +121,12 @@ export class MenuComponent implements OnInit {
     }
   ];
 
-  private lastSelectedMenu: Menu | undefined;
-
-  /** Menus ouverts (remplace le collapse Bootstrap) : tous ouverts par defaut */
+  /** Menus ouverts (remplace le collapse Bootstrap) : tous ouverts par defaut.
+   * On recree le Set a chaque bascule : la reference change, ce qui garantit
+   * la reactivite du template en OnPush. */
   menusOuverts = new Set<string>(this.menuProperties.map(m => m.id!).filter(Boolean));
+
+  private lastSelectedMenu: Menu | undefined;
 
   constructor(
     private router: Router
@@ -131,14 +134,13 @@ export class MenuComponent implements OnInit {
 
   /** Ouvre/ferme un groupe de menu (remplace data-toggle=collapse) */
   basculerMenu(id: string): void {
-    if (this.menusOuverts.has(id)) {
-      this.menusOuverts.delete(id);
+    const nouveau = new Set(this.menusOuverts);
+    if (nouveau.has(id)) {
+      nouveau.delete(id);
     } else {
-      this.menusOuverts.add(id);
+      nouveau.add(id);
     }
-  }
-
-  ngOnInit(): void {
+    this.menusOuverts = nouveau;
   }
 
   navigate(menu: Menu): void {

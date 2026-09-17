@@ -4,15 +4,15 @@
     <app-boutton-action (clickEvent)="nouvelArticle()"></app-boutton-action>
   </div>
 
-  <div class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</div>
+  <div class="alert alert-danger" *ngIf="errorMsg()">{{ errorMsg() }}</div>
 
-  <div class="empty-state" *ngIf="!listArticle.length && !errorMsg">
+  <div class="empty-state" *ngIf="!listArticle().length && !errorMsg()">
     Aucun article enregistre
   </div>
 
   <div class="page-content">
     <app-detail-article
-      *ngFor="let article of listArticle"
+      *ngFor="let article of listArticle(); track article.id"
       [articleDto]="article"
       (suppressionResult)="handleSuppression($event)"
       (detailsResult)="voirDetails($event)"
@@ -21,41 +21,41 @@
   </div>
 
   <!-- Panneau historiques article (remplace la modale + tabs Bootstrap) -->
-  <div class="dialog-backdrop" *ngIf="detailsVisibles" (click)="fermerDetails()">
+  <div class="dialog-backdrop" *ngIf="detailsVisibles()" (click)="fermerDetails()">
     <div class="dialog dialog-lg" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
       <div class="dialog-header">
-        <h3 class="dialog-title">{{ articleSelectionne.designation }} ({{ articleSelectionne.codeArticle }})</h3>
+        <h3 class="dialog-title">{{ articleSelectionne().designation }} ({{ articleSelectionne().codeArticle }})</h3>
         <button type="button" class="dialog-close" (click)="fermerDetails()" aria-label="Fermer">&times;</button>
       </div>
 
       <div class="tabs" role="tablist">
         <button type="button" role="tab" class="tab"
-                [class.tab-active]="ongletActif === 'ventes'"
-                [attr.aria-selected]="ongletActif === 'ventes'"
-                (click)="ongletActif = 'ventes'">
-          Ventes ({{ historiqueVentes.length }})
+                [class.tab-active]="ongletActif() === 'ventes'"
+                [attr.aria-selected]="ongletActif() === 'ventes'"
+                (click)="ongletActif.set('ventes')">
+          Ventes ({{ historiqueVentes().length }})
         </button>
         <button type="button" role="tab" class="tab"
-                [class.tab-active]="ongletActif === 'cmdClt'"
-                [attr.aria-selected]="ongletActif === 'cmdClt'"
-                (click)="ongletActif = 'cmdClt'">
-          Commandes clients ({{ historiqueCmdClient.length }})
+                [class.tab-active]="ongletActif() === 'cmdClt'"
+                [attr.aria-selected]="ongletActif() === 'cmdClt'"
+                (click)="ongletActif.set('cmdClt')">
+          Commandes clients ({{ historiqueCmdClient().length }})
         </button>
         <button type="button" role="tab" class="tab"
-                [class.tab-active]="ongletActif === 'cmdFrs'"
-                [attr.aria-selected]="ongletActif === 'cmdFrs'"
-                (click)="ongletActif = 'cmdFrs'">
-          Commandes fournisseurs ({{ historiqueCmdFournisseur.length }})
+                [class.tab-active]="ongletActif() === 'cmdFrs'"
+                [attr.aria-selected]="ongletActif() === 'cmdFrs'"
+                (click)="ongletActif.set('cmdFrs')">
+          Commandes fournisseurs ({{ historiqueCmdFournisseur().length }})
         </button>
       </div>
 
       <div class="dialog-body">
-        <ng-container *ngIf="ongletActif === 'ventes'">
-          <div class="empty-state empty-state-sm" *ngIf="!historiqueVentes.length">Aucune vente pour cet article.</div>
-          <table class="data-table" *ngIf="historiqueVentes.length">
+        <ng-container *ngIf="ongletActif() === 'ventes'">
+          <div class="empty-state empty-state-sm" *ngIf="!historiqueVentes().length">Aucune vente pour cet article.</div>
+          <table class="data-table" *ngIf="historiqueVentes().length">
             <thead><tr><th>Date</th><th>Quantite</th><th>Prix unitaire</th></tr></thead>
             <tbody>
-              <tr *ngFor="let l of historiqueVentes">
+              <tr *ngFor="let l of historiqueVentes()">
                 <td>{{ l.vente?.dateVente | date:'dd/MM/yyyy HH:mm' }}</td>
                 <td class="tnum">{{ l.quantite }}</td>
                 <td class="tnum">{{ l.prixUnitaire }} €</td>
@@ -64,12 +64,12 @@
           </table>
         </ng-container>
 
-        <ng-container *ngIf="ongletActif === 'cmdClt'">
-          <div class="empty-state empty-state-sm" *ngIf="!historiqueCmdClient.length">Aucune commande client pour cet article.</div>
-          <table class="data-table" *ngIf="historiqueCmdClient.length">
-            <thead><tr><th>Date</th><th>Quantite</th><th>Prix unitaire</th></tr></thead>
+        <ng-container *ngIf="ongletActif() === 'cmdClt'">
+          <div class="empty-state empty-state-sm" *ngIf="!historiqueCmdClient().length">Aucune commande client pour cet article.</div>
+          <table class="data-table" *ngIf="historiqueCmdClient().length">
+            <thead><tr><th>Ligne</th><th>Quantite</th><th>Prix unitaire</th></tr></thead>
             <tbody>
-              <tr *ngFor="let l of historiqueCmdClient">
+              <tr *ngFor="let l of historiqueCmdClient()">
                 <td>{{ l.id }}</td>
                 <td class="tnum">{{ l.quantite }}</td>
                 <td class="tnum">{{ l.prixUnitaire }} €</td>
@@ -78,12 +78,12 @@
           </table>
         </ng-container>
 
-        <ng-container *ngIf="ongletActif === 'cmdFrs'">
-          <div class="empty-state empty-state-sm" *ngIf="!historiqueCmdFournisseur.length">Aucune commande fournisseur pour cet article.</div>
-          <table class="data-table" *ngIf="historiqueCmdFournisseur.length">
-            <thead><tr><th>Date</th><th>Quantite</th><th>Prix unitaire</th></tr></thead>
+        <ng-container *ngIf="ongletActif() === 'cmdFrs'">
+          <div class="empty-state empty-state-sm" *ngIf="!historiqueCmdFournisseur().length">Aucune commande fournisseur pour cet article.</div>
+          <table class="data-table" *ngIf="historiqueCmdFournisseur().length">
+            <thead><tr><th>Ligne</th><th>Quantite</th><th>Prix unitaire</th></tr></thead>
             <tbody>
-              <tr *ngFor="let l of historiqueCmdFournisseur">
+              <tr *ngFor="let l of historiqueCmdFournisseur()">
                 <td>{{ l.id }}</td>
                 <td class="tnum">{{ l.quantite }}</td>
                 <td class="tnum">{{ l.prixUnitaire }} €</td>
@@ -99,7 +99,7 @@
     </div>
   </div>
 
-  <div class="page-pagination" *ngIf="listArticle.length">
+  <div class="page-pagination" *ngIf="listArticle().length">
     <app-pagination></app-pagination>
   </div>
 </div>

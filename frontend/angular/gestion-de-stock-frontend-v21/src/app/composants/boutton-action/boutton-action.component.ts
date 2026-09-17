@@ -1,32 +1,21 @@
-import { NgIf } from '@angular/common';
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 @Component({
-  imports: [NgIf],
   selector: 'app-boutton-action',
-  templateUrl: './boutton-action.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <button type="button" class="btn btn-primary" (click)="clickEvent.emit()">
+      Nouveau
+    </button>
+  `,
   styleUrls: ['./boutton-action.component.scss']
 })
-export class BouttonActionComponent implements OnInit {
+export class BouttonActionComponent {
 
-  @Input()
-  isNouveauVisible = true;
-  @Input()
-  isExporterVisible = true;
-  @Input()
-  isImporterVisible = true;
+  isNouveauVisible = input(true);
+  isExporterVisible = input(true);
+  isImporterVisible = input(true);
 
-  @Output()
-  clickEvent = new EventEmitter();
-
-  constructor() { }
-
-  ngOnInit(): void {
-  }
-
-  bouttonNouveauClick(): void {
-    this.clickEvent.emit();
-  }
+  clickEvent = output<void>();
 
 }

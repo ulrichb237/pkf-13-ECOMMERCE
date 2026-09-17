@@ -1,24 +1,23 @@
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Component, OnInit } from '@angular/core';
-import {UserService} from '../../services/user/user.service';
-import {UtilisateurDto} from '../../../gs-api/src/models/utilisateur-dto';
+import { UserService } from '../../services/user/user.service';
+import { UtilisateurDto } from '../../../gs-api/src/models/utilisateur-dto';
 
 @Component({
   imports: [RouterLink],
   selector: 'app-header',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent {
 
-  connectedUser: UtilisateurDto = {};
+  connectedUser: UtilisateurDto;
 
-  constructor(
-    private userService: UserService
-  ) { }
-
-  ngOnInit(): void {
-    this.connectedUser = this.userService.getConnectedUser();
+  constructor(userService: UserService) {
+    // Lu une seule fois a la construction du shell : le header affiche
+    // l'utilisateur de la session courante.
+    this.connectedUser = userService.getConnectedUser();
   }
 
 }

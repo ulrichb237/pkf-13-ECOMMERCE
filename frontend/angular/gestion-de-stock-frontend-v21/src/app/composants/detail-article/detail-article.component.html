@@ -1,21 +1,21 @@
 <div class="article-card custom-border">
   <div class="article-card-photo">
-    <img [src]="articleDto.photo ? articleDto.photo : 'assets/product.png'"
-         [alt]="'Photo de ' + (articleDto.designation || 'article')"
+    <img [src]="articleDto().photo ? articleDto().photo : 'assets/product.png'"
+         [alt]="'Photo de ' + (articleDto().designation || 'article')"
          width="100" height="100">
   </div>
 
   <div class="article-card-info">
-    <span class="article-card-code tnum">{{ articleDto.codeArticle }}</span>
-    <span class="article-card-designation">{{ articleDto.designation }}</span>
-    <span class="tnum">HT : {{ articleDto.prixUnitaireHt }} €</span>
-    <span class="tnum">TTC : {{ articleDto.prixUnitaireTtc }} €</span>
+    <span class="article-card-code tnum">{{ articleDto().codeArticle }}</span>
+    <span class="article-card-designation">{{ articleDto().designation }}</span>
+    <span class="tnum">HT : {{ articleDto().prixUnitaireHt }} €</span>
+    <span class="tnum">TTC : {{ articleDto().prixUnitaireTtc }} €</span>
   </div>
 
   <div class="article-card-category">
     <span class="caption">Categorie</span>
-    <span>{{ articleDto.category?.code }}</span>
-    <span>{{ articleDto.category?.designation }}</span>
+    <span>{{ articleDto().category?.code }}</span>
+    <span>{{ articleDto().category?.designation }}</span>
   </div>
 
   <div class="article-card-actions">
@@ -30,6 +30,6 @@
         <button type="button" class="btn-link btn-link-danger" (click)="confirmerEtSupprimerArticle()">Oui</button>
       </span>
     </ng-template>
-    <button type="button" class="btn-link" (click)="detailsResult.emit(articleDto)">Details</button>
+    <button type="button" class="btn-link" (click)="detailsResult.emit(articleDto())">Details</button>
   </div>
 </div>

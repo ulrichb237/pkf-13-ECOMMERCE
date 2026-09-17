@@ -1,6 +1,6 @@
 import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {Component, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {CltfrsService} from '../../services/cltfrs/cltfrs.service';
 import {ArticleDto} from '../../../gs-api/src/models/article-dto';
@@ -13,6 +13,7 @@ import {CommandeFournisseurDto} from '../../../gs-api/src/models/commande-fourni
 import { DetailCmdComponent } from '../detail-cmd/detail-cmd.component';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgIf, NgFor, FormsModule, RouterLink, DetailCmdComponent],
   selector: 'app-nouvelle-cmd-clt-frs',
   templateUrl: './nouvelle-cmd-clt-frs.component.html',

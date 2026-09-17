@@ -4,15 +4,15 @@
   </div>
 
   <div class="cmd-head-clt">
-    <span>{{ cltFrs?.nom }}</span>
-    <span>{{ cltFrs?.prenom }}</span>
-    <span class="text-muted tnum">{{ cltFrs?.numTel }}</span>
+    <span>{{ cltFrs()?.nom }}</span>
+    <span>{{ cltFrs()?.prenom }}</span>
+    <span class="text-muted tnum">{{ cltFrs()?.numTel }}</span>
   </div>
 
   <div class="cmd-head-cmd">
-    <span class="tnum">{{ commande.code }}</span>
-    <span class="text-muted">{{ commande.dateCommande | date:'dd/MM/yyyy HH:mm' }}</span>
-    <span class="pill-tag-soft">{{ commande.etatCommande }}</span>
+    <span class="tnum">{{ commande().code }}</span>
+    <span class="text-muted">{{ commande().dateCommande | date:'dd/MM/yyyy HH:mm' }}</span>
+    <span class="pill-tag-soft">{{ commande().etatCommande }}</span>
   </div>
 
   <div class="cmd-head-actions">

@@ -1,23 +1,22 @@
-import { Injectable } from '@angular/core';
-import {Subject} from 'rxjs';
-import {LoaderState} from '../loader.model';
+import { Injectable, signal } from '@angular/core';
 
+/**
+ * Etat global du loader, base sur un signal (zoneless-friendly).
+ * L'intercepteur HTTP appelle show()/hide() ; le LoaderComponent lit visible().
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class LoaderService {
 
-  private loaderSubject = new Subject<LoaderState>();
-
-  loaderState = this.loaderSubject.asObservable();
-
-  constructor() { }
+  private readonly _visible = signal(false);
+  readonly visible = this._visible.asReadonly();
 
   show(): void {
-    this.loaderSubject.next({show: true});
+    this._visible.set(true);
   }
 
   hide(): void {
-    this.loaderSubject.next({show: false});
+    this._visible.set(false);
   }
 }

@@ -1,8 +1,7 @@
-import { NgIf, NgFor } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { NgFor, NgIf } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import {Router} from '@angular/router';
 import {CltfrsService} from '../../../services/cltfrs/cltfrs.service';
-import {ClientDto} from '../../../../gs-api/src/models/client-dto';
 import {FournisseurDto} from '../../../../gs-api/src/models/fournisseur-dto';
 
 import { BouttonActionComponent } from '../../../composants/boutton-action/boutton-action.component';
@@ -14,13 +13,15 @@ import { PaginationComponent } from '../../../composants/pagination/pagination.c
 @Component({
   imports: [NgIf, NgFor, BouttonActionComponent, DetailCltFrsComponent, PaginationComponent],
   selector: 'app-page-fournisseur',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './page-fournisseur.component.html',
   styleUrls: ['./page-fournisseur.component.scss']
 })
 export class PageFournisseurComponent implements OnInit {
 
-  listFournisseur: Array<FournisseurDto> = [];
-  errorMsg = '';
+  /** Etat en signals : ecrits depuis les callbacks HTTP (zoneless-safe) */
+  readonly listFournisseur = signal<Array<FournisseurDto>>([]);
+  readonly errorMsg = signal('');
 
   constructor(
     private router: Router,
@@ -34,7 +35,7 @@ export class PageFournisseurComponent implements OnInit {
   findAllFournisseurs(): void {
     this.cltFrsService.findAllFournisseurs()
     .subscribe(fournisseurs => {
-      this.listFournisseur = fournisseurs;
+      this.listFournisseur.set(fournisseurs || []);
     });
   }
 
@@ -46,7 +47,7 @@ export class PageFournisseurComponent implements OnInit {
     if (event === 'success') {
       this.findAllFournisseurs();
     } else {
-      this.errorMsg = event;
+      this.errorMsg.set(event);
     }
   }
 }

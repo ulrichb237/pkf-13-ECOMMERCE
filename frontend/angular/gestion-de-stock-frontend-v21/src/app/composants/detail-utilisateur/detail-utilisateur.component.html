@@ -1,17 +1,17 @@
 <div class="cltfrs-card custom-border">
   <div class="cltfrs-photo">
-    <img [src]="utilisateur.photo ? utilisateur.photo : 'assets/product.png'"
-         [alt]="'Photo de ' + (utilisateur.nom || 'utilisateur')" width="100" height="100">
+    <img [src]="utilisateur().photo ? utilisateur().photo : 'assets/product.png'"
+         [alt]="'Photo de ' + (utilisateur().nom || 'utilisateur')" width="100" height="100">
   </div>
 
   <div class="cltfrs-info">
-    <span class="cltfrs-nom">{{ utilisateur.nom }} {{ utilisateur.prenom }}</span>
-    <span class="text-muted">{{ utilisateur.email }}</span>
+    <span class="cltfrs-nom">{{ utilisateur().nom }} {{ utilisateur().prenom }}</span>
+    <span class="text-muted">{{ utilisateur().email }}</span>
   </div>
 
   <div class="cltfrs-adresse">
-    <span>{{ utilisateur.adresse?.adresse1 }} {{ utilisateur.adresse?.adresse2 }}</span>
-    <span class="tnum">{{ utilisateur.adresse?.codePostale }} {{ utilisateur.adresse?.ville }}</span>
-    <span>{{ utilisateur.adresse?.pays }}</span>
+    <span>{{ utilisateur().adresse?.adresse1 }} {{ utilisateur().adresse?.adresse2 }}</span>
+    <span class="tnum">{{ utilisateur().adresse?.codePostale }} {{ utilisateur().adresse?.ville }}</span>
+    <span>{{ utilisateur().adresse?.pays }}</span>
   </div>
 </div>

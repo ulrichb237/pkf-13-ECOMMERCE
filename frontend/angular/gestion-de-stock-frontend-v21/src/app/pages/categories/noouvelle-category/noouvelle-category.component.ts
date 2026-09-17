@@ -1,11 +1,12 @@
 import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {CategoryDto} from '../../../../gs-api/src/models/category-dto';
 import {CategoryService} from '../../../services/category/category.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgIf, NgFor, FormsModule],
   selector: 'app-noouvelle-category',
   templateUrl: './noouvelle-category.component.html',

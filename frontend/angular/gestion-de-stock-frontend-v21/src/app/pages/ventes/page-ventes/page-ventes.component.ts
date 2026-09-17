@@ -1,11 +1,8 @@
-import { NgIf, NgFor, DatePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { NgFor, NgIf, DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import {Router} from '@angular/router';
 import {VentesServiceApp} from '../../../services/ventes/ventes.service';
 import {VentesDto} from '../../../../gs-api/src/models/ventes-dto';
-import {LigneVenteDto} from '../../../../gs-api/src/models/ligne-vente-dto';
-import {ArticleService} from '../../../services/article/article.service';
-import {ArticleDto} from '../../../../gs-api/src/models/article-dto';
 
 import { BouttonActionComponent } from '../../../composants/boutton-action/boutton-action.component';
 
@@ -14,14 +11,17 @@ import { PaginationComponent } from '../../../composants/pagination/pagination.c
 @Component({
   imports: [NgIf, NgFor, DatePipe, BouttonActionComponent, PaginationComponent],
   selector: 'app-page-ventes',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './page-ventes.component.html',
   styleUrls: ['./page-ventes.component.scss']
 })
 export class PageVentesComponent implements OnInit {
 
-  listVentes: Array<VentesDto> = [];
-  errorMsg = '';
-  selectedVenteIdToDelete ? = -1;
+  /** Etat en signals : ecrits depuis les callbacks HTTP (zoneless-safe) */
+  readonly listVentes = signal<Array<VentesDto>>([]);
+  readonly errorMsg = signal('');
+  /** id de la vente en attente de confirmation de suppression ; null = aucun dialog */
+  readonly venteASupprimer = signal<VentesDto | null>(null);
 
   constructor(
     private router: Router,
@@ -39,28 +39,29 @@ export class PageVentesComponent implements OnInit {
   findAllVentes(): void {
     this.ventesService.findAllVentes()
     .subscribe(ventes => {
-      this.listVentes = ventes;
+      this.listVentes.set(ventes || []);
     }, error => {
-      this.errorMsg = VentesServiceApp.errorMsg(error);
+      this.errorMsg.set(VentesServiceApp.errorMsg(error));
     });
   }
 
-  selectVentePourSupprimer(id?: number): void {
-    this.selectedVenteIdToDelete = id;
+  selectVentePourSupprimer(vente: VentesDto): void {
+    this.venteASupprimer.set(vente);
   }
 
   annulerSuppressionVente(): void {
-    this.selectedVenteIdToDelete = -1;
+    this.venteASupprimer.set(null);
   }
 
   confirmerEtSupprimerVente(): void {
-    const id = this.selectedVenteIdToDelete;
-    if (id !== undefined && id !== -1) {
-      this.ventesService.deleteVente(id)
+    const vente = this.venteASupprimer();
+    this.venteASupprimer.set(null);
+    if (vente?.id) {
+      this.ventesService.deleteVente(vente.id)
       .subscribe(() => {
         this.findAllVentes();
       }, error => {
-        this.errorMsg = VentesServiceApp.errorMsg(error);
+        this.errorMsg.set(VentesServiceApp.errorMsg(error));
       });
     }
   }

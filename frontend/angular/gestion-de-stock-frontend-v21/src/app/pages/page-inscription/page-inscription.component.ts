@@ -1,7 +1,7 @@
 import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import {EntrepriseDto} from '../../../gs-api/src/models/entreprise-dto';
 import {EntrepriseService} from '../../services/entreprise/entreprise.service';
 import {AdresseDto} from '../../../gs-api/src/models/adresse-dto';

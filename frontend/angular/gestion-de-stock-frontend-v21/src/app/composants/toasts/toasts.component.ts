@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { NgClass, NgFor } from '@angular/common';
 import { NotificationService } from '../../services/notification/notification.service';
 
@@ -10,16 +10,16 @@ import { NotificationService } from '../../services/notification/notification.se
 @Component({
   imports: [NgFor, NgClass],
   selector: 'app-toasts',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="toasts" aria-live="polite">
-      <div *ngFor="let toast of notificationService.toasts()"
-           class="toast-item"
-           [ngClass]="'toast-' + toast.type"
-           role="status">
-        <span class="toast-message">{{ toast.message }}</span>
-        <button type="button" class="toast-close" (click)="notificationService.dismiss(toast.id)"
-                aria-label="Fermer">&times;</button>
-      </div>
+      @for (toast of notificationService.toasts(); track toast.id) {
+        <div class="toast-item" [ngClass]="'toast-' + toast.type" role="status">
+          <span class="toast-message">{{ toast.message }}</span>
+          <button type="button" class="toast-close" (click)="notificationService.dismiss(toast.id)"
+                  aria-label="Fermer">&times;</button>
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -60,6 +60,6 @@ import { NotificationService } from '../../services/notification/notification.se
 })
 export class ToastsComponent {
 
-  constructor(public notificationService: NotificationService) { }
+  readonly notificationService = inject(NotificationService);
 
 }

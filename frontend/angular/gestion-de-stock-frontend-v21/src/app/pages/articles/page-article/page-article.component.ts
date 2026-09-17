@@ -1,5 +1,5 @@
 import { NgIf, NgFor, DatePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import {Router} from '@angular/router';
 import {ArticleDto} from '../../../../gs-api/src/models/article-dto';
 import {ArticleService} from '../../../services/article/article.service';
@@ -16,23 +16,23 @@ import { PaginationComponent } from '../../../composants/pagination/pagination.c
 @Component({
   imports: [NgIf, NgFor, DatePipe, BouttonActionComponent, DetailArticleComponent, PaginationComponent],
   selector: 'app-page-article',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './page-article.component.html',
   styleUrls: ['./page-article.component.scss']
 })
 export class PageArticleComponent implements OnInit {
 
-  listArticle: Array<ArticleDto> = [];
-  errorMsg = '';
-
-  articleSelectionne: ArticleDto = {};
-  historiqueVentes: Array<LigneVenteDto> = [];
-  historiqueCmdClient: Array<LigneCommandeClientDto> = [];
-  historiqueCmdFournisseur: Array<LigneCommandeFournisseurDto> = [];
-
+  /** Etat en signals : ecrits depuis les callbacks HTTP (zoneless-safe) */
+  readonly listArticle = signal<Array<ArticleDto>>([]);
+  readonly errorMsg = signal('');
+  readonly articleSelectionne = signal<ArticleDto>({});
+  readonly historiqueVentes = signal<Array<LigneVenteDto>>([]);
+  readonly historiqueCmdClient = signal<Array<LigneCommandeClientDto>>([]);
+  readonly historiqueCmdFournisseur = signal<Array<LigneCommandeFournisseurDto>>([]);
   /** Onglet actif du panneau historiques (remplace data-toggle=tab Bootstrap) */
-  ongletActif: 'ventes' | 'cmdClt' | 'cmdFrs' = 'ventes';
+  readonly ongletActif = signal<'ventes' | 'cmdClt' | 'cmdFrs'>('ventes');
   /** Visibilite du panneau historiques (remplace la modale Bootstrap) */
-  detailsVisibles = false;
+  readonly detailsVisibles = signal(false);
 
   constructor(
     private router: Router,
@@ -46,33 +46,33 @@ export class PageArticleComponent implements OnInit {
   findListArticle(): void {
     this.articleService.findAllArticles()
     .subscribe(articles => {
-      this.listArticle = articles;
+      this.listArticle.set(articles || []);
     }, error => {
-      this.errorMsg = error?.error?.message || 'Erreur lors du chargement des articles';
+      this.errorMsg.set(error?.error?.message || 'Erreur lors du chargement des articles');
     });
   }
 
   voirDetails(article?: ArticleDto): void {
-    this.errorMsg = '';
-    this.historiqueVentes = [];
-    this.historiqueCmdClient = [];
-    this.historiqueCmdFournisseur = [];
-    this.ongletActif = 'ventes';
+    this.errorMsg.set('');
+    this.historiqueVentes.set([]);
+    this.historiqueCmdClient.set([]);
+    this.historiqueCmdFournisseur.set([]);
+    this.ongletActif.set('ventes');
     if (!article?.id) {
       return;
     }
-    this.articleSelectionne = article;
-    this.detailsVisibles = true;
+    this.articleSelectionne.set(article);
+    this.detailsVisibles.set(true);
     this.articleService.findHistoriqueVentes(article.id)
-      .subscribe(ventes => this.historiqueVentes = ventes || []);
+      .subscribe(ventes => this.historiqueVentes.set(ventes || []));
     this.articleService.findHistoriqueCommandeClient(article.id)
-      .subscribe(cmds => this.historiqueCmdClient = cmds || []);
+      .subscribe(cmds => this.historiqueCmdClient.set(cmds || []));
     this.articleService.findHistoriqueCommandeFournisseur(article.id)
-      .subscribe(cmds => this.historiqueCmdFournisseur = cmds || []);
+      .subscribe(cmds => this.historiqueCmdFournisseur.set(cmds || []));
   }
 
   fermerDetails(): void {
-    this.detailsVisibles = false;
+    this.detailsVisibles.set(false);
   }
 
   nouvelArticle(): void {
@@ -83,7 +83,7 @@ export class PageArticleComponent implements OnInit {
     if (event === 'success') {
       this.findListArticle();
     } else {
-      this.errorMsg = event;
+      this.errorMsg.set(event);
     }
   }
 }

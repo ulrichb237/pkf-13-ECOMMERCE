@@ -1,5 +1,5 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import {Router} from '@angular/router';
 import {UtilisateurDto} from '../../../../gs-api/src/models/utilisateur-dto';
 import {UserService} from '../../../services/user/user.service';
@@ -10,13 +10,15 @@ import {PaginationComponent} from '../../../composants/pagination/pagination.com
 @Component({
   imports: [NgIf, NgFor, BouttonActionComponent, DetailUtilisateurComponent, PaginationComponent],
   selector: 'app-page-utilisateur',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './page-utilisateur.component.html',
   styleUrls: ['./page-utilisateur.component.scss']
 })
 export class PageUtilisateurComponent implements OnInit {
 
-  listUtilisateur: Array<UtilisateurDto> = [];
-  errorMsg = '';
+  /** Etat en signals : ecrits depuis les callbacks HTTP (zoneless-safe) */
+  readonly listUtilisateur = signal<Array<UtilisateurDto>>([]);
+  readonly errorMsg = signal('');
 
   constructor(
     private router: Router,
@@ -29,9 +31,9 @@ export class PageUtilisateurComponent implements OnInit {
 
   findAllUtilisateurs(): void {
     this.userService.findAllUtilisateurs().subscribe(utilisateurs => {
-      this.listUtilisateur = utilisateurs || [];
+      this.listUtilisateur.set(utilisateurs || []);
     }, error => {
-      this.errorMsg = error?.error?.message || 'Erreur lors du chargement des utilisateurs';
+      this.errorMsg.set(error?.error?.message || 'Erreur lors du chargement des utilisateurs');
     });
   }
 

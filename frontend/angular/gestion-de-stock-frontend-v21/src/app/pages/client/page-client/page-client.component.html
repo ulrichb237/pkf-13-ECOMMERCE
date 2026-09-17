@@ -4,20 +4,20 @@
     <app-boutton-action (clickEvent)="nouveauClient()"></app-boutton-action>
   </div>
 
-  <div class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</div>
+  <div class="alert alert-danger" *ngIf="errorMsg()">{{ errorMsg() }}</div>
 
-  <div class="empty-state" *ngIf="!listClient.length && !errorMsg">Aucun client enregistre</div>
+  <div class="empty-state" *ngIf="!listClient().length && !errorMsg()">Aucun client enregistre</div>
 
   <div class="page-content">
     <app-detail-clt-frs
-      *ngFor="let client of listClient"
+      *ngFor="let client of listClient(); track client.id"
       [clientFournisseur]="client"
       [origin]="'client'"
       (suppressionResult)="handleSuppression($event)"
     ></app-detail-clt-frs>
   </div>
 
-  <div class="page-pagination" *ngIf="listClient.length">
+  <div class="page-pagination" *ngIf="listClient().length">
     <app-pagination></app-pagination>
   </div>
 </div>

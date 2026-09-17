@@ -1,5 +1,5 @@
-import { NgIf, NgFor } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { NgFor, NgIf } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import {Router} from '@angular/router';
 import {CltfrsService} from '../../../services/cltfrs/cltfrs.service';
 import {ClientDto} from '../../../../gs-api/src/models/client-dto';
@@ -13,13 +13,15 @@ import { PaginationComponent } from '../../../composants/pagination/pagination.c
 @Component({
   imports: [NgIf, NgFor, BouttonActionComponent, DetailCltFrsComponent, PaginationComponent],
   selector: 'app-page-client',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './page-client.component.html',
   styleUrls: ['./page-client.component.scss']
 })
 export class PageClientComponent implements OnInit {
 
-  listClient: Array<ClientDto> = [];
-  errorMsg = '';
+  /** Etat en signals : ecrits depuis les callbacks HTTP (zoneless-safe) */
+  readonly listClient = signal<Array<ClientDto>>([]);
+  readonly errorMsg = signal('');
 
   constructor(
     private router: Router,
@@ -33,7 +35,7 @@ export class PageClientComponent implements OnInit {
   findAllClients(): void {
     this.cltFrsService.findAllClients()
     .subscribe(clients => {
-      this.listClient = clients;
+      this.listClient.set(clients || []);
     });
   }
 
@@ -45,7 +47,7 @@ export class PageClientComponent implements OnInit {
     if (event === 'success') {
       this.findAllClients();
     } else {
-      this.errorMsg = event;
+      this.errorMsg.set(event);
     }
   }
 }

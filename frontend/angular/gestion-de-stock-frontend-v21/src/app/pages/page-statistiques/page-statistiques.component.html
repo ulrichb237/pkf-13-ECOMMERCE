@@ -3,29 +3,29 @@
     <h1>Statistiques</h1>
   </div>
 
-  <div class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</div>
+  <div class="alert alert-danger" *ngIf="errorMsg()">{{ errorMsg() }}</div>
 
   <div class="stats-grid">
     <div class="card custom-border p-3 stats-card">
       <span class="caption">Lignes de vente chargees</span>
-      <span class="stats-value tnum">{{ lignesVentes.length }}</span>
+      <span class="stats-value tnum">{{ lignesVentes().length }}</span>
     </div>
     <div class="card custom-border p-3 stats-card">
       <span class="caption">Lignes de commande client</span>
-      <span class="stats-value tnum">{{ lignesCmdClient.length }}</span>
+      <span class="stats-value tnum">{{ lignesCmdClient().length }}</span>
     </div>
     <div class="card custom-border p-3 stats-card">
       <span class="caption">Lignes de commande fournisseur</span>
-      <span class="stats-value tnum">{{ lignesCmdFournisseur.length }}</span>
+      <span class="stats-value tnum">{{ lignesCmdFournisseur().length }}</span>
     </div>
   </div>
 
   <div class="card custom-border p-3 mt-2">
     <h3>Lignes de vente</h3>
-    <table class="data-table" *ngIf="lignesVentes.length">
+    <table class="data-table" *ngIf="lignesVentes().length">
       <thead><tr><th>Article</th><th>Quantite</th><th>Prix unitaire</th><th>Total</th></tr></thead>
       <tbody>
-        <tr *ngFor="let l of lignesVentes">
+        <tr *ngFor="let l of lignesVentes()">
           <td>{{ l.article?.designation }}</td>
           <td class="tnum">{{ l.quantite }}</td>
           <td class="tnum">{{ l.prixUnitaire }} €</td>
@@ -33,6 +33,6 @@
         </tr>
       </tbody>
     </table>
-    <div class="empty-state empty-state-sm" *ngIf="!lignesVentes.length">Aucune donnee de vente</div>
+    <div class="empty-state empty-state-sm" *ngIf="!lignesVentes().length">Aucune donnee de vente</div>
   </div>
 </div>

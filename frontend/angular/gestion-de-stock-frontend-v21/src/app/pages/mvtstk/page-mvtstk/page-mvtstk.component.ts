@@ -1,6 +1,6 @@
 import { NgIf, NgFor, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import {Router} from '@angular/router';
 import {ArticleDto} from '../../../../gs-api/src/models/article-dto';
 import {ArticleService} from '../../../services/article/article.service';
@@ -10,28 +10,27 @@ import {MvtStkDto} from '../../../../gs-api/src/models/mvt-stk-dto';
 @Component({
   imports: [NgIf, NgFor, FormsModule, DatePipe],
   selector: 'app-page-mvtstk',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './page-mvtstk.component.html',
   styleUrls: ['./page-mvtstk.component.scss']
 })
 export class PageMvtstkComponent implements OnInit {
 
-  listArticle: Array<ArticleDto> = [];
-  mapMvtstk = new Map<number, Array<MvtStkDto>>();
-  mapStockReel = new Map<number, number>();
+  /** Etat en signals : ecrits depuis les callbacks HTTP (zoneless-safe) */
+  readonly listArticle = signal<Array<ArticleDto>>([]);
+  readonly mapMvtstk = signal(new Map<number, Array<MvtStkDto>>());
+  readonly mapStockReel = signal(new Map<number, number>());
+
+  /** Champs de formulaire (evenements ngModel -> CD declenchee) */
   searchArticle = '';
   selectedArticle: ArticleDto = {};
   quantite = '';
 
-  /** Etat d'ouverture de l'accordeon par article (remplace le collapse Bootstrap) */
-  articlesOuverts = new Set<number>();
+  /** Etat d'ouverture de l'accordeon par article (reference recreee) */
+  readonly articlesOuverts = signal(new Set<number>());
 
-  /** Compat template : getter du stock reel */
-  get stockReel(): Map<number, number> {
-    return this.mapStockReel;
-  }
-
-  errorMsg = '';
-  successMsg = '';
+  readonly errorMsg = signal('');
+  readonly successMsg = signal('');
 
   constructor(
     private router: Router,
@@ -46,12 +45,12 @@ export class PageMvtstkComponent implements OnInit {
   findAllArticles(): void {
     this.articleService.findAllArticles()
     .subscribe(articles => {
-      this.listArticle = articles;
-      this.listArticle.forEach(article => {
+      this.listArticle.set(articles || []);
+      this.listArticle().forEach(article => {
         this.chargerDonneesArticle(article);
       });
     }, error => {
-      this.errorMsg = 'Erreur lors du chargement des articles';
+      this.errorMsg.set('Erreur lors du chargement des articles');
     });
   }
 
@@ -59,11 +58,11 @@ export class PageMvtstkComponent implements OnInit {
     if (article.id) {
       this.mvtstkService.mvtStkArticle(article.id)
       .subscribe(mouvements => {
-        this.mapMvtstk.set(article.id as number, mouvements);
+        this.mapMvtstk.update(m => new Map(m).set(article.id as number, mouvements || []));
       });
       this.mvtstkService.stockReelArticle(article.id)
       .subscribe(stock => {
-        this.mapStockReel.set(article.id as number, stock);
+        this.mapStockReel.update(m => new Map(m).set(article.id as number, stock));
       });
     }
   }
@@ -77,19 +76,21 @@ export class PageMvtstkComponent implements OnInit {
     if (!idArticle) {
       return;
     }
-    if (this.articlesOuverts.has(idArticle)) {
-      this.articlesOuverts.delete(idArticle);
+    const nouveau = new Set(this.articlesOuverts());
+    if (nouveau.has(idArticle)) {
+      nouveau.delete(idArticle);
     } else {
-      this.articlesOuverts.add(idArticle);
+      nouveau.add(idArticle);
     }
+    this.articlesOuverts.set(nouveau);
   }
 
   searchFilter(): Array<ArticleDto> {
     if (!this.searchArticle) {
-      return this.listArticle;
+      return this.listArticle();
     }
     const s = this.searchArticle.toLowerCase();
-    return this.listArticle.filter(art =>
+    return this.listArticle().filter(art =>
       art.codeArticle?.toLowerCase().includes(s) || art.designation?.toLowerCase().includes(s)
     );
   }
@@ -97,20 +98,20 @@ export class PageMvtstkComponent implements OnInit {
   selectArticle(article: ArticleDto): void {
     this.selectedArticle = article;
     this.quantite = '';
-    this.errorMsg = '';
-    this.successMsg = '';
+    this.errorMsg.set('');
+    this.successMsg.set('');
   }
 
   effectuerMouvement(typeMvt: 'ENTREE' | 'SORTIE' | 'CORRECTION_POS' | 'CORRECTION_NEG'): void {
-    this.errorMsg = '';
-    this.successMsg = '';
+    this.errorMsg.set('');
+    this.successMsg.set('');
     if (!this.selectedArticle.id) {
-      this.errorMsg = 'Veuillez selectionner un article';
+      this.errorMsg.set('Veuillez selectionner un article');
       return;
     }
     const quantiteNum = +this.quantite;
     if (!quantiteNum || quantiteNum <= 0) {
-      this.errorMsg = 'Veuillez renseigner une quantite valide';
+      this.errorMsg.set('Veuillez renseigner une quantite valide');
       return;
     }
     const mvt: MvtStkDto = {
@@ -123,10 +124,10 @@ export class PageMvtstkComponent implements OnInit {
       : typeMvt === 'CORRECTION_POS' ? this.mvtstkService.correctionStockPos(mvt)
       : this.mvtstkService.correctionStockNeg(mvt);
     requete.subscribe(mvtResult => {
-      this.successMsg = 'Mouvement de stock effectue';
+      this.successMsg.set('Mouvement de stock effectue');
       this.chargerDonneesArticle(this.selectedArticle);
-    }, error => {
-      this.errorMsg = error?.error?.message || 'Erreur lors du mouvement de stock';
+    }, (error: any) => {
+      this.errorMsg.set(error?.error?.message || 'Erreur lors du mouvement de stock');
     });
   }
 }
