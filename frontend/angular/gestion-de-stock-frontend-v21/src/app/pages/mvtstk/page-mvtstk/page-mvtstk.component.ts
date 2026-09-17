@@ -46,24 +46,45 @@ export class PageMvtstkComponent implements OnInit {
     this.articleService.findAllArticles()
     .subscribe(articles => {
       this.listArticle.set(articles || []);
+      // Perf : badge stock seul au chargement (1 requete legere par article) ;
+      // l'historique des mouvements (requete lourde) est charge a l'ouverture
+      // de l'accordeon dans chargerMouvements().
       this.listArticle().forEach(article => {
-        this.chargerDonneesArticle(article);
+        this.chargerStockReel(article);
       });
     }, error => {
       this.errorMsg.set('Erreur lors du chargement des articles');
     });
   }
 
+  /** Stock reel : badge leger affiche dans l'en-tete ferme de l'accordeon */
+  chargerStockReel(article: ArticleDto): void {
+    if (article.id) {
+      this.mvtstkService.stockReelArticle(article.id)
+      .subscribe(stock => {
+        this.mapStockReel.update(m => new Map(m).set(article.id as number, stock));
+      });
+    }
+  }
+
+  /** Historique des mouvements : charge a l'ouverture de l'accordeon (lazy) */
+  chargerMouvements(article: ArticleDto): void {
+    if (article.id && !this.mapMvtstk().has(article.id)) {
+      this.mvtstkService.mvtStkArticle(article.id)
+      .subscribe(mouvements => {
+        this.mapMvtstk.update(m => new Map(m).set(article.id as number, mouvements || []));
+      });
+    }
+  }
+
+  /** Recharge stock + mouvements apres une operation d'ecriture */
   chargerDonneesArticle(article: ArticleDto): void {
     if (article.id) {
       this.mvtstkService.mvtStkArticle(article.id)
       .subscribe(mouvements => {
         this.mapMvtstk.update(m => new Map(m).set(article.id as number, mouvements || []));
       });
-      this.mvtstkService.stockReelArticle(article.id)
-      .subscribe(stock => {
-        this.mapStockReel.update(m => new Map(m).set(article.id as number, stock));
-      });
+      this.chargerStockReel(article);
     }
   }
 
@@ -81,6 +102,11 @@ export class PageMvtstkComponent implements OnInit {
       nouveau.delete(idArticle);
     } else {
       nouveau.add(idArticle);
+      // Lazy : l'historique des mouvements n'est charge qu'a la 1re ouverture
+      const article = this.listArticle().find(a => a.id === idArticle);
+      if (article) {
+        this.chargerMouvements(article);
+      }
     }
     this.articlesOuverts.set(nouveau);
   }

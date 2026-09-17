@@ -1,0 +1,29 @@
+/* Loader global : overlay plein ecran + anneau de rotation.
+   Affiche apres un delai anti-clignotement (LoaderService). */
+.loader-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(2px);
+}
+
+.loader {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid var(--clr-hairline);
+  border-top-color: var(--clr-primary);
+  animation: loader-spin 0.8s linear infinite;
+}
+
+@keyframes loader-spin {
+  to { transform: rotate(360deg); }
+}
+
+.hidden {
+  display: none;
+}

@@ -130,10 +130,17 @@ POST/GET/GET-by-id/DELETE consommés par les pages fournisseurs (symétrique cli
 | Endpoint | Méthode | Consommation frontend |
 |---|---|---|
 | `/api/v1/ventes` | POST | Page `nouvellevelle` |
-| `/api/v1/ventes` | GET | Pages `ventes` et `statistiques` |
+| `/api/v1/ventes` | GET | Page `ventes` (la page `statistiques` n'utilise plus ce endpoint : les listes n'embarquent pas les lignes côté backend) |
 | `/api/v1/ventes/{idVente}` | GET | Disponible dans le service applicatif (`findVenteById`) |
 | `/api/v1/ventes/code/{codeVente}` | GET | Disponible dans le service applicatif (`findVenteByCode`) |
 | `/api/v1/ventes/{idVente}` | DELETE | Page `ventes` (dialog de confirmation) |
+
+## Notes
+
+### Perf chargement (17/09)
+- Pages commandes & mvtstk : les lignes/mouvements sont chargés **à l'ouverture de l'accordéon** (lazy) avec cache — plus de tempête de N requêtes au chargement.
+- Page statistiques : **sélecteur d'article** (les historiques sont des endpoints par article) — 3 appels `forkJoin` à la sélection au lieu de 2×N au chargement.
+- Loader global : délai 200 ms + compteur de requêtes (plus de clignotement pendant les rafales).
 
 ## Notes
 

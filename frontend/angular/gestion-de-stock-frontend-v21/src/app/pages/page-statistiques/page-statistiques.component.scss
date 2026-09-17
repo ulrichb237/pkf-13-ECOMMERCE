@@ -21,3 +21,11 @@
 @media (max-width: 767px) {
   .stats-grid { grid-template-columns: 1fr; }
 }
+
+/* Selecteur d'article du panneau statistiques */
+.stats-selector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-xs);
+  min-width: 260px;
+}

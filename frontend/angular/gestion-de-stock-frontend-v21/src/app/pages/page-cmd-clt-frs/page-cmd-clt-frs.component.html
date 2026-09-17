@@ -7,7 +7,7 @@
   </div>
 
   <div class="alert alert-danger" *ngIf="errorMsg()">{{ errorMsg() }}</div>
-  <div class="empty-state" *ngIf="!listeCommandes().length && !errorMsg()">
+  <div class="empty-state" *ngIf="!listeCommandes().length && !errorMsg() && !chargementLignes().size">
     Aucune commande
   </div>
 
@@ -18,9 +18,11 @@
         [commande]="cmd"
         [origin]="origin"
       ></app-detail-cmd-clt-frs>
+      <span class="spinner-inline" *ngIf="chargementLignes().has(cmd.id)"></span>
     </button>
 
     <div class="card-cmd-body" *ngIf="commandesOuvertes().has(cmd.id)">
+      <div class="empty-state empty-state-sm" *ngIf="chargementLignes().has(cmd.id)">Chargement des lignes…</div>
       <app-detail-cmd
         *ngFor="let ligne of mapLignesCommande().get(cmd.id); track ligne.id"
         #ligneRef
@@ -30,7 +32,7 @@
         (suppressionLigne)="supprimerLigneCommande($event)"
         (quantiteModifiee)="enregistrerRefLigne(ligne.id, ligneRef); modifierQuantiteLigne($event)"
       ></app-detail-cmd>
-      <div class="empty-state empty-state-sm" *ngIf="!mapLignesCommande().get(cmd.id)?.length">
+      <div class="empty-state empty-state-sm" *ngIf="!mapLignesCommande().get(cmd.id)?.length && !chargementLignes().has(cmd.id)">
         Aucune ligne dans cette commande
       </div>
     </div>

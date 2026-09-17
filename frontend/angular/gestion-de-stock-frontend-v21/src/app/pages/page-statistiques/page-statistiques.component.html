@@ -1,13 +1,21 @@
 <div class="page">
   <div class="page-header">
     <h1>Statistiques</h1>
+    <div class="stats-selector">
+      <label class="caption" for="article-stats">Article analyse</label>
+      <select id="article-stats" class="input" [(ngModel)]="articleSelectionneId" (ngModelChange)="chargerStatistiques()">
+        <option [ngValue]="null">— Choisir un article —</option>
+        <option *ngFor="let a of listArticle(); track a.id" [ngValue]="a.id">{{ a.designation }}</option>
+      </select>
+    </div>
   </div>
 
   <div class="alert alert-danger" *ngIf="errorMsg()">{{ errorMsg() }}</div>
+  <div class="empty-state" *ngIf="chargement()">Chargement des statistiques…</div>
 
-  <div class="stats-grid">
+  <div class="stats-grid" *ngIf="articleSelectionneId">
     <div class="card custom-border p-3 stats-card">
-      <span class="caption">Lignes de vente chargees</span>
+      <span class="caption">Lignes de vente</span>
       <span class="stats-value tnum">{{ lignesVentes().length }}</span>
     </div>
     <div class="card custom-border p-3 stats-card">
@@ -20,19 +28,24 @@
     </div>
   </div>
 
-  <div class="card custom-border p-3 mt-2">
-    <h3>Lignes de vente</h3>
+  <div class="card custom-border p-3 mt-2" *ngIf="articleSelectionneId">
+    <h3>Historique des ventes — {{ lignesVentes().length }} ligne(s)</h3>
     <table class="data-table" *ngIf="lignesVentes().length">
-      <thead><tr><th>Article</th><th>Quantite</th><th>Prix unitaire</th><th>Total</th></tr></thead>
+      <thead><tr><th>Vente</th><th>Date</th><th>Quantite</th><th>Prix unitaire</th><th>Total</th></tr></thead>
       <tbody>
-        <tr *ngFor="let l of lignesVentes()">
-          <td>{{ l.article?.designation }}</td>
+        <tr *ngFor="let l of lignesVentes(); track l.id">
+          <td>{{ l.vente?.code }}</td>
+          <td>{{ l.vente?.dateVente ? (l.vente?.dateVente | date:'dd/MM/yyyy') : '—' }}</td>
           <td class="tnum">{{ l.quantite }}</td>
           <td class="tnum">{{ l.prixUnitaire }} €</td>
           <td class="tnum">{{ l.quantite && l.prixUnitaire ? +l.quantite * +l.prixUnitaire : 0 }} €</td>
         </tr>
       </tbody>
     </table>
-    <div class="empty-state empty-state-sm" *ngIf="!lignesVentes().length">Aucune donnee de vente</div>
+    <div class="empty-state empty-state-sm" *ngIf="!lignesVentes().length && !chargement()">Aucune vente pour cet article</div>
+  </div>
+
+  <div class="empty-state" *ngIf="!articleSelectionneId && !chargement()">
+    Selectionne un article pour afficher ses statistiques de vente et de commande.
   </div>
 </div>

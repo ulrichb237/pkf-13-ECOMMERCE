@@ -36,6 +36,8 @@ export class PageCmdCltFrsComponent implements OnInit, OnDestroy {
 
   /** etat d'ouverture de l'accordeon par commande (reference recreee a chaque bascule) */
   readonly commandesOuvertes = signal(new Set<number>());
+  /** commandes dont les lignes sont en cours de chargement (lazy a l'ouverture) */
+  readonly chargementLignes = signal(new Set<number>());
   /** confirmation de suppression de commande (remplace la modale Bootstrap) */
   readonly commandeASupprimer = signal<CommandeClientDto | null>(null);
   /** commande dont le menu de changement d'etat est ouvert */
@@ -70,7 +72,9 @@ export class PageCmdCltFrsComponent implements OnInit, OnDestroy {
       this.cmdCltFrsService.findAllCommandesClient()
       .subscribe(cmd => {
         this.listeCommandes.set(cmd || []);
-        this.findAllLignesCommande();
+        // Perf : les lignes sont chargees a l'ouverture de l'accordeon (lazy),
+        // pas ici — sinon 1 requete par commande au chargement (N+1).
+        this.rafraichirLignesDejaChargees();
       }, error => {
         this.errorMsg.set(CmdcltfrsService.errorMsg(error));
       });
@@ -78,7 +82,7 @@ export class PageCmdCltFrsComponent implements OnInit, OnDestroy {
       this.cmdCltFrsService.findAllCommandesFournisseur()
       .subscribe(cmd => {
         this.listeCommandes.set(cmd || []);
-        this.findAllLignesCommande();
+        this.rafraichirLignesDejaChargees();
       }, error => {
         this.errorMsg.set(CmdcltfrsService.errorMsg(error));
       });
@@ -105,7 +109,9 @@ export class PageCmdCltFrsComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Ouvre/ferme l'accordeon d'une commande (remplace data-toggle=collapse) */
+  /** Ouvre/ferme l'accordeon d'une commande (remplace data-toggle=collapse).
+   * A l'ouverture : chargement paresseux des lignes, avec cache (1 seule requete
+   * par commande tant qu'elle n'a pas ete modifiee). */
   basculerAccordeon(idCommande?: number): void {
     if (!idCommande) {
       return;
@@ -116,6 +122,9 @@ export class PageCmdCltFrsComponent implements OnInit, OnDestroy {
       nouveau.delete(idCommande);
     } else {
       nouveau.add(idCommande);
+      if (!this.mapLignesCommande().has(idCommande)) {
+        this.findLignesCommande(idCommande);
+      }
     }
     this.commandesOuvertes.set(nouveau);
   }
@@ -189,10 +198,18 @@ export class PageCmdCltFrsComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Rafraichit uniquement les lignes DEJA chargees (apres une modification) ;
+   * au premier chargement le cache est vide donc aucune requete supplementaire. */
   findAllLignesCommande(): void {
-    this.listeCommandes().forEach(cmd => {
-     this.findLignesCommande(cmd.id);
+    this.mapLignesCommande().forEach((_lignes, idCommande) => {
+      this.findLignesCommande(idCommande);
     });
+  }
+
+  private rafraichirLignesDejaChargees(): void {
+    if (this.mapLignesCommande().size) {
+      this.findAllLignesCommande();
+    }
   }
 
   nouvelleCommande(): void {
@@ -207,23 +224,26 @@ export class PageCmdCltFrsComponent implements OnInit, OnDestroy {
     if (!idCommande) {
       return;
     }
-    if (this.origin === 'client') {
-      this.cmdCltFrsService.findAllLigneCommandesClient(idCommande)
-      .subscribe(list => {
-        const nouveau = new Map(this.mapLignesCommande());
-        nouveau.set(idCommande, list || []);
-        this.mapLignesCommande.set(nouveau);
-        this.mapPrixTotalCommande.update(m => new Map(m).set(idCommande, this.calculerTatalCmd(list || [])));
-      });
-    } else if (this.origin === 'fournisseur') {
-      this.cmdCltFrsService.findAllLigneCommandesFournisseur(idCommande)
-      .subscribe(list => {
-        const nouveau = new Map(this.mapLignesCommande());
-        nouveau.set(idCommande, list || []);
-        this.mapLignesCommande.set(nouveau);
-        this.mapPrixTotalCommande.update(m => new Map(m).set(idCommande, this.calculerTatalCmd(list || [])));
-      });
-    }
+    this.chargementLignes.update(s => new Set(s).add(idCommande));
+    // Typage explicite : union d'Observables non appelable sinon (TS2349)
+    const requete: Observable<Array<any>> = this.origin === 'client'
+      ? this.cmdCltFrsService.findAllLigneCommandesClient(idCommande)
+      : this.cmdCltFrsService.findAllLigneCommandesFournisseur(idCommande);
+    requete.subscribe(list => {
+      const nouveau = new Map(this.mapLignesCommande());
+      nouveau.set(idCommande, list || []);
+      this.mapLignesCommande.set(nouveau);
+      this.mapPrixTotalCommande.update(m => new Map(m).set(idCommande, this.calculerTatalCmd(list || [])));
+      this.finChargementLignes(idCommande);
+    }, () => this.finChargementLignes(idCommande));
+  }
+
+  private finChargementLignes(idCommande: number): void {
+    this.chargementLignes.update(s => {
+      const n = new Set(s);
+      n.delete(idCommande);
+      return n;
+    });
   }
 
   calculerTatalCmd(list: Array<LigneCommandeClientDto>): number {

@@ -29,3 +29,20 @@
   font-size: 13px;
   color: var(--clr-ink-mute);
 }
+
+/* Spinner inline : chargement paresseux des lignes a l'ouverture d'une commande */
+.spinner-inline {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--clr-hairline);
+  border-top-color: var(--clr-primary);
+  animation: spin-inline 0.8s linear infinite;
+  margin-left: var(--sp-sm);
+}
+
+@keyframes spin-inline {
+  to { transform: rotate(360deg); }
+}
