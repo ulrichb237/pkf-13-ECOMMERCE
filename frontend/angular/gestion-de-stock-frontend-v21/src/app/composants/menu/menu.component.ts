@@ -121,9 +121,22 @@ export class MenuComponent implements OnInit {
   ];
 
   private lastSelectedMenu: Menu | undefined;
+
+  /** Menus ouverts (remplace le collapse Bootstrap) : tous ouverts par defaut */
+  menusOuverts = new Set<string>(this.menuProperties.map(m => m.id!).filter(Boolean));
+
   constructor(
     private router: Router
   ) { }
+
+  /** Ouvre/ferme un groupe de menu (remplace data-toggle=collapse) */
+  basculerMenu(id: string): void {
+    if (this.menusOuverts.has(id)) {
+      this.menusOuverts.delete(id);
+    } else {
+      this.menusOuverts.add(id);
+    }
+  }
 
   ngOnInit(): void {
   }

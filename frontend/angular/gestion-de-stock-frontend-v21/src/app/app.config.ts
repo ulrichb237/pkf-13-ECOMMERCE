@@ -1,20 +1,30 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter, withInMemoryScrolling } from '@angular/router';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+  provideZonelessChangeDetection
+} from '@angular/core';
+import { provideRouter, withInMemoryScrolling, withComponentInputBinding } from '@angular/router';
+import {
+  provideHttpClient,
+  withInterceptors,
+  withFetch
+} from '@angular/common/http';
 
 import { routes } from './app.routes';
-import { HttpInterceptorService } from './services/interceptor/http-interceptor.service';
+import { apiInterceptor } from './services/interceptor/api.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'top' })),
-    provideHttpClient(withInterceptorsFromDi()),
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: HttpInterceptorService,
-      multi: true
-    }
+    // Angular 21 : détection de changements sans Zone.js (best practice MCP Angular)
+    provideZonelessChangeDetection(),
+    provideRouter(
+      routes,
+      withInMemoryScrolling({ scrollPositionRestoration: 'top' }),
+      // Les paramètres de route (:id) deviennent des input() signal dans les composants
+      withComponentInputBinding()
+    ),
+    // Intercepteur fonctionnel (best practice Angular >= 15) + backend API Fetch
+    provideHttpClient(withInterceptors([apiInterceptor]), withFetch())
   ]
 };

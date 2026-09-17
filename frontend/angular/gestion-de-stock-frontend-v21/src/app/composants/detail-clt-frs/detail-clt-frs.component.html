@@ -1,117 +1,52 @@
-<div class="row mb-1 mr-0 custom-border">
-  <div class="col-md-1 custom-border-right p-1 text-center mb-1 mt-1 ">
-    <img [src]="clientFournisseur.photo ? clientFournisseur.photo : 'assets/product.png'" width="100px" height="100px">
+<div class="cltfrs-card custom-border">
+  <div class="cltfrs-photo">
+    <img [src]="clientFournisseur.photo ? clientFournisseur.photo : 'assets/product.png'"
+         [alt]="'Photo de ' + (clientFournisseur.nom || '')" width="100" height="100">
   </div>
 
-  <!--  Details article-->
-  <div class="col-md-5 custom-border-right mb-1 mt-1 ">
-    <div class="col">
-      <div class="row">
-        <div class="col-md-1"><i class="fas fa-info-circle blue-color"></i></div>
-        <div class="col-md-10">{{ clientFournisseur.nom }}</div>
-      </div>
-      <div class="row">
-        <div class="col-md-1"><i class="fas fa-info-circle blue-color"></i></div>
-        <div class="col-md-10">{{ clientFournisseur.prenom }}</div>
-      </div>
-      <div class="row">
-        <div class="col-md-1"><i class="fas fa-phone-alt blue-color"></i></div>
-        <div class="col-md-10">{{ clientFournisseur.numTel }}</div>
-      </div>
+  <div class="cltfrs-info">
+    <span class="cltfrs-nom">{{ clientFournisseur.nom }} {{ clientFournisseur.prenom }}</span>
+    <span class="text-muted tnum">{{ clientFournisseur.numTel }}</span>
+  </div>
+
+  <div class="cltfrs-adresse">
+    <span>{{ clientFournisseur.adresse?.adresse1 }} {{ clientFournisseur.adresse?.adresse2 }}</span>
+    <span class="tnum">{{ clientFournisseur.adresse?.codePostale }} {{ clientFournisseur.adresse?.ville }}</span>
+    <span>{{ clientFournisseur.adresse?.pays }}</span>
+  </div>
+
+  <div class="cltfrs-actions">
+    <button type="button" class="btn-link" (click)="modifierClientFournisseur()">Modifier</button>
+    <ng-container *ngIf="!confirmationVisible; else confirmBloc">
+      <button type="button" class="btn-link btn-link-danger" (click)="demanderConfirmation()">Supprimer</button>
+    </ng-container>
+    <ng-template #confirmBloc>
+      <span class="cmd-ligne-confirm">
+        Supprimer ce {{ origin }} ?
+        <button type="button" class="btn-link" (click)="annulerConfirmation()">Non</button>
+        <button type="button" class="btn-link btn-link-danger" (click)="confirmerEtSupprimer()">Oui</button>
+      </span>
+    </ng-template>
+    <button type="button" class="btn-link" (click)="detailsVisibles = true">Details</button>
+  </div>
+</div>
+
+<!-- Panneau details (remplace la modale Bootstrap) -->
+<div class="dialog-backdrop" *ngIf="detailsVisibles" (click)="detailsVisibles = false">
+  <div class="dialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="dialog-header">
+      <h3 class="dialog-title">{{ clientFournisseur.nom }} {{ clientFournisseur.prenom }}</h3>
+      <button type="button" class="dialog-close" (click)="detailsVisibles = false" aria-label="Fermer">&times;</button>
     </div>
-  </div>
-
-  <!--  details categorie-->
-  <div class="col-md-3 custom-border-right mb-1 mt-1 ">
-    <div class="col">
-      <div class="row">
-        <div class="col-md-1"><i class="fas fa-home blue-color"></i></div>
-        <div class="col-md-10">{{ clientFournisseur.adresse?.adresse1 }}&nbsp;{{ clientFournisseur.adresse?.adresse2 }}</div>
-      </div>
-      <div class="row">
-        <div class="col-md-1"><i class="fas fa-map-marker-alt blue-color"></i></div>
-        <div class="col-md-10">{{ clientFournisseur.adresse?.codePostale }}&nbsp;{{ clientFournisseur.adresse?.ville }}</div>
-      </div>
-      <div class="row">
-        <div class="col-md-1"><i class="fas fa-globe-europe blue-color"></i></div>
-        <div class="col-md-10">{{ clientFournisseur.adresse?.pays }}</div>
-      </div>
-    </div>
-  </div>
-
-  <!--  boutons action-->
-  <div class="col-md-3 mb-1 mt-1 ">
-    <div class="row">
-      <div class="col-md-4">
-        <button type="button" class="btn btn-link" (click)="modifierClientFournisseur()">
-          <i class="fas fa-pencil-alt"></i>&nbsp;Modifier
-        </button>
-      </div>
-      <div class="col-md-4">
-        <button type="button" class="btn btn-link text-danger" data-toggle="modal" [attr.data-target]="'#modalDelete' + clientFournisseur.id">
-          <i class="fas fa-trash-alt"></i>&nbsp;Supprimer
-        </button>
-      </div>
-      <div class="col-md-4">
-        <button type="button" class="btn btn-link " data-toggle="modal" [attr.data-target]="'#modalDetailsCltFrs' + clientFournisseur.id">
-          <i class="far fa-list-alt"></i>&nbsp;Details
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal -->
-  <div class="modal fade" id="modalDelete{{ clientFournisseur.id }}" data-backdrop="static" data-keyboard="false" tabindex="-1"
-       aria-labelledby="staticBackdropLabel"
-       aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="staticBackdropLabel">Confirmation</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>          <div class="modal-body">
-          Etes vous-sur de vouloir supprimer ce {{ origin }}?
-        </div>
-
-  <!-- Modal Details -->
-  <div class="modal fade" [attr.id]="'modalDetailsCltFrs' + clientFournisseur.id" tabindex="-1" role="dialog"
-       [attr.aria-labelledby]="'modalDetailsCltFrsLabel' + clientFournisseur.id" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" [attr.id]="'modalDetailsCltFrsLabel' + clientFournisseur.id">
-            <i class="far fa-list-alt" aria-hidden="true"></i>&nbsp;{{ clientFournisseur.nom }} {{ clientFournisseur.prenom }}
-          </h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <ul class="list-group">
-            <li class="list-group-item"><strong>Email :</strong> {{ clientFournisseur.mail || '—' }}</li>
-            <li class="list-group-item"><strong>Telephone :</strong> {{ clientFournisseur.numTel || '—' }}</li>
-            <li class="list-group-item"><strong>Adresse :</strong> {{ clientFournisseur.adresse?.adresse1 }} {{ clientFournisseur.adresse?.adresse2 }}</li>
-            <li class="list-group-item"><strong>Ville :</strong> {{ clientFournisseur.adresse?.codePostale }} {{ clientFournisseur.adresse?.ville }}</li>
-            <li class="list-group-item"><strong>Pays :</strong> {{ clientFournisseur.adresse?.pays || '—' }}</li>
-          </ul>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">
-            <i class="fas fa-ban" aria-hidden="true"></i>&nbsp;Fermer
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">
-            <i class="fas fa-ban"></i>&nbsp;Annuler</button>
-          <button type="button" class="btn btn-danger" data-dismiss="modal" (click)="confirmerEtSupprimer()">
-            <i class="fas fa-trash-alt"></i>&nbsp;Supprimer</button>
-        </div>
-      </div>
+    <ul class="list-group">
+      <li class="list-group-item"><strong>Email :</strong> {{ clientFournisseur.mail || '—' }}</li>
+      <li class="list-group-item"><strong>Telephone :</strong> {{ clientFournisseur.numTel || '—' }}</li>
+      <li class="list-group-item"><strong>Adresse :</strong> {{ clientFournisseur.adresse?.adresse1 }} {{ clientFournisseur.adresse?.adresse2 }}</li>
+      <li class="list-group-item"><strong>Ville :</strong> {{ clientFournisseur.adresse?.codePostale }} {{ clientFournisseur.adresse?.ville }}</li>
+      <li class="list-group-item"><strong>Pays :</strong> {{ clientFournisseur.adresse?.pays || '—' }}</li>
+    </ul>
+    <div class="dialog-actions">
+      <button type="button" class="btn-pill btn-pill-secondary" (click)="detailsVisibles = false">Fermer</button>
     </div>
   </div>
 </div>

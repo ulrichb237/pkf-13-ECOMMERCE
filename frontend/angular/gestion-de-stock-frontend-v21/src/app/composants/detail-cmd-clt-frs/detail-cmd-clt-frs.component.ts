@@ -1,7 +1,9 @@
 import {Component, Input, OnInit} from '@angular/core';
+import {DatePipe} from '@angular/common';
 import {ClientDto} from '../../../gs-api/src/models/client-dto';
 
 @Component({
+  imports: [DatePipe],
   selector: 'app-detail-cmd-clt-frs',
   templateUrl: './detail-cmd-clt-frs.component.html',
   styleUrls: ['./detail-cmd-clt-frs.component.scss']

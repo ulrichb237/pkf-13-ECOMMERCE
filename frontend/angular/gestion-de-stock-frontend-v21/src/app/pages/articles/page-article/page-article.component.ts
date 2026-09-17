@@ -1,4 +1,4 @@
-import { NgIf, NgFor } from '@angular/common';
+import { NgIf, NgFor, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import {Router} from '@angular/router';
 import {ArticleDto} from '../../../../gs-api/src/models/article-dto';
@@ -14,7 +14,7 @@ import { DetailArticleComponent } from '../../../composants/detail-article/detai
 import { PaginationComponent } from '../../../composants/pagination/pagination.component';
 
 @Component({
-  imports: [NgIf, NgFor, BouttonActionComponent, DetailArticleComponent, PaginationComponent],
+  imports: [NgIf, NgFor, DatePipe, BouttonActionComponent, DetailArticleComponent, PaginationComponent],
   selector: 'app-page-article',
   templateUrl: './page-article.component.html',
   styleUrls: ['./page-article.component.scss']
@@ -28,6 +28,11 @@ export class PageArticleComponent implements OnInit {
   historiqueVentes: Array<LigneVenteDto> = [];
   historiqueCmdClient: Array<LigneCommandeClientDto> = [];
   historiqueCmdFournisseur: Array<LigneCommandeFournisseurDto> = [];
+
+  /** Onglet actif du panneau historiques (remplace data-toggle=tab Bootstrap) */
+  ongletActif: 'ventes' | 'cmdClt' | 'cmdFrs' = 'ventes';
+  /** Visibilite du panneau historiques (remplace la modale Bootstrap) */
+  detailsVisibles = false;
 
   constructor(
     private router: Router,
@@ -52,16 +57,22 @@ export class PageArticleComponent implements OnInit {
     this.historiqueVentes = [];
     this.historiqueCmdClient = [];
     this.historiqueCmdFournisseur = [];
+    this.ongletActif = 'ventes';
     if (!article?.id) {
       return;
     }
     this.articleSelectionne = article;
+    this.detailsVisibles = true;
     this.articleService.findHistoriqueVentes(article.id)
       .subscribe(ventes => this.historiqueVentes = ventes || []);
     this.articleService.findHistoriqueCommandeClient(article.id)
       .subscribe(cmds => this.historiqueCmdClient = cmds || []);
     this.articleService.findHistoriqueCommandeFournisseur(article.id)
       .subscribe(cmds => this.historiqueCmdFournisseur = cmds || []);
+  }
+
+  fermerDetails(): void {
+    this.detailsVisibles = false;
   }
 
   nouvelArticle(): void {

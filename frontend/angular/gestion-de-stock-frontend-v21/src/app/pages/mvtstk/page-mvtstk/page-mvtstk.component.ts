@@ -22,6 +22,14 @@ export class PageMvtstkComponent implements OnInit {
   selectedArticle: ArticleDto = {};
   quantite = '';
 
+  /** Etat d'ouverture de l'accordeon par article (remplace le collapse Bootstrap) */
+  articlesOuverts = new Set<number>();
+
+  /** Compat template : getter du stock reel */
+  get stockReel(): Map<number, number> {
+    return this.mapStockReel;
+  }
+
   errorMsg = '';
   successMsg = '';
 
@@ -62,6 +70,18 @@ export class PageMvtstkComponent implements OnInit {
 
   filtrerArticle(): void {
     // le filtrage est fait dans le template via searchFilter()
+  }
+
+  /** Ouvre/ferme l'accordeon d'un article (remplace data-toggle=collapse) */
+  basculerArticle(idArticle?: number): void {
+    if (!idArticle) {
+      return;
+    }
+    if (this.articlesOuverts.has(idArticle)) {
+      this.articlesOuverts.delete(idArticle);
+    } else {
+      this.articlesOuverts.add(idArticle);
+    }
   }
 
   searchFilter(): Array<ArticleDto> {

@@ -1,27 +1,22 @@
-<div class="accordion" id="appMenuAccordion">
+<div class="menu">
   <div class="card" *ngFor="let menu of menuProperties">
-    <div class="card-header" id="menu{{menu.id}}">
-      <h2 class="mb-0">
-        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
-                [attr.data-target]="'#collapse' + menu.id" aria-expanded="true" aria-controls="collapseOne">
-          <i class="{{menu.icon}}"></i>&nbsp;
-          {{menu.titre}}
-        </button>
-      </h2>
-    </div>
+    <button type="button" class="card-cmd-header menu-title"
+            (click)="basculerMenu(menu.id!)"
+            [attr.aria-expanded]="menusOuverts.has(menu.id!)">
+      <span class="menu-icon">{{ (menu.titre || '').substring(0, 1) }}</span>
+      {{ menu.titre }}
+    </button>
 
-    <div id="collapse{{menu.id}}" class="collapse" [attr.aria-labelledby]="'menu' + menu.id" data-parent="#appMenuAccordion">
-
-      <div class="card">
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item" *ngFor="let sousMenu of menu.sousMenu" [ngClass]="{'text-white bg-primary': sousMenu.active, '': !sousMenu.active}">
-            <a href="javascript:void(0);" (click)="navigate(sousMenu)" style="color: inherit;">
-              <i class="{{sousMenu.icon}}"></i>&nbsp;
-              {{sousMenu.titre}}
-            </a>
-          </li>
-        </ul>
-      </div>
+    <div *ngIf="menusOuverts.has(menu.id!)" class="menu-items">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item" *ngFor="let sousMenu of menu.sousMenu"
+            [ngClass]="{'list-item-active': sousMenu.active}">
+          <a href="javascript:void(0);" (click)="navigate(sousMenu)" class="menu-link">
+            <span class="menu-icon menu-icon-sm">{{ (sousMenu.titre || '').substring(0, 1) }}</span>
+            {{ sousMenu.titre }}
+          </a>
+        </li>
+      </ul>
     </div>
   </div>
 </div>

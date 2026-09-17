@@ -1,25 +1,22 @@
 <div class="mesh-hero">
   <div class="auth-card">
-    <div class="card-header text-center">
-      <h3>Se connecter</h3>
-    </div>
-    <div class="card-body">
-      <div class="alert alert-danger" *ngIf="errorMessage">
-        {{errorMessage}}
-      </div>
-      <div class="mb-3">
-        <input type="email" class="form-control" placeholder="E-mail" [(ngModel)] = "authenticationRequest.login">
-      </div>
-      <div class="mb-3">
-        <input type="password" class="form-control" placeholder="Mot de passe" [(ngModel)] = "authenticationRequest.password">
-      </div>
-      <div class="mb-3 d-flex justify-content-between">
-        <a [routerLink]="['/inscrire']" class="btn btn-link">S'inscrire</a>
-        <button type="button" class="btn btn-primary" (click)="login()">
-          <i class="fas fa-check"></i>&nbsp;Se connecter
-        </button>
-      </div>
-    </div>
+    <span class="pill-tag-soft">Gestion de stock</span>
+    <h2>Se connecter</h2>
+    <p class="text-muted">Accedez a votre espace de gestion.</p>
+
+    <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <label class="caption" for="login-email">E-mail</label>
+    <input id="login-email" type="email" class="form-control" placeholder="E-mail"
+           [(ngModel)]="authenticationRequest.login" autocomplete="username">
+
+    <label class="caption" for="login-password">Mot de passe</label>
+    <input id="login-password" type="password" class="form-control" placeholder="Mot de passe"
+           [(ngModel)]="authenticationRequest.password" autocomplete="current-password">
+
+    <button type="button" class="btn btn-primary" (click)="login()">Se connecter</button>
+    <p class="text-muted text-center auth-alt">Pas encore de compte ?
+      <a [routerLink]="['/inscrire']" class="btn-link">S'inscrire</a>
+    </p>
   </div>
 </div>
-

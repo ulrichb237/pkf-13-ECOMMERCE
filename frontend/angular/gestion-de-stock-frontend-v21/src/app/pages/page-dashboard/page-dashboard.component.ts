@@ -7,8 +7,10 @@ import { LoaderComponent } from '../../composants/loader/loader.component';
 
 import { MenuComponent } from '../../composants/menu/menu.component';
 
+import { ToastsComponent } from '../../composants/toasts/toasts.component';
+
 @Component({
-  imports: [RouterOutlet, HeaderComponent, LoaderComponent, MenuComponent],
+  imports: [RouterOutlet, HeaderComponent, LoaderComponent, MenuComponent, ToastsComponent],
   selector: 'app-page-dashboard',
   templateUrl: './page-dashboard.component.html',
   styleUrls: ['./page-dashboard.component.scss']

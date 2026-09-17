@@ -1,94 +1,63 @@
-<div class="col">
-  <div class="row m-3">
-    <div class="col-md-8 p-0">
-      <h1>Commande {{origin}}s</h1>
-    </div>
-    <div class="col-md-4 text-right">
-      <app-boutton-action
-        [isImporterVisible]="false"
-
+<div class="page">
+  <div class="page-header">
+    <h1>Commande {{origin}}s</h1>
+    <app-boutton-action
+      [isImporterVisible]="false"
       (clickEvent)="nouvelleCommande()"
-      ></app-boutton-action>
+    ></app-boutton-action>
+  </div>
+
+  <div class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</div>
+  <div class="empty-state" *ngIf="!listeCommandes.length && !errorMsg">
+    Aucune commande
+  </div>
+
+  <div *ngFor="let cmd of listeCommandes" class="card card-cmd">
+    <button type="button" class="card-cmd-header" (click)="basculerAccordeon(cmd.id)"
+            [attr.aria-expanded]="commandesOuvertes.has(cmd.id)">
+      <app-detail-cmd-clt-frs
+        [commande]="cmd"
+        [origin]="origin"
+      ></app-detail-cmd-clt-frs>
+    </button>
+
+    <div class="card-cmd-body" *ngIf="commandesOuvertes.has(cmd.id)">
+      <app-detail-cmd
+        *ngFor="let ligne of mapLignesCommande.get(cmd.id)"
+        [ligneCommande]="ligne"
+        [origin]="origin"
+        (suppressionLigne)="supprimerLigneCommande($event)"
+      ></app-detail-cmd>
+      <div class="empty-state empty-state-sm" *ngIf="!mapLignesCommande.get(cmd.id)?.length">
+        Aucune ligne dans cette commande
+      </div>
+    </div>
+
+    <div class="card-cmd-footer">
+      <span class="caption">{{ mapLignesCommande.get(cmd.id)?.length || 0 }} ligne(s) de commande</span>
+      <span class="caption tnum">
+        Total : {{ calculerTotalCommande(cmd.id) }} €
+        <button type="button" class="btn-link btn-link-danger" (click)="demanderSuppressionCommande(cmd)"
+                aria-label="Supprimer la commande">
+          Supprimer
+        </button>
+      </span>
     </div>
   </div>
-  <div class="col m-3" >
-    <div class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</div>
-    <div class="text-center text-muted p-3" *ngIf="!listeCommandes.length && !errorMsg">
-      Aucune commande
-    </div>
-    <div class="accordion" id="accordionExample" *ngFor="let cmd of listeCommandes">
-      <div class="card">
-        <div class="card-body" id="headingOne">
-          <button class="btn btn-block text-left" type="button" data-toggle="collapse"
-                  [attr.data-target]="'#collapseOne'+cmd.id"
-                  aria-expanded="true"
-                  aria-controls="collapseOne">
-            <app-detail-cmd-clt-frs
-              [commande]="cmd"
-              [origin]="origin"
-            ></app-detail-cmd-clt-frs>
-          </button>
-        </div>
-        <div id="collapseOne{{cmd.id}}" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample"
-             style="max-height: 300px;
-        overflow-y: scroll">
-          <div class="card-body">
-            <app-detail-cmd
-            *ngFor="let ligne of mapLignesCommande.get(cmd.id)"
-            [ligneCommande]="ligne"
-            [origin]="origin"
-            (suppressionLigne)="supprimerLigneCommande($event)"
-            ></app-detail-cmd>
-            <div class="text-center text-muted p-2" *ngIf="!mapLignesCommande.get(cmd.id)?.length">
-              Aucune ligne dans cette commande
-            </div>
-          </div>
-        </div>
-          <div class="card-footer">
-            <div class="row">
-              <div class="col-md-6 text-left">
-                <h5>{{mapLignesCommande.get(cmd.id).length}} lignes de commande</h5>
-              </div>
-              <div class="col-md-6 text-right">
-                <h5>Total commande: {{ calculerTotalCommande(cmd.id) }}
-                  <button type="button" class="btn btn-link text-danger ml-3" data-toggle="modal"
-                          [attr.data-target]="'#modalDeleteCmd' + cmd.id"
-                          aria-label="Supprimer la commande">
-                    <i class="fas fa-trash-alt" aria-hidden="true"></i>
-                  </button>
-                </h5>
-              </div>
-            </div>
-          </div>
-          <!-- Modal confirmation suppression commande -->
-          <div class="modal fade" [attr.id]="'modalDeleteCmd' + cmd.id" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">Confirmation</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  Supprimer la commande {{ cmd.code }} ?
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-                  <button type="button" class="btn btn-danger" data-dismiss="modal" (click)="supprimerCommande(cmd.id)">Supprimer</button>
-                </div>
-              </div>
-            </div>
-          </div>
-            </div>
-          </div>
+
+  <!-- Confirmation de suppression de commande (remplace la modale Bootstrap) -->
+  <div class="dialog-backdrop" *ngIf="commandeASupprimer" (click)="annulerSuppressionCommande()">
+    <div class="dialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+      <h3 class="dialog-title">Confirmation</h3>
+      <p>Supprimer la commande {{ commandeASupprimer.code }} ?</p>
+      <div class="dialog-actions">
+        <button type="button" class="btn-pill btn-pill-secondary" (click)="annulerSuppressionCommande()">Annuler</button>
+        <button type="button" class="btn-pill btn-pill-danger" (click)="supprimerCommande(commandeASupprimer.id); commandeASupprimer = null">Supprimer</button>
       </div>
     </div>
   </div>
-  <div class="row mb-3" *ngIf="listeCommandes.length">
-    <div class=" col-md-12 text-center">
-      <app-pagination></app-pagination>
-    </div>
-  </div>
 
+  <div class="page-pagination" *ngIf="listeCommandes.length">
+    <app-pagination></app-pagination>
+  </div>
 </div>

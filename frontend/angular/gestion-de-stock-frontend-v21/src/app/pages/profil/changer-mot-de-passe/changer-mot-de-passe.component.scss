@@ -1,0 +1,20 @@
+/* Reutilise la grille profil : voir page-profil.component.scss (styles globales dupliques volontairement) */
+.profil-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: var(--sp-lg);
+  align-items: start;
+}
+
+.profil-avatar {
+  width: 160px;
+  height: 160px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--clr-hairline);
+  object-fit: cover;
+  margin-bottom: var(--sp-md);
+}
+
+@media (max-width: 767px) {
+  .profil-grid { grid-template-columns: 1fr; }
+}

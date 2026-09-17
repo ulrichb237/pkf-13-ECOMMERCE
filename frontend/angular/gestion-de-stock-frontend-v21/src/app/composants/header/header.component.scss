@@ -1,0 +1,29 @@
+/* Header design system */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-xl);
+  padding: var(--sp-md) var(--sp-lg);
+  background: var(--clr-canvas);
+  border-bottom: 1px solid var(--clr-hairline);
+}
+
+.header-search {
+  flex: 1 1 320px;
+  max-width: 480px;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+}
+
+.header-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--clr-hairline);
+  object-fit: cover;
+}

@@ -1,3 +1,15 @@
-:host {
-  width: 100%;
+/* Grille des lignes de ventes */
+.ventes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.4fr .7fr auto;
+  gap: var(--sp-sm);
+  align-items: center;
+  padding: var(--sp-sm) var(--sp-md);
 }
+.data-table-head {
+  color: var(--clr-ink-mute);
+  font-size: 13px;
+  letter-spacing: -0.39px;
+  padding: var(--sp-sm) var(--sp-md);
+}
+.ventes-row { margin-bottom: var(--sp-sm); }

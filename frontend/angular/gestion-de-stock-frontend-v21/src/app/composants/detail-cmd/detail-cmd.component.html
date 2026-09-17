@@ -1,69 +1,24 @@
-<div class="row mb-1 mr-0 custom-border">
-  <!--  Details article-->
-  <div class="col-md-3 custom-border-right mb-1 mt-1 ">
-    <div class="row text-center">
-      <div class="col-md-11">{{ ligneCommande.article?.codeArticle }}</div>
-    </div>
-  </div>
-
-  <div class="col-md-3 custom-border-right mb-1 mt-1 ">
-    <div class="row">
-      <div class="col-md-12 text-center">
-        {{ ligneCommande.article?.designation }}
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-2 custom-border-right mb-1 mt-1 ">
-    <div class="row">
-      <div class="col-md-12 text-center">
-        {{ ligneCommande.quantite }}
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-2 custom-border-right mb-1 mt-1 ">
-    <div class="row">
-      <div class="col-md-12 text-center">
-        {{ ligneCommande.prixUnitaire }}
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-2 mb-1 mt-1">
-    <div class="row">
-      <div class="col-md-12 text-center">
-        {{ ligneCommande.prixUnitaire && ligneCommande.quantite ? +ligneCommande.prixUnitaire * +ligneCommande.quantite : '' }}
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-1 mb-1 mt-1 text-center">
-    <button type="button" class="btn btn-link text-danger" data-toggle="modal"
-            [attr.data-target]="'#modalDeleteLigne' + ligneCommande.id"
-            aria-label="Supprimer la ligne">
-      <i class="fas fa-trash-alt" aria-hidden="true"></i>
-    </button>
-  </div>
-
-  <!-- Modal confirmation suppression ligne -->
-  <div class="modal fade" [attr.id]="'modalDeleteLigne' + ligneCommande.id" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-sm" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Confirmation</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          Supprimer la ligne {{ ligneCommande.article?.designation }} ?
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-          <button type="button" class="btn btn-danger" data-dismiss="modal" (click)="supprimerLigne()">Supprimer</button>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="cmd-ligne">
+  <span class="cmd-ligne-cell">{{ ligneCommande.article?.codeArticle }}</span>
+  <span class="cmd-ligne-cell">{{ ligneCommande.article?.designation }}</span>
+  <span class="cmd-ligne-cell tnum">{{ ligneCommande.quantite }}</span>
+  <span class="cmd-ligne-cell tnum">{{ ligneCommande.prixUnitaire }} €</span>
+  <span class="cmd-ligne-cell tnum">
+    {{ ligneCommande.prixUnitaire && ligneCommande.quantite ? +ligneCommande.prixUnitaire * +ligneCommande.quantite : '' }} €
+  </span>
+  <span class="cmd-ligne-cell cmd-ligne-actions">
+    <ng-container *ngIf="!confirmationVisible; else confirmBloc">
+      <button type="button" class="btn-link btn-link-danger" (click)="demanderConfirmation()"
+              aria-label="Supprimer la ligne">
+        Supprimer
+      </button>
+    </ng-container>
+    <ng-template #confirmBloc>
+      <span class="cmd-ligne-confirm">
+        Supprimer ?
+        <button type="button" class="btn-link" (click)="annulerConfirmation()">Non</button>
+        <button type="button" class="btn-link btn-link-danger" (click)="supprimerLigne()">Oui</button>
+      </span>
+    </ng-template>
+  </span>
 </div>

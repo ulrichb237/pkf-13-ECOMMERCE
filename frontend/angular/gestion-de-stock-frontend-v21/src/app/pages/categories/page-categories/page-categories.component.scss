@@ -1,0 +1,20 @@
+/* Ligne de categorie */
+.cat-row {
+  display: grid;
+  grid-template-columns: 160px 1fr auto;
+  gap: var(--sp-lg);
+  align-items: center;
+  padding: var(--sp-md) var(--sp-lg);
+}
+
+.cat-code { color: var(--clr-ink-mute); }
+
+.cat-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-xs);
+}
+
+@media (max-width: 767px) {
+  .cat-row { grid-template-columns: 1fr; }
+}

@@ -56,44 +56,45 @@ export class CmdcltfrsService {
     return of();
   }
 
-  deleteLigneCommandeClient(idCommande: number, idLigne: number): Observable<any> {
-    return this.commandeClientService.deleteLigneCommandeClient(idCommande, idLigne);
+  // Signatures alignees sur le client genere gs-api (objets de parametres)
+  deleteLigneCommandeClient(idCommande: number, idLigne: number): Observable<CommandeClientDto> {
+    return this.commandeClientService.deleteArticle({ idCommande, idLigneCommande: idLigne });
   }
 
-  deleteLigneCommandeFournisseur(idCommande: number, idLigne: number): Observable<any> {
-    return this.commandeFournisseurService.deleteLigneCommandeFournisseur(idCommande, idLigne);
+  deleteLigneCommandeFournisseur(idCommande: number, idLigne: number): Observable<CommandeFournisseurDto> {
+    return this.commandeFournisseurService.deleteArticle({ idCommande, idLigneCommande: idLigne });
   }
 
   updateQuantiteCommandeClient(idCommande: number, idLigne: number, quantite: number): Observable<CommandeClientDto> {
-    return this.commandeClientService.updateQuantiteCommandeClient(idCommande, idLigne, quantite);
+    return this.commandeClientService.updateQuantiteCommande({ idCommande, idLigneCommande: idLigne, quantite });
   }
 
   updateQuantiteCommandeFournisseur(idCommande: number, idLigne: number, quantite: number): Observable<CommandeFournisseurDto> {
-    return this.commandeFournisseurService.updateQuantiteCommandeFournisseur(idCommande, idLigne, quantite);
+    return this.commandeFournisseurService.updateQuantiteCommande({ idCommande, idLigneCommande: idLigne, quantite });
   }
 
   updateArticleCommandeClient(idCommande: number, idLigne: number, idArticle: number): Observable<CommandeClientDto> {
-    return this.commandeClientService.updateArticleCommandeClient(idCommande, idLigne, idArticle);
+    return this.commandeClientService.updateArticle({ idCommande, idLigneCommande: idLigne, idArticle });
   }
 
   updateArticleCommandeFournisseur(idCommande: number, idLigne: number, idArticle: number): Observable<CommandeFournisseurDto> {
-    return this.commandeFournisseurService.updateArticleCommandeFournisseur(idCommande, idLigne, idArticle);
+    return this.commandeFournisseurService.updateArticle({ idCommande, idLigneCommande: idLigne, idArticle });
   }
 
   updateClient(idCommande: number, idClient: number): Observable<CommandeClientDto> {
-    return this.commandeClientService.updateClient(idCommande, idClient);
+    return this.commandeClientService.updateClient({ idCommande, idClient });
   }
 
   updateFournisseur(idCommande: number, idFournisseur: number): Observable<CommandeFournisseurDto> {
-    return this.commandeFournisseurService.updateFournisseur(idCommande, idFournisseur);
+    return this.commandeFournisseurService.updateFournisseur({ idCommande, idFournisseur });
   }
 
-  updateEtatCommandeClient(idCommande: number, etat: string): Observable<CommandeClientDto> {
-    return this.commandeClientService.updateEtatCommandeClient(idCommande, etat);
+  updateEtatCommandeClient(idCommande: number, etat: 'EN_PREPARATION' | 'VALIDEE' | 'LIVREE'): Observable<CommandeClientDto> {
+    return this.commandeClientService.updateEtatCommande({ idCommande, etatCommande: etat });
   }
 
-  updateEtatCommandeFournisseur(idCommande: number, etat: string): Observable<CommandeFournisseurDto> {
-    return this.commandeFournisseurService.updateEtatCommandeFournisseur(idCommande, etat);
+  updateEtatCommandeFournisseur(idCommande: number, etat: 'EN_PREPARATION' | 'VALIDEE' | 'LIVREE'): Observable<CommandeFournisseurDto> {
+    return this.commandeFournisseurService.updateEtatCommande({ idCommande, etatCommande: etat });
   }
 
   deleteCommandeClient(idCommande: number): Observable<any> {

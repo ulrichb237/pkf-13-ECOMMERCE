@@ -1,0 +1,5 @@
+/* Page articles : les lignes sont rendues par app-detail-article.
+   Les grilles globales (cards, dialogs, tabs) vivent dans styles.scss. */
+:host {
+  display: block;
+}

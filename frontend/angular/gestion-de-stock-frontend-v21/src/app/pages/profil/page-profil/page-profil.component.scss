@@ -1,0 +1,54 @@
+/* Profil : grille 2 colonnes */
+.profil-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: var(--sp-lg);
+  align-items: start;
+}
+
+.profil-avatar {
+  width: 160px;
+  height: 160px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--clr-hairline);
+  object-fit: cover;
+  margin-bottom: var(--sp-md);
+}
+
+.profil-avatar-lg {
+  width: 140px;
+  height: 140px;
+}
+
+.profil-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-md);
+  margin-top: var(--sp-lg);
+}
+
+.photo-upload {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-block;
+  margin-bottom: var(--sp-lg);
+}
+
+/* Partage : grille formulaire 2 colonnes */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-md);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-md);
+}
+
+@media (max-width: 767px) {
+  .profil-grid, .form-grid-2 { grid-template-columns: 1fr; }
+}

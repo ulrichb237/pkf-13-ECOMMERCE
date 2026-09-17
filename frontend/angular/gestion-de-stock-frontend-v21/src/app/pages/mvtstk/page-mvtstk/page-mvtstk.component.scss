@@ -1,0 +1,26 @@
+/* Tete d'article dans l'accordeon */
+.mvt-article-head {
+  display: grid;
+  grid-template-columns: 160px 1fr auto;
+  gap: var(--sp-md);
+  align-items: center;
+}
+
+/* Formulaire de mouvement */
+.mvt-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-lg);
+  align-items: flex-end;
+}
+.mvt-form-field {
+  flex: 1 1 220px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-xs);
+}
+.mvt-form-actions {
+  display: flex;
+  gap: var(--sp-md);
+  flex-wrap: wrap;
+}

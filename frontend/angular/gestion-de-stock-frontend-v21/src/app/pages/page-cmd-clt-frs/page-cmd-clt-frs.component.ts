@@ -1,6 +1,8 @@
-import { NgIf, NgFor } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
+import {Subject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
 import {CmdcltfrsService} from '../../services/cmdcltfrs/cmdcltfrs.service';
 import {CommandeClientDto} from '../../../gs-api/src/models/commande-client-dto';
 import {LigneCommandeClientDto} from '../../../gs-api/src/models/ligne-commande-client-dto';
@@ -14,17 +16,24 @@ import { DetailCmdCltFrsComponent } from '../../composants/detail-cmd-clt-frs/de
 import { PaginationComponent } from '../../composants/pagination/pagination.component';
 
 @Component({
-  imports: [NgIf, NgFor, BouttonActionComponent, DetailCmdComponent, DetailCmdCltFrsComponent, PaginationComponent],
+  imports: [NgIf, NgFor, DatePipe, BouttonActionComponent, DetailCmdComponent, DetailCmdCltFrsComponent, PaginationComponent],
   selector: 'app-page-cmd-clt-frs',
   templateUrl: './page-cmd-clt-frs.component.html',
   styleUrls: ['./page-cmd-clt-frs.component.scss']
 })
-export class PageCmdCltFrsComponent implements OnInit {
+export class PageCmdCltFrsComponent implements OnInit, OnDestroy {
 
   origin = '';
   listeCommandes: Array<any> = [];
-  mapLignesCommande = new Map();
-  mapPrixTotalCommande = new Map();
+  mapLignesCommande = new Map<number, LigneCommandeClientDto[]>();
+  mapPrixTotalCommande = new Map<number, number>();
+
+  /** etat d'ouverture de l'accordeon par commande (remplace le collapse Bootstrap) */
+  commandesOuvertes = new Set<number>();
+  /** confirmation de suppression de commande (remplace la modale Bootstrap) */
+  commandeASupprimer: CommandeClientDto | null = null;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private router: Router,
@@ -33,10 +42,15 @@ export class PageCmdCltFrsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.activatedRoute.data.subscribe(data => {
+    this.activatedRoute.data.pipe(takeUntil(this.destroy$)).subscribe(data => {
       this.origin = data['origin'];
     });
     this.findAllCommandes();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   errorMsg = '';
@@ -63,7 +77,9 @@ export class PageCmdCltFrsComponent implements OnInit {
   }
 
   supprimerLigneCommande(ligne: LigneCommandeClientDto): void {
-    const idCommande = ligne.commandeClient?.id;
+    // Le backend ne renvoie pas la commande parente dans la ligne (fromEntity
+    // ne la peuple pas) : on la deduit de la commande ouverte dans l'accordeon.
+    const idCommande = [...this.commandesOuvertes][0];
     if (!ligne.id || !idCommande) {
       return;
     }
@@ -73,11 +89,32 @@ export class PageCmdCltFrsComponent implements OnInit {
         this.errorMsg = CmdcltfrsService.errorMsg(error);
       });
     } else if (this.origin === 'fournisseur') {
-      this.cmdCltFrsService.deleteLigneCommandeFournisseur(idCommande, ligne.id)
+      this.cmdCltFrsService.deleteLigneCommandeFournisseur(idCommande, ligne.id!)
       .subscribe(() => this.findLignesCommande(idCommande), error => {
         this.errorMsg = CmdcltfrsService.errorMsg(error);
       });
     }
+  }
+
+  /** Ouvre/ferme l'accordeon d'une commande (remplace data-toggle=collapse) */
+  basculerAccordeon(idCommande?: number): void {
+    if (!idCommande) {
+      return;
+    }
+    if (this.commandesOuvertes.has(idCommande)) {
+      this.commandesOuvertes.delete(idCommande);
+    } else {
+      this.commandesOuvertes.add(idCommande);
+    }
+  }
+
+  /** Affiche la confirmation de suppression (remplace la modale Bootstrap) */
+  demanderSuppressionCommande(cmd: CommandeClientDto): void {
+    this.commandeASupprimer = cmd;
+  }
+
+  annulerSuppressionCommande(): void {
+    this.commandeASupprimer = null;
   }
 
   supprimerCommande(id?: number): void {
@@ -112,6 +149,9 @@ export class PageCmdCltFrsComponent implements OnInit {
   }
 
   findLignesCommande(idCommande?: number): void {
+    if (!idCommande) {
+      return;
+    }
     if (this.origin === 'client') {
       this.cmdCltFrsService.findAllLigneCommandesClient(idCommande)
       .subscribe(list => {
@@ -138,6 +178,6 @@ export class PageCmdCltFrsComponent implements OnInit {
   }
 
   calculerTotalCommande(id?: number): number {
-    return this.mapPrixTotalCommande.get(id);
+    return this.mapPrixTotalCommande.get(id!) ?? 0;
   }
 }

@@ -1,7 +1,7 @@
 import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {CltfrsService} from '../../services/cltfrs/cltfrs.service';
 import {ArticleDto} from '../../../gs-api/src/models/article-dto';
 import {ArticleService} from '../../services/article/article.service';
@@ -13,7 +13,7 @@ import {CommandeFournisseurDto} from '../../../gs-api/src/models/commande-fourni
 import { DetailCmdComponent } from '../detail-cmd/detail-cmd.component';
 
 @Component({
-  imports: [NgIf, NgFor, FormsModule, DetailCmdComponent],
+  imports: [NgIf, NgFor, FormsModule, RouterLink, DetailCmdComponent],
   selector: 'app-nouvelle-cmd-clt-frs',
   templateUrl: './nouvelle-cmd-clt-frs.component.html',
   styleUrls: ['./nouvelle-cmd-clt-frs.component.scss']
@@ -32,7 +32,7 @@ export class NouvelleCmdCltFrsComponent implements OnInit {
   lignesCommande: Array<any> = [];
   totalCommande = 0;
   articleNotYetSelected = false;
-  errorMsg: Array<string> = [];
+  errorMsg: string = '';
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -131,16 +131,21 @@ export class NouvelleCmdCltFrsComponent implements OnInit {
       .subscribe(cmd => {
         this.router.navigate(['commandesclient']);
       }, error => {
-        this.errorMsg = error.error.errors;
+        this.errorMsg = CmdcltfrsService.errorMsg(error);
       });
     } else if (this.origin === 'fournisseur') {
       this.cmdCltFrsService.enregistrerCommandeFournisseur(commande as CommandeFournisseurDto)
       .subscribe(cmd => {
         this.router.navigate(['commandesfournisseur']);
       }, error => {
-        this.errorMsg = error.error.errors;
+        this.errorMsg = CmdcltfrsService.errorMsg(error);
       });
     }
+  }
+
+  /** Retour vers la liste correspondante (bouton Annuler) */
+  get returnUrl(): string {
+    return this.origin === 'fournisseur' ? '/commandesfournisseur' : '/commandesclient';
   }
 
   private preparerCommande(): any {

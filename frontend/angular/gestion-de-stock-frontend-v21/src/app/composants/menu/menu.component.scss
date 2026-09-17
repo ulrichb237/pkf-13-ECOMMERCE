@@ -1,0 +1,51 @@
+/* Menu lateral design system */
+.menu-title {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--clr-ink);
+}
+
+.menu-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  background: var(--clr-primary-subdued);
+  color: var(--clr-primary-deep);
+  font-size: 13px;
+  font-weight: 400;
+  flex-shrink: 0;
+}
+
+.menu-icon-sm {
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+}
+
+.menu-items .list-group-item {
+  padding-left: var(--sp-xl);
+}
+
+.menu-link {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+  color: inherit;
+  text-decoration: none;
+}
+
+.list-item-active {
+  background: var(--clr-primary);
+  color: var(--clr-on-primary) !important;
+
+  .menu-icon {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--clr-on-primary);
+  }
+}

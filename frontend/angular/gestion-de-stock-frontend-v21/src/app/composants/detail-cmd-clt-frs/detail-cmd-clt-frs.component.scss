@@ -1,0 +1,37 @@
+/* En-tete d'une commande dans l'accordeon */
+.cmd-head {
+  display: grid;
+  grid-template-columns: 84px 1.2fr 1.2fr auto;
+  gap: var(--sp-lg);
+  align-items: center;
+}
+
+.cmd-head-photo img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.cmd-head-clt,
+.cmd-head-cmd {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cmd-head-cmd {
+  border-left: 1px solid var(--clr-hairline);
+  padding-left: var(--sp-lg);
+}
+
+.cmd-head-actions {
+  display: flex;
+  gap: var(--sp-sm);
+}
+
+@media (max-width: 767px) {
+  .cmd-head { grid-template-columns: 64px 1fr; }
+  .cmd-head-cmd { border-left: none; padding-left: 0; }
+  .cmd-head-actions { grid-column: 1 / -1; }
+}

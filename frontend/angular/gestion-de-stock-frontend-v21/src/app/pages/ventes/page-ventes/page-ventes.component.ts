@@ -54,8 +54,9 @@ export class PageVentesComponent implements OnInit {
   }
 
   confirmerEtSupprimerVente(): void {
-    if (this.selectedVenteIdToDelete !== -1) {
-      this.ventesService.deleteVente(this.selectedVenteIdToDelete)
+    const id = this.selectedVenteIdToDelete;
+    if (id !== undefined && id !== -1) {
+      this.ventesService.deleteVente(id)
       .subscribe(() => {
         this.findAllVentes();
       }, error => {

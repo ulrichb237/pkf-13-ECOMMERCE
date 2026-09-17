@@ -1,0 +1,46 @@
+/* Carte client/fournisseur (design system Stripi) */
+.cltfrs-card {
+  display: grid;
+  grid-template-columns: 110px 1.2fr 1.4fr auto;
+  gap: var(--sp-lg);
+  align-items: center;
+  padding: var(--sp-md) var(--sp-lg);
+}
+
+.cltfrs-photo img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--clr-hairline);
+}
+
+.cltfrs-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cltfrs-nom { font-size: 16px; }
+
+.cltfrs-adresse {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-left: 1px solid var(--clr-hairline);
+  padding-left: var(--sp-lg);
+  font-size: 14px;
+}
+
+.cltfrs-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-xs);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 767px) {
+  .cltfrs-card { grid-template-columns: 80px 1fr; }
+  .cltfrs-photo img { width: 80px; height: 80px; }
+  .cltfrs-adresse { border-left: none; padding-left: 0; }
+  .cltfrs-actions { grid-column: 1 / -1; }
+}

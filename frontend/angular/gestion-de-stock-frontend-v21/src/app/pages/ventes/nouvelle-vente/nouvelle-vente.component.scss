@@ -1,3 +1,56 @@
-:host {
-  width: 100%;
+/* Formulaires en grille */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-md);
+}
+
+.form-grid-4 {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr auto;
+  gap: var(--sp-md);
+  align-items: start;
+}
+
+.autocomplete-wrap { position: relative; }
+
+.autocomplete {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--clr-canvas);
+  border: 1px solid var(--clr-hairline);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+  max-height: 240px;
+  overflow-y: auto;
+  padding: var(--sp-xs);
+}
+
+.autocomplete-item {
+  margin: 0;
+  padding: var(--sp-sm) var(--sp-md);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.autocomplete-item:hover {
+  background: var(--clr-canvas-soft);
+}
+
+.lignes-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-md);
+}
+
+@media (max-width: 767px) {
+  .form-grid-2, .form-grid-4 { grid-template-columns: 1fr; }
 }

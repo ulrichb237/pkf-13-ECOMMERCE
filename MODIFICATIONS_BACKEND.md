@@ -7,6 +7,23 @@
 
 ---
 
+## 5. Campagne « migration Angular 21 + design system » (2026-09-17)
+
+**Bilan : AUCUNE modification backend requise.** Le frontend a été aligné sur
+le backend tel quel. Améliorations backend *optionnelles* constatées (à valider
+par le propriétaire du backend, non appliquées) :
+
+| Constat | Endpoints concernés | Impact frontend actuel | Suggestion (si validée) |
+|---|---|---|---|
+| `LigneCommandeClientDto.fromEntity` ne peuple pas `commandeClient` (toujours `null` dans le JSON) | `GET /api/v1/articles/{id}/historique-commandes-clients`, `GET .../lignes` | La page articles affiche l'id de ligne au lieu de la date ; la page commandes déduit la commande parente de l'accordéon ouvert | Renseigner `commandeClient(CommandeClientDto.fromEntity(...))` dans `fromEntity` |
+| `LigneCommandeFournisseurDto.fromEntity` ne peuple pas `commandeFournisseur` | `GET /api/v1/articles/{id}/historique-commandes-fournisseurs` | Même contournement côté frontend | Renseigner `commandeFournisseur(...)` dans `fromEntity` |
+| Le champ `Date` des lignes est porté par la commande parente, absente du payload | idem | Les dates sont masquées dans les historiques | Résolu automatiquement si les 2 points ci-dessus sont corrigés |
+
+Rien de tout cela ne bloque : le frontend a été écrit pour fonctionner avec le
+backend **actuel**.
+
+---
+
 ## 1. `validator/AdresseValidator.java` — bug de copier-coller sur le code postal
 
 **Fichier** : `backend/gestion-de-stock-api/src/main/java/com/k48/gestiondestock/validator/AdresseValidator.java`

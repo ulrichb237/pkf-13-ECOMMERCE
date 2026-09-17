@@ -16,12 +16,24 @@ export class DetailCmdComponent implements OnInit {
   @Output()
   suppressionLigne = new EventEmitter<LigneCommandeClientDto>();
 
+  /** Etat de la confirmation inline (remplace la modale Bootstrap) */
+  confirmationVisible = false;
+
   constructor() { }
 
   ngOnInit(): void {
   }
 
+  demanderConfirmation(): void {
+    this.confirmationVisible = true;
+  }
+
+  annulerConfirmation(): void {
+    this.confirmationVisible = false;
+  }
+
   supprimerLigne(): void {
+    this.confirmationVisible = false;
     this.suppressionLigne.emit(this.ligneCommande);
   }
 }

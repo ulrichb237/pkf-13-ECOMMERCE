@@ -38,7 +38,14 @@ export class PageInscriptionComponent implements OnInit {
       // depuis la page "changermotdepasse".
       this.router.navigate(['login']);
     }, error => {
-      this.errorsMsg = error.error.errors;
+      // Le backend renvoie soit une liste de violations de validation (errors),
+      // soit un ErrorDto avec message unique — les deux cas sont couverts.
+      const errors = error?.error?.errors;
+      if (Array.isArray(errors) && errors.length) {
+        this.errorsMsg = errors;
+      } else {
+        this.errorsMsg = [error?.error?.message || 'Erreur lors de l inscription'];
+      }
       });
   }
 }

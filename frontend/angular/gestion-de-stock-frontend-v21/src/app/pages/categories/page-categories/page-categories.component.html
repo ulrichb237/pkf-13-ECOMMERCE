@@ -1,121 +1,68 @@
-<div class="col">
-  <div class="row m-3">
-    <div class="col-md-8 p-0">
-      <h1>Liste des categories</h1>
-    </div>
-    <div class="col-md-4 text-right">
-      <app-boutton-action
-        (clickEvent)="nouvelleCategory()"
-      ></app-boutton-action>
-    </div>
+<div class="page">
+  <div class="page-header">
+    <h1>Liste des categories</h1>
+    <app-boutton-action (clickEvent)="nouvelleCategory()"></app-boutton-action>
   </div>
-  <div class="col m-3">
-    <div class="row col-md-12 alert alert-danger" *ngIf="errorMsgs">
-      {{ errorMsgs }}
-    </div>
-    <div class="row col-md-12 custom-border mb-3 p-3" *ngFor="let cat of listCategories">
-      <div class="col-md-3 custom-border-right">
-        {{cat.code}}
-      </div>
-      <div class="col-md-4 custom-border-right">
-        {{cat.designation}}
-      </div>
-      <div class="col-md-3">
-        <div class="row">
-          <div class="col-md-4">
-            <button type="button" class="btn btn-link" (click)="modifierCategory(cat.id)">
-              <i class="fas fa-pencil-alt"></i>&nbsp;Modifier
-            </button>
-          </div>
-          <div class="col-md-4">
-            <button type="button" class="btn btn-link text-danger" data-toggle="modal" data-target="#modalDeleteCat"
-                    (click)="selectCatPourSupprimer(cat.id)">
-              <i class="fas fa-trash-alt"></i>&nbsp;Supprimer
-            </button>
-          </div>
-          <div class="col-md-4">
-            <button type="button" class="btn btn-link " data-toggle="modal" data-target="#modalDetailsCat" (click)="voirDetails(cat)">
-              <i class="far fa-list-alt"></i>&nbsp;Details
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+
+  <div class="alert alert-danger" *ngIf="errorMsgs">{{ errorMsgs }}</div>
+
+  <div class="empty-state" *ngIf="!listCategories.length && !errorMsgs">Aucune categorie enregistree</div>
+
+  <div class="card custom-border cat-row" *ngFor="let cat of listCategories">
+    <span class="tnum cat-code">{{ cat.code }}</span>
+    <span class="cat-designation">{{ cat.designation }}</span>
+    <span class="cat-actions">
+      <button type="button" class="btn-link" (click)="modifierCategory(cat.id)">Modifier</button>
+      <button type="button" class="btn-link btn-link-danger" (click)="selectCatPourSupprimer(cat.id)">Supprimer</button>
+      <button type="button" class="btn-link" (click)="voirDetails(cat)">Details</button>
+    </span>
   </div>
-  <div class="row mb-3" *ngIf="listCategories.length > 0">
-    <div class=" col-md-12 text-center">
-      <app-pagination></app-pagination>
+
+  <div class="page-pagination" *ngIf="listCategories.length">
+    <app-pagination></app-pagination>
+  </div>
+</div>
+
+<!-- Confirmation de suppression (remplace la modale Bootstrap) -->
+<div class="dialog-backdrop" *ngIf="catASupprimer">
+  <div class="dialog" role="dialog" aria-modal="true">
+    <h3 class="dialog-title">Confirmation</h3>
+    <p>Etes-vous sur de vouloir supprimer cette categorie ?</p>
+    <div class="dialog-actions">
+      <button type="button" class="btn-pill btn-pill-secondary" (click)="annulerSuppressionCat()">Annuler</button>
+      <button type="button" class="btn-pill btn-pill-danger" (click)="confirmerEtSupprimerCat()">Supprimer</button>
     </div>
   </div>
 </div>
 
-<!-- Modal -->
-<div class="modal fade" id="modalDeleteCat" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel"
-     aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="staticBackdropLabel">Confirmation</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+<!-- Details : articles de la categorie (remplace la modale Bootstrap) -->
+<div class="dialog-backdrop" *ngIf="detailsVisibles" (click)="detailsVisibles = false">
+  <div class="dialog dialog-lg" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="dialog-header">
+      <h3 class="dialog-title">Articles de la categorie {{ codeCategorieSelectionnee }}</h3>
+      <button type="button" class="dialog-close" (click)="detailsVisibles = false" aria-label="Fermer">&times;</button>
+    </div>
+    <div class="dialog-body">
+      <div class="alert alert-danger" *ngIf="errorMsgs">{{ errorMsgs }}</div>
+      <div class="empty-state empty-state-sm" *ngIf="!errorMsgs && articlesCategorie.length === 0">
+        Aucun article dans cette categorie.
       </div>
-      <div class="modal-body">
-        Etes vous-sur de vouloir supprimer cette categorie?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="annulerSuppressionCat()">
-          <i class="fas fa-ban"></i>&nbsp;Annuler</button>
-        <button type="button" class="btn btn-danger" data-dismiss="modal" (click)="confirmerEtSupprimerCat()">
-          <i class="fas fa-trash-alt"></i>&nbsp;Supprimer</button>
-      </div>
+      <table class="data-table" *ngIf="articlesCategorie.length > 0">
+        <thead>
+          <tr><th>Code</th><th>Designation</th><th>Prix HT</th><th>Prix TTC</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let article of articlesCategorie">
+            <td class="tnum">{{ article.codeArticle }}</td>
+            <td>{{ article.designation }}</td>
+            <td class="tnum">{{ article.prixUnitaireHt }} €</td>
+            <td class="tnum">{{ article.prixUnitaireTtc }} €</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="dialog-actions">
+      <button type="button" class="btn-pill btn-pill-secondary" (click)="detailsVisibles = false">Fermer</button>
     </div>
   </div>
 </div>
-
-<!-- Modal Details : articles de la categorie -->
-<div class="modal fade" id="modalDetailsCat" tabindex="-1" aria-labelledby="modalDetailsCatLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalDetailsCatLabel">
-          <i class="far fa-list-alt"></i>&nbsp;Articles de la categorie {{ codeCategorieSelectionnee }}
-        </h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="alert alert-danger" *ngIf="errorMsgs">
-          {{ errorMsgs }}
-        </div>
-        <div class="alert alert-info" *ngIf="!errorMsgs && articlesCategorie.length === 0">
-          Aucun article dans cette categorie.
-        </div>
-        <table class="table table-striped" *ngIf="articlesCategorie.length > 0">
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Designation</th>
-              <th>Prix HT</th>
-              <th>Prix TTC</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let article of articlesCategorie">
-              <td>{{ article.codeArticle }}</td>
-              <td>{{ article.designation }}</td>
-              <td>{{ article.prixUnitaireHt }} €</td>
-              <td>{{ article.prixUnitaireTtc }} €</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-          <i class="fas fa-ban"></i>&nbsp;Fermer</button>
-      </div>
-    </div>
-  </div>
-</div>
-

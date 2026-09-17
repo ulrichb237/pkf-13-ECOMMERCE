@@ -21,6 +21,11 @@ export class PageCategoriesComponent implements OnInit {
   selectedCatIdToDelete ? = -1;
   errorMsgs = '';
 
+  /** Confirmation de suppression (remplace la modale Bootstrap) */
+  catASupprimer = false;
+  /** Visibilite du panneau details (remplace la modale Bootstrap) */
+  detailsVisibles = false;
+
   articlesCategorie: Array<ArticleDto> = [];
   codeCategorieSelectionnee = '';
 
@@ -37,6 +42,7 @@ export class PageCategoriesComponent implements OnInit {
     this.errorMsgs = '';
     this.articlesCategorie = [];
     this.codeCategorieSelectionnee = categorie?.code ? categorie.code : '';
+    this.detailsVisibles = true;
     if (categorie?.id) {
       this.categoryService.findAllArticleByCategorie(categorie.id)
         .subscribe(articles => {
@@ -63,12 +69,14 @@ export class PageCategoriesComponent implements OnInit {
   }
 
   confirmerEtSupprimerCat(): void {
-    if (this.selectedCatIdToDelete !== -1) {
-      this.categoryService.delete(this.selectedCatIdToDelete)
+    this.catASupprimer = false;
+    const id = this.selectedCatIdToDelete;
+    if (id !== undefined && id !== -1) {
+      this.categoryService.delete(id)
       .subscribe(res => {
         this.findAllCategories();
       }, error => {
-        this.errorMsgs = error.error.message;
+        this.errorMsgs = error?.error?.message || 'Erreur lors de la suppression';
       });
     }
   }
@@ -79,5 +87,6 @@ export class PageCategoriesComponent implements OnInit {
 
   selectCatPourSupprimer(id?: number): void {
     this.selectedCatIdToDelete = id;
+    this.catASupprimer = true;
   }
 }

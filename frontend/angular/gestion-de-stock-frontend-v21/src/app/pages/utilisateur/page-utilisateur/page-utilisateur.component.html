@@ -1,27 +1,21 @@
-<div class="col">
-  <div class="row m-3">
-    <div class="col-md-8 p-0">
-      <h1>Liste des utilisateurs</h1>
-    </div>
-    <div class="col-md-4 text-right">
-      <app-boutton-action
-        (clickEvent)="nouvelUtilosateur()"
-      ></app-boutton-action>
-    </div>
-  </div>
-  <div class="col m-3">
-    <app-detail-utilisateur></app-detail-utilisateur>
-    <app-detail-utilisateur></app-detail-utilisateur>
-    <app-detail-utilisateur></app-detail-utilisateur>
-    <app-detail-utilisateur></app-detail-utilisateur>
-    <app-detail-utilisateur></app-detail-utilisateur>
-    <app-detail-utilisateur></app-detail-utilisateur>
-    <app-detail-utilisateur></app-detail-utilisateur>
-  </div>
-  <div class="row mb-3">
-    <div class=" col-md-12 text-center">
-      <app-pagination></app-pagination>
-    </div>
+<div class="page">
+  <div class="page-header">
+    <h1>Liste des utilisateurs</h1>
+    <app-boutton-action (clickEvent)="nouvelUtilosateur()"></app-boutton-action>
   </div>
 
+  <div class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <div class="empty-state" *ngIf="!listUtilisateur.length && !errorMsg">Aucun utilisateur enregistre</div>
+
+  <div class="page-content">
+    <app-detail-utilisateur
+      *ngFor="let utilisateur of listUtilisateur"
+      [utilisateur]="utilisateur"
+    ></app-detail-utilisateur>
+  </div>
+
+  <div class="page-pagination" *ngIf="listUtilisateur.length">
+    <app-pagination></app-pagination>
+  </div>
 </div>

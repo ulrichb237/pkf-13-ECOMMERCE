@@ -1,0 +1,23 @@
+/* Cartes KPI */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-lg);
+}
+
+.stats-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-xs);
+}
+
+.stats-value {
+  font-size: 32px;
+  font-weight: 300;
+  letter-spacing: -0.64px;
+  color: var(--clr-primary-deep);
+}
+
+@media (max-width: 767px) {
+  .stats-grid { grid-template-columns: 1fr; }
+}

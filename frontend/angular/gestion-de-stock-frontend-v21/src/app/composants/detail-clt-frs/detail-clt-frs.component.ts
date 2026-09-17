@@ -1,9 +1,11 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {NgIf} from '@angular/common';
 import {ClientDto} from '../../../gs-api/src/models/client-dto';
 import {Router} from '@angular/router';
 import {CltfrsService} from '../../services/cltfrs/cltfrs.service';
 
 @Component({
+  imports: [NgIf],
   selector: 'app-detail-clt-frs',
   templateUrl: './detail-clt-frs.component.html',
   styleUrls: ['./detail-clt-frs.component.scss']
@@ -17,12 +19,25 @@ export class DetailCltFrsComponent implements OnInit {
   @Output()
   suppressionResult = new EventEmitter();
 
+  /** Etat de la confirmation inline (remplace la modale Bootstrap) */
+  confirmationVisible = false;
+  /** Visibilite du panneau details (remplace la modale Bootstrap) */
+  detailsVisibles = false;
+
   constructor(
     private router: Router,
     private cltFrsService: CltfrsService
   ) { }
 
   ngOnInit(): void {
+  }
+
+  demanderConfirmation(): void {
+    this.confirmationVisible = true;
+  }
+
+  annulerConfirmation(): void {
+    this.confirmationVisible = false;
   }
 
   modifierClientFournisseur(): void {
@@ -34,6 +49,7 @@ export class DetailCltFrsComponent implements OnInit {
   }
 
   confirmerEtSupprimer(): void {
+    this.confirmationVisible = false;
     if (this.origin === 'client') {
       this.cltFrsService.deleteClient(this.clientFournisseur.id)
       .subscribe(res => {

@@ -33,6 +33,11 @@ export class UserService {
     return of();
   }
 
+  /** GET /api/v1/utilisateurs — liste des utilisateurs de l'entreprise */
+  findAllUtilisateurs(): Observable<UtilisateurDto[]> {
+    return this.utilisateurService.findAll();
+  }
+
   setAccessToken(authenticationResponse: AuthenticationResponse): void {
     localStorage.setItem('accessToken', JSON.stringify(authenticationResponse));
   }

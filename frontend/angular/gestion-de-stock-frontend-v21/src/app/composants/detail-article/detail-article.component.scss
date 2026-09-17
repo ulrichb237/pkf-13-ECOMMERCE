@@ -1,0 +1,45 @@
+/* Carte article (design system Stripi) */
+.article-card {
+  display: grid;
+  grid-template-columns: 110px 1.6fr 1fr auto;
+  gap: var(--sp-lg);
+  align-items: center;
+  padding: var(--sp-md) var(--sp-lg);
+}
+
+.article-card-photo img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.article-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.article-card-code { color: var(--clr-ink-mute); font-size: 13px; }
+.article-card-designation { font-size: 16px; }
+
+.article-card-category {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-left: 1px solid var(--clr-hairline);
+  padding-left: var(--sp-lg);
+}
+
+.article-card-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-xs);
+}
+
+/* Responsive : empilement mobile */
+@media (max-width: 767px) {
+  .article-card { grid-template-columns: 80px 1fr; }
+  .article-card-photo img { width: 80px; height: 80px; }
+  .article-card-category { border-left: none; padding-left: 0; }
+  .article-card-actions { grid-column: 1 / -1; }
+}

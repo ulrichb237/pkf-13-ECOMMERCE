@@ -1,21 +1,16 @@
-<div class="col">
-  <div class="row m-3">
-    <div class="col-md-8 p-0">
-      <h1>Liste des articles</h1>
-    </div>
-    <div class="col-md-4 text-right">
-      <app-boutton-action
-        (clickEvent)="nouvelArticle()"
-      ></app-boutton-action>
-    </div>
-    <div class="alert alert-danger" *ngIf="errorMsg">
-      {{ errorMsg }}
-    </div>
+<div class="page">
+  <div class="page-header">
+    <h1>Liste des articles</h1>
+    <app-boutton-action (clickEvent)="nouvelArticle()"></app-boutton-action>
   </div>
-  <div class="col m-3">
-    <div class="text-center text-muted p-3" *ngIf="!listArticle.length && !errorMsg">
-      Aucun article enregistre
-    </div>
+
+  <div class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <div class="empty-state" *ngIf="!listArticle.length && !errorMsg">
+    Aucun article enregistre
+  </div>
+
+  <div class="page-content">
     <app-detail-article
       *ngFor="let article of listArticle"
       [articleDto]="article"
@@ -25,90 +20,86 @@
     </app-detail-article>
   </div>
 
-  <!-- Modal Details article : 3 historiques -->
-  <div class="modal fade" id="modalDetailsArticle" tabindex="-1" role="dialog" aria-labelledby="modalDetailsArticleLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalDetailsArticleLabel">
-            <i class="far fa-list-alt" aria-hidden="true"></i>&nbsp;{{ articleSelectionne.designation }} ({{ articleSelectionne.codeArticle }})
-          </h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <ul class="nav nav-tabs" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button class="nav-link active" data-toggle="tab" data-target="#tabVentes" type="button" role="tab" aria-selected="true">
-                Ventes ({{ historiqueVentes.length }})
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" data-toggle="tab" data-target="#tabCmdClt" type="button" role="tab" aria-selected="false">
-                Commandes clients ({{ historiqueCmdClient.length }})
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" data-toggle="tab" data-target="#tabCmdFrs" type="button" role="tab" aria-selected="false">
-                Commandes fournisseurs ({{ historiqueCmdFournisseur.length }})
-              </button>
-            </li>
-          </ul>
-          <div class="tab-content mt-2">
-            <div class="tab-pane fade show active" id="tabVentes" role="tabpanel">
-              <div class="alert alert-info" *ngIf="!historiqueVentes.length">Aucune vente pour cet article.</div>
-              <table class="table" *ngIf="historiqueVentes.length">
-                <thead><tr><th>Date</th><th>Quantite</th><th>Prix unitaire</th></tr></thead>
-                <tbody>
-                  <tr *ngFor="let l of historiqueVentes">
-                    <td>{{ l.vente?.dateVente | date:'dd/MM/yyyy HH:mm' }}</td>
-                    <td>{{ l.quantite }}</td>
-                    <td>{{ l.prixUnitaire }} €</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="tab-pane fade" id="tabCmdClt" role="tabpanel">
-              <div class="alert alert-info" *ngIf="!historiqueCmdClient.length">Aucune commande client pour cet article.</div>
-              <table class="table" *ngIf="historiqueCmdClient.length">
-                <thead><tr><th>Date</th><th>Quantite</th><th>Prix unitaire</th></tr></thead>
-                <tbody>
-                  <tr *ngFor="let l of historiqueCmdClient">
-                    <td>{{ l.commandeClient?.dateCommande | date:'dd/MM/yyyy HH:mm' }}</td>
-                    <td>{{ l.quantite }}</td>
-                    <td>{{ l.prixUnitaire }} €</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="tab-pane fade" id="tabCmdFrs" role="tabpanel">
-              <div class="alert alert-info" *ngIf="!historiqueCmdFournisseur.length">Aucune commande fournisseur pour cet article.</div>
-              <table class="table" *ngIf="historiqueCmdFournisseur.length">
-                <thead><tr><th>Date</th><th>Quantite</th><th>Prix unitaire</th></tr></thead>
-                <tbody>
-                  <tr *ngFor="let l of historiqueCmdFournisseur">
-                    <td>{{ l.commandeFournisseur?.dateCommande | date:'dd/MM/yyyy HH:mm' }}</td>
-                    <td>{{ l.quantite }}</td>
-                    <td>{{ l.prixUnitaire }} €</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">
-            <i class="fas fa-ban" aria-hidden="true"></i>&nbsp;Fermer
-          </button>
-        </div>
+  <!-- Panneau historiques article (remplace la modale + tabs Bootstrap) -->
+  <div class="dialog-backdrop" *ngIf="detailsVisibles" (click)="fermerDetails()">
+    <div class="dialog dialog-lg" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h3 class="dialog-title">{{ articleSelectionne.designation }} ({{ articleSelectionne.codeArticle }})</h3>
+        <button type="button" class="dialog-close" (click)="fermerDetails()" aria-label="Fermer">&times;</button>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" class="tab"
+                [class.tab-active]="ongletActif === 'ventes'"
+                [attr.aria-selected]="ongletActif === 'ventes'"
+                (click)="ongletActif = 'ventes'">
+          Ventes ({{ historiqueVentes.length }})
+        </button>
+        <button type="button" role="tab" class="tab"
+                [class.tab-active]="ongletActif === 'cmdClt'"
+                [attr.aria-selected]="ongletActif === 'cmdClt'"
+                (click)="ongletActif = 'cmdClt'">
+          Commandes clients ({{ historiqueCmdClient.length }})
+        </button>
+        <button type="button" role="tab" class="tab"
+                [class.tab-active]="ongletActif === 'cmdFrs'"
+                [attr.aria-selected]="ongletActif === 'cmdFrs'"
+                (click)="ongletActif = 'cmdFrs'">
+          Commandes fournisseurs ({{ historiqueCmdFournisseur.length }})
+        </button>
+      </div>
+
+      <div class="dialog-body">
+        <ng-container *ngIf="ongletActif === 'ventes'">
+          <div class="empty-state empty-state-sm" *ngIf="!historiqueVentes.length">Aucune vente pour cet article.</div>
+          <table class="data-table" *ngIf="historiqueVentes.length">
+            <thead><tr><th>Date</th><th>Quantite</th><th>Prix unitaire</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let l of historiqueVentes">
+                <td>{{ l.vente?.dateVente | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="tnum">{{ l.quantite }}</td>
+                <td class="tnum">{{ l.prixUnitaire }} €</td>
+              </tr>
+            </tbody>
+          </table>
+        </ng-container>
+
+        <ng-container *ngIf="ongletActif === 'cmdClt'">
+          <div class="empty-state empty-state-sm" *ngIf="!historiqueCmdClient.length">Aucune commande client pour cet article.</div>
+          <table class="data-table" *ngIf="historiqueCmdClient.length">
+            <thead><tr><th>Date</th><th>Quantite</th><th>Prix unitaire</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let l of historiqueCmdClient">
+                <td>{{ l.id }}</td>
+                <td class="tnum">{{ l.quantite }}</td>
+                <td class="tnum">{{ l.prixUnitaire }} €</td>
+              </tr>
+            </tbody>
+          </table>
+        </ng-container>
+
+        <ng-container *ngIf="ongletActif === 'cmdFrs'">
+          <div class="empty-state empty-state-sm" *ngIf="!historiqueCmdFournisseur.length">Aucune commande fournisseur pour cet article.</div>
+          <table class="data-table" *ngIf="historiqueCmdFournisseur.length">
+            <thead><tr><th>Date</th><th>Quantite</th><th>Prix unitaire</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let l of historiqueCmdFournisseur">
+                <td>{{ l.id }}</td>
+                <td class="tnum">{{ l.quantite }}</td>
+                <td class="tnum">{{ l.prixUnitaire }} €</td>
+              </tr>
+            </tbody>
+          </table>
+        </ng-container>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn-pill btn-pill-secondary" (click)="fermerDetails()">Fermer</button>
       </div>
     </div>
   </div>
-  <div class="row mb-3" *ngIf="listArticle.length">
-    <div class=" col-md-12 text-center">
-      <app-pagination></app-pagination>
-    </div>
-  </div>
 
+  <div class="page-pagination" *ngIf="listArticle.length">
+    <app-pagination></app-pagination>
+  </div>
 </div>
