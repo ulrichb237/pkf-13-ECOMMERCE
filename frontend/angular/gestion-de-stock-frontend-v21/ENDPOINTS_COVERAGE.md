@@ -8,8 +8,8 @@
 | Métrique | Valeur |
 |---|---|
 | Endpoints backend (mappings HTTP) | **67** |
-| Consommés par le frontend (directement ou via client `gs-api`) | **60** |
-| Non consommés (voir ⚠️ dans les tableaux) | **7** |
+| Consommés par le frontend (directement ou via client `gs-api`) | **64** |
+| Non consommés (voir ⚠️ dans les tableaux) | **3** |
 ## Article (9)
 
 | Endpoint | Méthode | Consommation frontend |
@@ -117,12 +117,12 @@ POST/GET/GET-by-id/DELETE consommés par les pages fournisseurs (symétrique cli
 
 | Endpoint | Méthode | Consommation frontend |
 |---|---|---|
-| `/api/v1/utilisateurs` | POST | ⚠️ Réservé au backend (création admin à l'inscription) — pas d'UI de création manuelle |
+| `/api/v1/utilisateurs` | POST | Page `nouvelutilisateur` — création par l'admin (mot de passe défini à la création, 18/09) |
 | `/api/v1/utilisateurs` | GET | Page `utilisateurs` (liste branchée le 17/09) |
-| `/api/v1/utilisateurs/{idUtilisateur}` | GET | ⚠️ Disponible dans `gs-api` (fiche utilisateur non implémentée) |
+| `/api/v1/utilisateurs/{idUtilisateur}` | GET | Page `nouvelutilisateur/:id` — fiche en mode édition (18/09) |
 | `/api/v1/utilisateurs/email/{email}` | GET | Post-login (chargement du profil connecté) |
 | `/api/v1/utilisateurs/mot-de-passe` | PATCH | Page `changermotdepasse` |
-| `/api/v1/utilisateurs/{idUtilisateur}` | DELETE | ⚠️ Disponible dans `gs-api`, pas d'UI de suppression |
+| `/api/v1/utilisateurs/{idUtilisateur}` | DELETE | Page `utilisateurs` — dialog de confirmation (18/09) |
 
 ## Ventes (5)
 
@@ -159,13 +159,15 @@ POST/GET/GET-by-id/DELETE consommés par les pages fournisseurs (symétrique cli
 ## Notes
 
 - ⚠️ = disponible dans le client généré `gs-api` mais sans page qui l'appelle
-  aujourd'hui. Restent non consommés après l'extension du 18/09 :
+  aujourd'hui. Restent non consommés après l'ajout de l'admin utilisateurs (18/09) :
   `GET /commandes-clients/{id}` (le détail passe par `/lignes`),
   `GET /entreprises` (pas de page d'admin multi-entreprises, volontaire),
   `DELETE /entreprises/{id}` (risqué, volontaire), `POST /photos` (Flickr
-  désactivé côté backend), `POST /utilisateurs` (réservé au backend),
-  `GET /utilisateurs/{id}` et `DELETE /utilisateurs/{id}` (pas d'UI
-  d'administration des comptes). Aucun ne bloque le flux métier principal
+  désactivé côté backend). Aucun ne bloque le flux métier principal
   (vente, commande, stock).
+- **Race condition du login corrigée (18/09)** : le profil était chargé en
+  parallèle de la navigation — une page d'arrivée pouvait démarrer sans
+  `connectedUser` (la fiche entreprise échouait à la première connexion).
+  Le profil est désormais chargé **avant** `router.navigate`.
 - Le contrat de dates (ISO-8601 obligatoire) est documenté dans
   `MODIFICATIONS_BACKEND.md` §3.

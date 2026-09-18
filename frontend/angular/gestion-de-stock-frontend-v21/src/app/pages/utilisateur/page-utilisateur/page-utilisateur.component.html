@@ -1,7 +1,7 @@
 <div class="page">
   <div class="page-header">
     <h1>Liste des utilisateurs</h1>
-    <app-boutton-action (clickEvent)="nouvelUtilosateur()"></app-boutton-action>
+    <app-boutton-action (clickEvent)="nouvelUtilisateur()"></app-boutton-action>
   </div>
 
   <div class="alert alert-danger" *ngIf="errorMsg()">{{ errorMsg() }}</div>
@@ -12,10 +12,24 @@
     <app-detail-utilisateur
       *ngFor="let utilisateur of listUtilisateur()"
       [utilisateur]="utilisateur"
+      (ficheDemandee)="ouvrirFiche($event)"
+      (suppressionDemandee)="demanderSuppression($event)"
     ></app-detail-utilisateur>
   </div>
 
   <div class="page-pagination" *ngIf="listUtilisateur().length">
     <app-pagination></app-pagination>
+  </div>
+</div>
+
+<!-- Confirmation de suppression -->
+<div class="dialog-backdrop" *ngIf="utilisateurASupprimer()">
+  <div class="dialog" role="dialog" aria-modal="true">
+    <h3 class="dialog-title">Confirmation</h3>
+    <p>Supprimer l'utilisateur {{ utilisateurASupprimer()?.nom }} {{ utilisateurASupprimer()?.prenom }} ?</p>
+    <div class="dialog-actions">
+      <button type="button" class="btn-pill btn-pill-secondary" (click)="annulerSuppression()">Annuler</button>
+      <button type="button" class="btn-pill btn-pill-danger" (click)="confirmerSuppression()">Supprimer</button>
+    </div>
   </div>
 </div>

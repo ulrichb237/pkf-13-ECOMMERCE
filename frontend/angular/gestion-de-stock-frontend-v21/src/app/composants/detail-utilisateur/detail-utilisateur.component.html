@@ -14,4 +14,9 @@
     <span class="tnum">{{ utilisateur().adresse?.codePostale }} {{ utilisateur().adresse?.ville }}</span>
     <span>{{ utilisateur().adresse?.pays }}</span>
   </div>
+
+  <div class="cltfrs-actions">
+    <button type="button" class="btn-link" (click)="ouvrirFiche()">Fiche</button>
+    <button type="button" class="btn-link btn-link-danger" (click)="demanderSuppression()">Supprimer</button>
+  </div>
 </div>

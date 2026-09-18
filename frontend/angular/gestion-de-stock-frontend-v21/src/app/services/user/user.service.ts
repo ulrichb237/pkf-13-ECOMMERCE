@@ -38,6 +38,27 @@ export class UserService {
     return this.utilisateurService.findAll();
   }
 
+  /** POST /api/v1/utilisateurs — creation d'un utilisateur (admin) */
+  saveUtilisateur(utilisateur: UtilisateurDto): Observable<UtilisateurDto> {
+    return this.utilisateurService.save(utilisateur);
+  }
+
+  /** GET /api/v1/utilisateurs/{idUtilisateur} — fiche utilisateur */
+  findUtilisateurById(idUtilisateur?: number): Observable<UtilisateurDto> {
+    if (idUtilisateur) {
+      return this.utilisateurService.findById(idUtilisateur);
+    }
+    return of({});
+  }
+
+  /** DELETE /api/v1/utilisateurs/{idUtilisateur} */
+  deleteUtilisateur(idUtilisateur?: number): Observable<any> {
+    if (idUtilisateur) {
+      return this.utilisateurService.delete(idUtilisateur);
+    }
+    return of(null);
+  }
+
   setAccessToken(authenticationResponse: AuthenticationResponse): void {
     localStorage.setItem('accessToken', JSON.stringify(authenticationResponse));
   }

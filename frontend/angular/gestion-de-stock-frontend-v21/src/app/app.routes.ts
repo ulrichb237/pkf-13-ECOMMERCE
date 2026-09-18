@@ -49,6 +49,7 @@ export const routes: Routes = [
       { path: 'nouvellecategorie/:idCategory', loadComponent: () => import('./pages/categories/noouvelle-category/noouvelle-category.component').then(m => m.NoouvelleCategoryComponent), canActivate: [authGuard] },
       { path: 'utilisateurs', loadComponent: () => import('./pages/utilisateur/page-utilisateur/page-utilisateur.component').then(m => m.PageUtilisateurComponent), canActivate: [authGuard] },
       { path: 'nouvelutilisateur', loadComponent: () => import('./pages/utilisateur/nouvel-utilisateur/nouvel-utilisateur.component').then(m => m.NouvelUtilisateurComponent), canActivate: [authGuard] },
+      { path: 'nouvelutilisateur/:idUtilisateur', loadComponent: () => import('./pages/utilisateur/nouvel-utilisateur/nouvel-utilisateur.component').then(m => m.NouvelUtilisateurComponent), canActivate: [authGuard] },
       { path: 'profil', loadComponent: () => import('./pages/profil/page-profil/page-profil.component').then(m => m.PageProfilComponent), canActivate: [authGuard] },
       { path: 'changermotdepasse', loadComponent: () => import('./pages/profil/changer-mot-de-passe/changer-mot-de-passe.component').then(m => m.ChangerMotDePasseComponent), canActivate: [authGuard] },
       { path: 'entreprise', loadComponent: () => import('./pages/entreprise/page-entreprise/page-entreprise.component').then(m => m.PageEntrepriseComponent), canActivate: [authGuard] }

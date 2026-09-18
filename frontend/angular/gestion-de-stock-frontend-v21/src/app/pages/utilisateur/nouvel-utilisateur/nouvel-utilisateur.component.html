@@ -1,27 +1,52 @@
 <div class="page">
   <div class="page-header">
-    <h2>Information de l'utilisateur</h2>
+    <h2>{{ modeEdition() ? 'Fiche utilisateur' : 'Nouvel utilisateur' }}</h2>
   </div>
 
-  <div class="card custom-border p-3">
+  <div class="alert alert-danger" *ngIf="errorMsg()">{{ errorMsg() }}</div>
+  <div class="empty-state" *ngIf="chargement()">Chargement...</div>
+
+  <div class="card custom-border p-3" *ngIf="!chargement()">
     <form>
       <div class="form-grid-2">
-        <input type="text" class="form-control" placeholder="Nom">
-        <input type="text" class="form-control" placeholder="Adresse 1">
-        <input type="text" class="form-control" placeholder="Prenom">
-        <input type="text" class="form-control" placeholder="Adresse 2">
-        <input type="email" class="form-control" placeholder="E-mail">
-        <input type="text" class="form-control" placeholder="Ville">
-        <input type="tel" class="form-control" placeholder="Telephone">
-        <input type="text" class="form-control" placeholder="Code postal">
+        <input type="text" class="form-control" placeholder="Nom"
+               [value]="utilisateurDto().nom || ''" (input)="champ('nom', $event)">
+        <input type="text" class="form-control" placeholder="Adresse 1"
+               [value]="utilisateurDto().adresse?.adresse1 || ''" (input)="champAdresse('adresse1', $event)">
+        <input type="text" class="form-control" placeholder="Prenom"
+               [value]="utilisateurDto().prenom || ''" (input)="champ('prenom', $event)">
+        <input type="text" class="form-control" placeholder="Adresse 2"
+               [value]="utilisateurDto().adresse?.adresse2 || ''" (input)="champAdresse('adresse2', $event)">
+        <input type="email" class="form-control" placeholder="E-mail"
+               [value]="utilisateurDto().email || ''" (input)="champ('email', $event)">
+        <input type="text" class="form-control" placeholder="Ville"
+               [value]="utilisateurDto().adresse?.ville || ''" (input)="champAdresse('ville', $event)">
+        <input type="date" class="form-control" aria-label="Date de naissance"
+               [value]="dateNaissanceInput()" (input)="champDateNaissance($event)">
+        <input type="text" class="form-control" placeholder="Code postal"
+               [value]="utilisateurDto().adresse?.codePostale || ''" (input)="champAdresse('codePostale', $event)">
         <span></span>
-        <input type="text" class="form-control" placeholder="Pays">
+        <input type="text" class="form-control" placeholder="Pays"
+               [value]="utilisateurDto().adresse?.pays || ''" (input)="champAdresse('pays', $event)">
       </div>
+
+      @if (!modeEdition()) {
+        <div class="form-grid-2 mt-2">
+          <input type="password" class="form-control" placeholder="Mot de passe (min. 6 caracteres)"
+                 [value]="motDePasse()" (input)="motDePasse.set($any($event.target).value)">
+          <input type="password" class="form-control" placeholder="Confirmer le mot de passe"
+                 [value]="confirmMotDePasse()" (input)="confirmMotDePasse.set($any($event.target).value)">
+        </div>
+      } @else {
+        <p class="text-muted mt-2">Le mot de passe se modifie via la page « Changer le mot de passe ».</p>
+      }
     </form>
   </div>
 
   <div class="form-actions mt-2">
-    <button class="btn btn-secondary" (click)="cancel()">Annuler</button>
-    <button class="btn btn-primary">Enregistrer</button>
+    <button class="btn btn-secondary" (click)="cancel()" [disabled]="chargement()">Annuler</button>
+    <button class="btn btn-primary" (click)="enregistrer()" [disabled]="chargement()">
+      {{ chargement() ? 'Enregistrement...' : 'Enregistrer' }}
+    </button>
   </div>
 </div>

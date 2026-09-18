@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { UtilisateurDto } from '../../../gs-api/src/models/utilisateur-dto';
 
 @Component({
@@ -10,5 +10,16 @@ import { UtilisateurDto } from '../../../gs-api/src/models/utilisateur-dto';
 export class DetailUtilisateurComponent {
 
   utilisateur = input.required<UtilisateurDto>();
+  /** Ouvre la fiche (GET /utilisateurs/{id} via la page d'edition) */
+  ficheDemandee = output<UtilisateurDto>();
+  /** Demande la suppression (confirmation geree par la page) */
+  suppressionDemandee = output<UtilisateurDto>();
 
+  ouvrirFiche(): void {
+    this.ficheDemandee.emit(this.utilisateur());
+  }
+
+  demanderSuppression(): void {
+    this.suppressionDemandee.emit(this.utilisateur());
+  }
 }
