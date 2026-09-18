@@ -100,14 +100,15 @@ public class CommandeFournisseurServiceImpl implements CommandeFournisseurServic
     dto.setDateCommande(Instant.now());
     CommandeFournisseur savedCmdFrs = commandeFournisseurRepository.save(CommandeFournisseurDto.toEntity(dto));
 
+    // Le stock n'est PAS credite ici : l'entree est comptabilisee une seule fois,
+    // lors du passage a LIVREE (reception effective, updateEtatCommande ->
+    // updateMvtStk). Un credit a la creation generait une double comptabilisation.
     if (dto.getLigneCommandeFournisseurs() != null) {
       dto.getLigneCommandeFournisseurs().forEach(ligCmdFrs -> {
         LigneCommandeFournisseur ligneCommandeFournisseur = LigneCommandeFournisseurDto.toEntity(ligCmdFrs);
         ligneCommandeFournisseur.setCommandeFournisseur(savedCmdFrs);
         ligneCommandeFournisseur.setIdEntreprise(savedCmdFrs.getIdEntreprise());
-        LigneCommandeFournisseur saveLigne = ligneCommandeFournisseurRepository.save(ligneCommandeFournisseur);
-
-        effectuerEntree(saveLigne);
+        ligneCommandeFournisseurRepository.save(ligneCommandeFournisseur);
       });
     }
 

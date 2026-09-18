@@ -99,14 +99,15 @@ public class CommandeClientServiceImpl implements CommandeClientService {
     dto.setDateCommande(Instant.now());
     CommandeClient savedCmdClt = commandeClientRepository.save(CommandeClientDto.toEntity(dto));
 
+    // Le stock n'est PAS deduit ici : la sortie est comptabilisee une seule fois,
+    // lors du passage a LIVREE (updateEtatCommande -> updateMvtStk). Une deduction
+    // a la creation generait une double comptabilisation pour la meme commande.
     if (dto.getLigneCommandeClients() != null) {
       dto.getLigneCommandeClients().forEach(ligCmdClt -> {
         LigneCommandeClient ligneCommandeClient = LigneCommandeClientDto.toEntity(ligCmdClt);
         ligneCommandeClient.setCommandeClient(savedCmdClt);
         ligneCommandeClient.setIdEntreprise(dto.getIdEntreprise());
-        LigneCommandeClient savedLigneCmd = ligneCommandeClientRepository.save(ligneCommandeClient);
-
-        effectuerSortie(savedLigneCmd);
+        ligneCommandeClientRepository.save(ligneCommandeClient);
       });
     }
 

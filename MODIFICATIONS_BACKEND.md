@@ -99,7 +99,13 @@ envoie ses dates au format ISO-8601.
 
 ---
 
-## 6. Bugs backend découverts lors des tests E2E (2026-09-18) — ⚠️ À VALIDER avant correction
+## 6. Bugs backend découverts lors des tests E2E (2026-09-18) — ✅ VALIDÉS ET CORRIGÉS
+
+> Validés puis appliqués le 2026-09-18 (voir statut par section). Vérification complète :
+> flux vente / commande client / commande fournisseur testés par API, puis parcours E2E navigateur **14/14 OK**
+> (dont cartes statistiques enfin peuplées et tableau des ventes de l'article OK).
+
+### 6.1 `VentesServiceImpl.save` — lignes de vente et mouvements créés sans `idEntreprise` — ✅ CORRIGÉ
 
 Conformément à la règle du projet, ces deux anomalies nécessitent une **validation avant toute modification backend**.
 Le frontend est blanchi : les mêmes appels reproduits avec `curl` (JSON strictement numérique) produisent les mêmes symptômes.
@@ -136,15 +142,23 @@ ligneVente.setVente(savedVentes);
 ligneVenteRepository.save(ligneVente);   // identreprise jamais renseigné
 ```
 
-**Correction proposée** (1 ligne, symétrique du flow commandes) :
+**Correction appliquée** (1 ligne, symétrique du flow commandes) :
 ```java
+// VentesServiceImpl.save :
 ligneVente.setIdEntreprise(dto.getIdEntreprise());
 ```
-+ rétro-patcher en base les lignes/mouvements existants :
-`update lignevente set identreprise = (select identreprise from ventes v where v.id = idvente) where identreprise is null;`
-(idem sur `mvtstk` pour `sourcemvt = 'VENTE'`).
 
-### 6.2 Double comptabilisation du stock sur les commandes clients (et symétrique fournisseurs)
+**Rétro-patch SQL exécuté en base de dev** :
+```sql
+update lignevente set identreprise = (select v.identreprise from ventes v where v.id = idvente) where identreprise is null;
+update mvtstk m join lignevente l on l.idarticle = m.idarticle and l.quantite = abs(m.quantite)
+  set m.identreprise = l.identreprise where m.sourcemvt = 'VENTE' and m.identreprise is null;
+```
+
+**Vérification post-correctif** : `GET /api/v1/articles/157/historique-ventes` renvoie désormais les 3 lignes,
+stock réel exact (-15.00 à ce stade).
+
+### 6.2 Double comptabilisation du stock sur les commandes clients (et symétrique fournisseurs) — ✅ CORRIGÉ (Option A)
 
 **Symptôme** : une commande client génère une **sortie de stock à la création**
 (`CommandeClientServiceImpl.save` → `effectuerSortie(savedLigneCmd)`) **et** une seconde à la livraison
@@ -155,14 +169,24 @@ Le stock part donc en double négatif.
 **Symétrique** : `CommandeFournisseurServiceImpl` fait de même avec `effectuerEntree` à la création
 (ligne 110) + `updateMvtStk` à la réception (ligne 184) → double entrée.
 
-**Correction proposée** : choisir **un seul point de comptabilisation**. Option A (recommandée,
-cohérente avec le message UI actuel « la livraison génère une sortie de stock ») :
-supprimer `effectuerSortie(...)` / `effectuerEntree(...)` de `save` et ne comptabiliser qu'à la
-transition d'état (LIVREE / réception selon le workflow). Option B : garder la comptabilisation à la
-création et supprimer l'appel dans `updateEtatCommande` — auquel cas le frontend ne doit plus
-afficher l'avertissement de livraison (déjà documenté côté UI).
+**Option A retenue et appliquée** (comptabilisation uniquement à la livraison/réception, cohérente
+avec le message UI « la livraison génère une sortie de stock ») :
 
-**À valider** : quelle option retenir (A ou B) avant toute modification.
+```java
+// CommandeClientServiceImpl.save : effectuerSortie(savedLigneCmd) supprimé
+// CommandeFournisseurServiceImpl.save : effectuerEntree(saveLigne) supprimé
+// La comptabilisation reste dans updateEtatCommande -> updateMvtStk (passage a LIVREE)
+```
+
+**Rétro-patch SQL exécuté en base de dev** (suppression du mouvement de création orphelin) :
+```sql
+delete from mvtstk where id = 167 and sourcemvt = 'COMMANDE_CLIENT' and typemvt = 'SORTIE';
+```
+
+**Vérification post-correctif (API, article 157)** :
+- Création commande client qt 3 → stock inchangé ; VALIDEE → inchangé ; LIVREE → **un seul** mouvement -3 (stock -18) ✓
+- Commande fournisseur qt 2 → création/LIVREE identiques → **une seule** entrée +2 (stock -16) ✓
+- Nouvelles ventes : lignes et mouvements correctement rattachés à l'entreprise ✓
 
 
 | Règle | Comportement API |

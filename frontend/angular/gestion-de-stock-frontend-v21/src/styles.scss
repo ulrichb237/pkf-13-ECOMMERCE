@@ -1,3 +1,5 @@
+@use "sass:math";
+
 /* ============================================================================
    DESIGN SYSTEM — Stripi-Inspired (voir /DESIGN.md à la racine du dépôt)
    Sans Bootstrap/jQuery : tokens CSS, typo Inter 300 (ss01/tnum), pills,
@@ -342,8 +344,8 @@ img { border-radius: var(--radius-sm); max-width: 100%; }
 .row > [class*='col'] { padding: 0 var(--sp-md); width: 100%; }
 .col { flex: 1 1 0; }
 @for $i from 1 through 12 {
-  .col-#{$i} { flex: 0 0 percentage($i / 12); max-width: percentage($i / 12); }
-  .col-md-#{$i} { @media (min-width: 768px) { flex: 0 0 percentage($i / 12); max-width: percentage($i / 12); } }
+  .col-#{$i} { flex: 0 0 math.percentage(math.div($i, 12)); max-width: math.percentage(math.div($i, 12)); }
+  .col-md-#{$i} { @media (min-width: 768px) { flex: 0 0 math.percentage(math.div($i, 12)); max-width: math.percentage(math.div($i, 12)); } }
 }
 .m-1 { margin: var(--sp-xs); } .m-2 { margin: var(--sp-sm); } .m-3 { margin: var(--sp-lg); }
 .mt-1 { margin-top: var(--sp-xs); } .mt-2 { margin-top: var(--sp-sm); } .mt-3 { margin-top: var(--sp-lg); }

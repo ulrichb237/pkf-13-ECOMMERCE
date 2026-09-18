@@ -75,6 +75,10 @@ public class VentesServiceImpl implements VentesService {
     dto.getLigneVentes().forEach(ligneVenteDto -> {
       LigneVente ligneVente = LigneVenteDto.toEntity(ligneVenteDto);
       ligneVente.setVente(savedVentes);
+      // Propagation de l'entreprise : sans elle, le filtre multi-entreprise
+      // (EntrepriseStatementInspector) rend les lignes et leurs mouvements
+      // invisibles a toutes les lectures (historique vide, stock faux).
+      ligneVente.setIdEntreprise(dto.getIdEntreprise());
       ligneVenteRepository.save(ligneVente);
       updateMvtStk(ligneVente);
     });
