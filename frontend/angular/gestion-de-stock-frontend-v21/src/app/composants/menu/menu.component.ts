@@ -116,6 +116,12 @@ export class MenuComponent {
           titre: 'Utilisateurs',
           icon: 'fas fa-users-cog',
           url: 'utilisateurs'
+        },
+        {
+          id: '53',
+          titre: 'Mon entreprise',
+          icon: 'fas fa-building',
+          url: 'entreprise'
         }
       ]
     }

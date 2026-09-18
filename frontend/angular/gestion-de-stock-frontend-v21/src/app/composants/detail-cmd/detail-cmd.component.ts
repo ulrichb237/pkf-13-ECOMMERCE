@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgIf } from '@angular/common';
 import { LigneCommandeClientDto } from '../../../gs-api/src/models/ligne-commande-client-dto';
 
 /**
@@ -12,7 +11,7 @@ import { LigneCommandeClientDto } from '../../../gs-api/src/models/ligne-command
 @Component({
   selector: 'app-detail-cmd',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, FormsModule],
+  imports: [FormsModule],
   templateUrl: './detail-cmd.component.html',
   styleUrls: ['./detail-cmd.component.scss']
 })
@@ -24,6 +23,8 @@ export class DetailCmdComponent {
   modifiable = input(true);
   suppressionLigne = output<LigneCommandeClientDto>();
   quantiteModifiee = output<{ ligne: LigneCommandeClientDto; quantite: number }>();
+  /** Ouvre le dialog de remplacement d'article (PATCH .../lignes/{id}/article/{idArticle}) */
+  remplacementArticleDemande = output<LigneCommandeClientDto>();
 
   /** Etat de la confirmation inline (remplace la modale Bootstrap) */
   readonly confirmationVisible = signal(false);
@@ -43,9 +44,12 @@ export class DetailCmdComponent {
   demanderConfirmation(): void {
     this.confirmationVisible.set(true);
   }
-
   annulerConfirmation(): void {
     this.confirmationVisible.set(false);
+  }
+
+  demanderRemplacementArticle(): void {
+    this.remplacementArticleDemande.emit(this.ligneCommande());
   }
 
   supprimerLigne(): void {

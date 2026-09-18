@@ -30,6 +30,13 @@ export class CategoryService {
     return this.categoryService.findById(idCategory);
   }
 
+  findByCode(codeCategory: string): Observable<CategoryDto> {
+    if (codeCategory) {
+      return this.categoryService.findByCode(codeCategory);
+    }
+    return of({});
+  }
+
   delete(idCategorie?: number): Observable<any> {
     if (idCategorie) {
       return this.categoryService.delete(idCategorie);

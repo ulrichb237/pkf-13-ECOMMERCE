@@ -15,4 +15,18 @@ export class EntrepriseService {
   sinscrire(entreprise: EntrepriseDto): Observable<EntrepriseDto> {
     return this.entreprisesService.save(entreprise);
   }
+
+  /** GET /api/v1/entreprises — liste (administration) */
+  findAll(): Observable<EntrepriseDto[]> {
+    return this.entreprisesService.findAll();
+  }
+
+  /** GET /api/v1/entreprises/{idEntreprise} — fiche entreprise */
+  findById(idEntreprise?: number): Observable<EntrepriseDto> {
+    if (idEntreprise) {
+      return this.entreprisesService.findById(idEntreprise);
+    }
+    // Fiche par defaut (utilisateur non connecte) : objet vide
+    return new Observable<EntrepriseDto>(observer => observer.next({}));
+  }
 }

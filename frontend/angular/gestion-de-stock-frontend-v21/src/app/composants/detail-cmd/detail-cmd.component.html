@@ -32,19 +32,22 @@
 
   <span class="cmd-ligne-cell cmd-ligne-actions">
     @if (modifiable()) {
-      <ng-container *ngIf="!confirmationVisible; else confirmBloc">
+      @if (!confirmationVisible()) {
+        <button type="button" class="btn-link" (click)="demanderRemplacementArticle()"
+                [disabled]="operationEnCours()" aria-label="Remplacer l'article">
+          Remplacer
+        </button>
         <button type="button" class="btn-link btn-link-danger" (click)="demanderConfirmation()"
                 [disabled]="operationEnCours()" aria-label="Supprimer la ligne">
           Supprimer
         </button>
-      </ng-container>
-      <ng-template #confirmBloc>
+      } @else {
         <span class="cmd-ligne-confirm">
           Supprimer ?
           <button type="button" class="btn-link" (click)="annulerConfirmation()">Non</button>
           <button type="button" class="btn-link btn-link-danger" (click)="supprimerLigne()">Oui</button>
         </span>
-      </ng-template>
+      }
     }
   </span>
 </div>

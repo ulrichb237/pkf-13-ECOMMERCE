@@ -1,16 +1,17 @@
 import { NgIf, NgFor } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, signal } from '@angular/core';
 import {Router} from '@angular/router';
 import {CategoryDto} from '../../../../gs-api/src/models/category-dto';
 import {ArticleDto} from '../../../../gs-api/src/models/article-dto';
 import {CategoryService} from '../../../services/category/category.service';
+import { RechercheCmdComponent } from '../../../composants/recherche-cmd/recherche-cmd.component';
 
 import { BouttonActionComponent } from '../../../composants/boutton-action/boutton-action.component';
 
 import { PaginationComponent } from '../../../composants/pagination/pagination.component';
 
 @Component({
-  imports: [NgIf, NgFor, BouttonActionComponent, PaginationComponent],
+  imports: [NgIf, NgFor, BouttonActionComponent, PaginationComponent, RechercheCmdComponent],
   selector: 'app-page-categories',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './page-categories.component.html',
@@ -26,6 +27,32 @@ export class PageCategoriesComponent implements OnInit {
   readonly detailsVisibles = signal(false);
   readonly articlesCategorie = signal<Array<ArticleDto>>([]);
   readonly codeCategorieSelectionnee = signal('');
+
+  /* Recherche par code : resultat affiche seul, null = liste complete */
+  readonly catRecherchee = signal<CategoryDto | null>(null);
+  readonly categoriesAffichees = computed<CategoryDto[]>(() => {
+    const resultat = this.catRecherchee();
+    return resultat ? [resultat] : this.listCategories();
+  });
+
+  /** GET /api/v1/categories/code/{codeCategory} */
+  rechercherParCode(code: string): void {
+    if (!code) {
+      this.catRecherchee.set(null);
+      this.errorMsgs.set('');
+      return;
+    }
+    this.categoryService.findByCode(code)
+      .subscribe(cat => {
+        this.catRecherchee.set(cat?.id ? cat : null);
+        if (!cat?.id) {
+          this.errorMsgs.set(`Aucune categorie trouvee avec le code ${code}`);
+        }
+      }, error => {
+        this.catRecherchee.set(null);
+        this.errorMsgs.set(error?.error?.message || 'Erreur lors de la recherche');
+      });
+  }
 
   constructor(
     private router: Router,

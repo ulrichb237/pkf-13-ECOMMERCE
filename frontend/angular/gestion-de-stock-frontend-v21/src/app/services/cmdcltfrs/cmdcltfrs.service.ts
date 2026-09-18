@@ -38,8 +38,36 @@ export class CmdcltfrsService {
     return this.commandeClientService.findAll();
   }
 
+  findCommandeClientById(id?: number): Observable<CommandeClientDto> {
+    if (id) {
+      return this.commandeClientService.findById(id);
+    }
+    return of({});
+  }
+
+  findCommandeClientByCode(code: string): Observable<CommandeClientDto> {
+    if (code) {
+      return this.commandeClientService.findByCode(code);
+    }
+    return of({});
+  }
+
   findAllCommandesFournisseur(): Observable<CommandeFournisseurDto[]> {
     return this.commandeFournisseurService.findAll();
+  }
+
+  findCommandeFournisseurById(id?: number): Observable<CommandeFournisseurDto> {
+    if (id) {
+      return this.commandeFournisseurService.findById(id);
+    }
+    return of({});
+  }
+
+  findCommandeFournisseurByCode(code: string): Observable<CommandeFournisseurDto> {
+    if (code) {
+      return this.commandeFournisseurService.findByCode(code);
+    }
+    return of({});
   }
 
   findAllLigneCommandesClient(idCmd?: number): Observable<LigneCommandeClientDto[]> {

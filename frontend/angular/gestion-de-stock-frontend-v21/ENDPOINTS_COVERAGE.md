@@ -8,9 +8,8 @@
 | Métrique | Valeur |
 |---|---|
 | Endpoints backend (mappings HTTP) | **67** |
-| Consommés par le frontend (directement ou via client `gs-api`) | **63** |
-| Non consommés (volontairement, voir notes) | **4** |
-
+| Consommés par le frontend (directement ou via client `gs-api`) | **60** |
+| Non consommés (voir ⚠️ dans les tableaux) | **7** |
 ## Article (9)
 
 | Endpoint | Méthode | Consommation frontend |
@@ -39,7 +38,7 @@
 | `/api/v1/categories` | GET | Page `categories` |
 | `/api/v1/categories/{idCategorie}` | GET | Édition catégorie |
 | `/api/v1/categories/{idCategorie}` | DELETE | Page `categories` (dialog de confirmation) |
-| `/api/v1/categories/code/{codeCategorie}` | GET | ⚠️ Disponible dans `gs-api` mais aucune page ne l'appelle (recherche catégorie non implémentée) |
+| `/api/v1/categories/code/{codeCategorie}` | GET | Page `categories` — barre de recherche par code (18/09) |
 
 ## Clients (4)
 
@@ -57,22 +56,22 @@
 | `/api/v1/commandes-clients` | POST | Page `nouvellecommandeclt` |
 | `/api/v1/commandes-clients` | GET | Page `commandesclient` |
 | `/api/v1/commandes-clients/{idCommande}` | GET | ⚠️ Non consommé (le détail passe par `/lignes`) |
-| `/api/v1/commandes-clients/code/{codeCommande}` | GET | ⚠️ Non consommé (recherche par code non implémentée) |
+| `/api/v1/commandes-clients/code/{codeCommande}` | GET | Page `commandesclient` — barre de recherche par code (18/09) |
 | `/api/v1/commandes-clients/{idCommande}/lignes` | GET | Accordéon page `commandesclient` |
 | `/api/v1/commandes-clients/{idCommande}/etat/{etatCommande}` | PATCH | **Page `commandesclient`** — bouton « Valider » sur les commandes EN_PREPARATION, « Livrer » sur les VALIDÉES (confirmation inline, toasts) |
 | `/api/v1/commandes-clients/{idCommande}/lignes/{idLigne}/quantite/{quantite}` | PATCH | Page `commandesclient` — édition de quantité inline (clic sur la quantité) |
-| `/api/v1/commandes-clients/{idCommande}/client/{idClient}` | PATCH | Service applicatif — UI de réaffectation client à venir |
-| `/api/v1/commandes-clients/{idCommande}/lignes/{idLigne}/article/{idArticle}` | PATCH | ⚠️ Non consommé (remplacement d'article non exposé dans l'UI) |
+| `/api/v1/commandes-clients/{idCommande}/client/{idClient}` | PATCH | Page `commandesclient` — bouton « Réaffecter » + dialog de choix (18/09) |
+| `/api/v1/commandes-clients/{idCommande}/lignes/{idLigne}/article/{idArticle}` | PATCH | Page `commandesclient` — bouton « Remplacer » sur la ligne + dialog (18/09) |
 | `/api/v1/commandes-clients/{idCommande}/lignes/{idLigne}` | DELETE | Page `commandesclient` (suppression ligne) |
 | `/api/v1/commandes-clients/{idCommande}` | DELETE | Page `commandesclient` (dialog de confirmation) |
 
 ## Commandes fournisseurs (11)
 
 Symétrique des commandes clients : POST/GET/DELETE, **PATCH état** (workflow
-Valider → Livrer) et **PATCH quantité** (édition inline) consommés par les
-pages `nouvellecommandefrs` / `commandesfournisseur` ; les 2 PATCH restants
-(fournisseur, article) sont câblés dans le service applicatif mais sans UI
-dédiée pour le moment ; `{idCommande}` GET et `/code/{code}` non consommés.
+Valider → Livrer), **PATCH quantité** (édition inline), **réaffectation
+fournisseur** et **remplacement d'article** consommés par les pages
+`nouvellecommandefrs` / `commandesfournisseur` ; `{idCommande}` GET et
+`/code/{code}` GET consommés (recherche par code — 18/09).
 
 ## Workflow d'état des commandes (UI ajoutée le 17/09)
 
@@ -90,7 +89,7 @@ dédiée pour le moment ; `{idCommande}` GET et `/code/{code}` non consommés.
 |---|---|---|
 | `/api/v1/entreprises` | POST | Page `inscrire` (création entreprise + compte admin) |
 | `/api/v1/entreprises` | GET | ⚠️ Disponible dans `gs-api`, pas de page d'admin entreprises |
-| `/api/v1/entreprises/{idEntreprise}` | GET | ⚠️ Disponible dans `gs-api`, pas de fiche entreprise |
+| `/api/v1/entreprises/{idEntreprise}` | GET | Page `entreprise` (« Mon entreprise », menu Paramétrages — 18/09) |
 | `/api/v1/entreprises/{idEntreprise}` | DELETE | ⚠️ Disponible dans `gs-api`, pas d'UI de suppression (risqué volontairement) |
 
 ## Fournisseurs (4)
@@ -142,12 +141,31 @@ POST/GET/GET-by-id/DELETE consommés par les pages fournisseurs (symétrique cli
 - Page statistiques : **sélecteur d'article** (les historiques sont des endpoints par article) — 3 appels `forkJoin` à la sélection au lieu de 2×N au chargement.
 - Loader global : délai 200 ms + compteur de requêtes (plus de clignotement pendant les rafales).
 
+### Couverture étendue (18/09)
+- **Recherche par code** ajoutée sur les pages commandes clients, commandes fournisseurs et
+  catégories (composant réutilisable `recherche-cmd`) : consomme
+  `GET /commandes-clients/code/{code}`, `GET /commandes-fournisseurs/code/{code}` et
+  `GET /categories/code/{codeCategory}`.
+- **Réaffectation client/fournisseur** : bouton « Réaffecter » sur les cartes de commande non
+  livrées, choix dans un dialog → consomme `PATCH /commandes-clients/{id}/client/{idClient}` et
+  `PATCH /commandes-fournisseurs/{id}/fournisseur/{idFournisseur}`.
+- **Remplacement d'article d'une ligne** : bouton « Remplacer » sur chaque ligne modifiable →
+  consomme `PATCH /commandes-clients|fournisseurs/{id}/lignes/{idLigne}/article/{idArticle}`.
+- **Fiche entreprise** : nouvelle page `/entreprise` (menu Paramétrages) → consomme
+  `GET /entreprises/{idEntreprise}` avec l'identifiant de l'utilisateur connecté.
+- Les pages commandes filtrent l'affichage sur `commandesAffichees()` (résultat de recherche seul
+  ou liste complète) — la recherche ne recharge pas toute la liste.
+
 ## Notes
 
 - ⚠️ = disponible dans le client généré `gs-api` mais sans page qui l'appelle
-  aujourd'hui. Aucun de ces endpoints n'est critique pour le flux métier
-  principal (vente, commande, stock). Les plus utiles à brancher ensuite :
-  recherche par code (catégories/ventes/commandes), changement d'état de
-  commande (workflow VALIDEE/LIVREE), upload de photos.
+  aujourd'hui. Restent non consommés après l'extension du 18/09 :
+  `GET /commandes-clients/{id}` (le détail passe par `/lignes`),
+  `GET /entreprises` (pas de page d'admin multi-entreprises, volontaire),
+  `DELETE /entreprises/{id}` (risqué, volontaire), `POST /photos` (Flickr
+  désactivé côté backend), `POST /utilisateurs` (réservé au backend),
+  `GET /utilisateurs/{id}` et `DELETE /utilisateurs/{id}` (pas d'UI
+  d'administration des comptes). Aucun ne bloque le flux métier principal
+  (vente, commande, stock).
 - Le contrat de dates (ISO-8601 obligatoire) est documenté dans
   `MODIFICATIONS_BACKEND.md` §3.

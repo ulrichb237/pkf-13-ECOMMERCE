@@ -7,11 +7,14 @@
   </div>
 
   <div class="alert alert-danger" *ngIf="errorMsg()">{{ errorMsg() }}</div>
-  <div class="empty-state" *ngIf="!listeCommandes().length && !errorMsg() && !chargementLignes().size">
+
+  <app-recherche-cmd (rechercheDemandee)="rechercherParCode($event)"></app-recherche-cmd>
+
+  <div class="empty-state" *ngIf="!commandesAffichees().length && !errorMsg() && !chargementLignes().size">
     Aucune commande
   </div>
 
-  <div *ngFor="let cmd of listeCommandes()" class="card card-cmd">
+  <div *ngFor="let cmd of commandesAffichees()" class="card card-cmd">
     <button type="button" class="card-cmd-header" (click)="basculerAccordeon(cmd.id)"
             [attr.aria-expanded]="commandesOuvertes().has(cmd.id)">
       <app-detail-cmd-clt-frs
@@ -31,6 +34,7 @@
         [modifiable]="estModifiable(cmd)"
         (suppressionLigne)="supprimerLigneCommande($event)"
         (quantiteModifiee)="enregistrerRefLigne(ligne.id, ligneRef); modifierQuantiteLigne($event)"
+        (remplacementArticleDemande)="ouvrirDialogRemplacementArticle(cmd, $event)"
       ></app-detail-cmd>
       <div class="empty-state empty-state-sm" *ngIf="!mapLignesCommande().get(cmd.id)?.length && !chargementLignes().has(cmd.id)">
         Aucune ligne dans cette commande
@@ -43,6 +47,12 @@
       </span>
 
       <span class="cmd-footer-actions">
+        @if (estModifiable(cmd)) {
+          <button type="button" class="btn-link" (click)="ouvrirDialogReaffectation(cmd)">
+            Reaffecter
+          </button>
+        }
+
         <!-- Workflow d'etat : le bouton propose l'etat suivant, masque si LIVREE -->
         @if (etatsSuivants(cmd.etatCommande).length) {
           <span class="etat-menu-wrap">
@@ -87,6 +97,19 @@
     </div>
   </div>
   <ng-template #pasDeDialog></ng-template>
+
+  <!-- Dialog de remplacement : reaffectation client/fournisseur ou remplacement d'article -->
+  @if (dialogOuvert()) {
+    <app-dialog-remplacement
+      [titre]="titreDialog()"
+      [valeurActuelle]="valeurActuelleDialog()"
+      [options]="optionsDialog()"
+      [chargement]="chargementDialog()"
+      [operationEnCours]="operationDialogEnCours()"
+      (remplacementConfirme)="confirmerRemplacement($event)"
+      (ferme)="fermerDialog()"
+    ></app-dialog-remplacement>
+  }
 
   <div class="page-pagination" *ngIf="listeCommandes().length">
     <app-pagination></app-pagination>

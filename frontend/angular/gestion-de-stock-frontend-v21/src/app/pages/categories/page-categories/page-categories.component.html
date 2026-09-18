@@ -6,9 +6,11 @@
 
   <div class="alert alert-danger" *ngIf="errorMsgs()">{{ errorMsgs() }}</div>
 
+  <app-recherche-cmd placeholder="Rechercher une categorie par code (ex. CAT-1)" (rechercheDemandee)="rechercherParCode($event)"></app-recherche-cmd>
+
   <div class="empty-state" *ngIf="!listCategories().length && !errorMsgs()">Aucune categorie enregistree</div>
 
-  <div class="card custom-border cat-row" *ngFor="let cat of listCategories()">
+  <div class="card custom-border cat-row" *ngFor="let cat of categoriesAffichees()">
     <span class="tnum cat-code">{{ cat.code }}</span>
     <span class="cat-designation">{{ cat.designation }}</span>
     <span class="cat-actions">

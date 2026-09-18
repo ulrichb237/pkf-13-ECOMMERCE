@@ -1,11 +1,19 @@
 import { NgIf, NgFor } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {CmdcltfrsService} from '../../services/cmdcltfrs/cmdcltfrs.service';
 import {CommandeClientDto} from '../../../gs-api/src/models/commande-client-dto';
 import {LigneCommandeClientDto} from '../../../gs-api/src/models/ligne-commande-client-dto';
 import { NotificationService } from '../../services/notification/notification.service';
 import { Observable } from 'rxjs';
+import { ClientDto } from '../../../gs-api/src/models/client-dto';
+import { FournisseurDto } from '../../../gs-api/src/models/fournisseur-dto';
+import { ArticleDto } from '../../../gs-api/src/models/article-dto';
+import { CltfrsService } from '../../services/cltfrs/cltfrs.service';
+import { ArticleService } from '../../services/article/article.service';
+import { OptionRemplacement, DialogRemplacementComponent } from '../../composants/dialog-remplacement/dialog-remplacement.component';
+
+import { RechercheCmdComponent } from '../../composants/recherche-cmd/recherche-cmd.component';
 
 import { BouttonActionComponent } from '../../composants/boutton-action/boutton-action.component';
 
@@ -19,7 +27,7 @@ import { PaginationComponent } from '../../composants/pagination/pagination.comp
 type EtatCommande = 'EN_PREPARATION' | 'VALIDEE' | 'LIVREE';
 
 @Component({
-  imports: [NgIf, NgFor, BouttonActionComponent, DetailCmdComponent, DetailCmdCltFrsComponent, PaginationComponent],
+  imports: [NgIf, NgFor, BouttonActionComponent, DetailCmdComponent, DetailCmdCltFrsComponent, PaginationComponent, RechercheCmdComponent, DialogRemplacementComponent],
   selector: 'app-page-cmd-clt-frs',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './page-cmd-clt-frs.component.html',
@@ -49,11 +57,33 @@ export class PageCmdCltFrsComponent implements OnInit, OnDestroy {
   /** derniere commande dont on a ouvert une ligne (contexte des actions ligne) */
   private dernierIdCommandeOuvert: number | null = null;
 
+  /* Recherche par code : resultat affiche seul, '' = retour a la liste complete */
+  readonly cmdRecherchee = signal<CommandeClientDto | null>(null);
+  readonly rechercheEnCours = signal(false);
+  /** Liste affichee : le resultat de recherche seul, ou la liste complete.
+   * Typage any : aligne sur listeCommandes (les DTO client/fournisseur different). */
+  readonly commandesAffichees = computed<Array<any>>(() => {
+    const resultat = this.cmdRecherchee();
+    return resultat ? [resultat] : this.listeCommandes();
+  });
+
+  /* Dialog de remplacement (reaffectation client/fournisseur ou article de ligne) */
+  readonly dialogOuvert = signal<'' | 'client' | 'fournisseur' | 'article'>('');
+  readonly optionsDialog = signal<Array<OptionRemplacement>>([]);
+  readonly chargementDialog = signal(false);
+  readonly operationDialogEnCours = signal(false);
+  /** Ligne cible quand dialogOuvert = 'article' */
+  private ligneCibleRemplacement: LigneCommandeClientDto | null = null;
+  /** Commande cible du dialog (pour connaitre son contexte) */
+  private commandeCibleDialog: any = null;
+
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private cmdCltFrsService: CmdcltfrsService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private cltFrsService: CltfrsService,
+    private articleService: ArticleService
   ) { }
 
   ngOnInit(): void {
@@ -307,5 +337,159 @@ export class PageCmdCltFrsComponent implements OnInit, OnDestroy {
     // sortie de stock ; on rafraichit la liste complete pour reprendre
     // les etats a jour.
     this.findAllCommandes();
+  }
+
+  /* ================================================================
+   * Recherche par code : GET /commandes-clients|fournisseurs/code/{code}
+   * ================================================================ */
+
+  rechercherParCode(code: string): void {
+    if (!code) {
+      // Annulation : retour a la liste complete
+      this.cmdRecherchee.set(null);
+      this.errorMsg.set('');
+      return;
+    }
+    this.rechercheEnCours.set(true);
+    this.errorMsg.set('');
+    const requete: Observable<any> = this.origin === 'client'
+      ? this.cmdCltFrsService.findCommandeClientByCode(code)
+      : this.cmdCltFrsService.findCommandeFournisseurByCode(code);
+    requete.subscribe(cmd => {
+      this.cmdRecherchee.set(cmd?.id ? cmd : null);
+      if (!cmd?.id) {
+        this.errorMsg.set(`Aucune commande trouvee avec le code ${code}`);
+      }
+      this.rechercheEnCours.set(false);
+    }, (error: any) => {
+      this.cmdRecherchee.set(null);
+      this.errorMsg.set(CmdcltfrsService.errorMsg(error));
+      this.rechercheEnCours.set(false);
+    });
+  }
+
+  /* ================================================================
+   * Reaffectation client/fournisseur : PATCH .../{id}/client|fournisseur/{id}
+   * ================================================================ */
+
+  ouvrirDialogReaffectation(cmd: any): void {
+    if (!cmd?.id || !this.estModifiable(cmd)) {
+      return;
+    }
+    this.commandeCibleDialog = cmd;
+    this.dialogOuvert.set(this.origin === 'client' ? 'client' : 'fournisseur');
+    this.chargementDialog.set(true);
+    this.optionsDialog.set([]);
+    const requete: Observable<Array<ClientDto | FournisseurDto>> = this.origin === 'client'
+      ? this.cltFrsService.findAllClients()
+      : this.cltFrsService.findAllFournisseurs();
+    requete.subscribe(list => {
+      this.optionsDialog.set((list || []).map(c => ({
+        id: c.id,
+        label: `${c.nom || ''} ${c.prenom || ''}`.trim(),
+        sousTitre: c.mail || c.numTel || ''
+      })));
+      this.chargementDialog.set(false);
+    }, (error: any) => {
+      this.chargementDialog.set(false);
+      this.errorMsg.set(CmdcltfrsService.errorMsg(error));
+    });
+  }
+
+  /* ================================================================
+   * Remplacement d'article d'une ligne : PATCH .../{id}/lignes/{idLigne}/article/{idArticle}
+   * ================================================================ */
+
+  ouvrirDialogRemplacementArticle(cmd: any, ligne: LigneCommandeClientDto): void {
+    if (!cmd?.id || !this.estModifiable(cmd)) {
+      return;
+    }
+    this.commandeCibleDialog = cmd;
+    this.ligneCibleRemplacement = ligne;
+    this.dialogOuvert.set('article');
+    this.chargementDialog.set(true);
+    this.optionsDialog.set([]);
+    this.articleService.findAllArticles()
+      .subscribe(list => {
+        this.optionsDialog.set((list || []).map(a => ({
+          id: a.id,
+          label: a.designation || '',
+          sousTitre: a.codeArticle || ''
+        })));
+        this.chargementDialog.set(false);
+      }, (error: any) => {
+        this.chargementDialog.set(false);
+        this.errorMsg.set(CmdcltfrsService.errorMsg(error));
+      });
+  }
+
+  /** Confirme le remplacement en cours dans le dialog (client, fournisseur ou article) */
+  confirmerRemplacement(opt: OptionRemplacement): void {
+    if (!opt.id || !this.commandeCibleDialog?.id || this.operationDialogEnCours()) {
+      return;
+    }
+    this.operationDialogEnCours.set(true);
+    const idCommande = this.commandeCibleDialog.id;
+    let requete: Observable<unknown>;
+
+    if (this.dialogOuvert() === 'client') {
+      requete = this.cmdCltFrsService.updateClient(idCommande, opt.id);
+    } else if (this.dialogOuvert() === 'fournisseur') {
+      requete = this.cmdCltFrsService.updateFournisseur(idCommande, opt.id);
+    } else if (this.dialogOuvert() === 'article' && this.ligneCibleRemplacement?.id) {
+      requete = this.origin === 'client'
+        ? this.cmdCltFrsService.updateArticleCommandeClient(idCommande, this.ligneCibleRemplacement.id, opt.id)
+        : this.cmdCltFrsService.updateArticleCommandeFournisseur(idCommande, this.ligneCibleRemplacement!.id, opt.id);
+    } else {
+      this.operationDialogEnCours.set(false);
+      return;
+    }
+
+    requete.subscribe(() => {
+      this.operationDialogEnCours.set(false);
+      this.fermerDialog();
+      this.notificationService.success('Commande mise a jour');
+      // Les lignes en cache ne sont plus a jour (article remplace) : rechargement
+      this.mapLignesCommande.update(m => {
+        const copie = new Map(m);
+        copie.delete(idCommande);
+        return copie;
+      });
+      this.findLignesCommande(idCommande);
+    }, (error: any) => {
+      this.operationDialogEnCours.set(false);
+      this.errorMsg.set(CmdcltfrsService.errorMsg(error));
+    });
+  }
+
+  fermerDialog(): void {
+    this.dialogOuvert.set('');
+    this.optionsDialog.set([]);
+    this.ligneCibleRemplacement = null;
+    this.commandeCibleDialog = null;
+  }
+
+  /** Titre du dialog selon le type de remplacement (apostrophe protegee) */
+  titreDialog(): string {
+    switch (this.dialogOuvert()) {
+      case 'client': return 'Reaffecter le client';
+      case 'fournisseur': return 'Reaffecter le fournisseur';
+      default: return "Remplacer l'article de la ligne";
+    }
+  }
+
+  /** Valeur actuellement en place, affichee en contexte dans le dialog */
+  valeurActuelleDialog(): string {
+    const cmd = this.commandeCibleDialog;
+    if (!cmd) {
+      return '';
+    }
+    if (this.dialogOuvert() === 'client') {
+      return `${cmd.client?.nom || ''} ${cmd.client?.prenom || ''}`.trim();
+    }
+    if (this.dialogOuvert() === 'fournisseur') {
+      return `${cmd.fournisseur?.nom || ''} ${cmd.fournisseur?.prenom || ''}`.trim();
+    }
+    return this.ligneCibleRemplacement?.article?.designation || '';
   }
 }
