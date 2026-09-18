@@ -43,6 +43,15 @@ public class EntrepriseDto {
   @Schema(description = "Site web", example = "https://www.k48.com")
   private String steWeb;
 
+  /**
+   * Mot de passe choisi par l'utilisateur pour le compte administrateur cree a l'inscription.
+   * Transitoire : jamais persiste sur Entreprise, consomme puis efface par le service.
+   * S'il est absent, l'ancien comportement (mot de passe par defaut) s'applique.
+   */
+  @Schema(description = "Mot de passe du compte administrateur (creation uniquement, 6 caracteres minimum). "
+      + "Transitoire : jamais stocke sur l'entreprise.", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+  private String motDePasseAdmin;
+
 
   @JsonIgnore
   private List<UtilisateurDto> utilisateurs;

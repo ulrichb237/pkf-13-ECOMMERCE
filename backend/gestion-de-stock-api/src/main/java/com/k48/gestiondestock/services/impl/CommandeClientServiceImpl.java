@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import com.k48.gestiondestock.utils.CodeGenerator;
 
 @Service
 @Slf4j
@@ -58,6 +59,13 @@ public class CommandeClientServiceImpl implements CommandeClientService {
 
   @Override
   public CommandeClientDto save(CommandeClientDto dto) {
+
+    // Code auto-genre si absent (CC-2026-0001)
+    if (!CodeGenerator.estFourni(dto.getCode())) {
+      String dernier = commandeClientRepository.findTopByCodeStartingWithOrderByIdDesc("CC-")
+          .map(CommandeClient::getCode).orElse(null);
+      dto.setCode(CodeGenerator.nextCommandeClientCode(dernier));
+    }
 
     List<String> errors = CommandeClientValidator.validate(dto);
 

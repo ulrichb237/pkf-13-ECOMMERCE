@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import com.k48.gestiondestock.model.Category;
+import com.k48.gestiondestock.utils.CodeGenerator;
 
 @Service
 @Slf4j
@@ -37,6 +39,14 @@ public class CategoryServiceImpl implements CategoryService {
       log.error("Article is not valid {}", dto);
       throw new InvalidEntityException("La category n'est pas valide", ErrorCodes.CATEGORY_NOT_VALID, errors);
     }
+
+    // Code auto-genre si absent (CAT-2026-0001) : uniformite garantie
+    if (!CodeGenerator.estFourni(dto.getCode())) {
+      String dernier = categoryRepository.findTopByCodeStartingWithOrderByIdDesc("CAT-")
+          .map(Category::getCode).orElse(null);
+      dto.setCode(CodeGenerator.nextCategoryCode(dernier));
+    }
+
     return CategoryDto.fromEntity(
         categoryRepository.save(CategoryDto.toEntity(dto))
     );

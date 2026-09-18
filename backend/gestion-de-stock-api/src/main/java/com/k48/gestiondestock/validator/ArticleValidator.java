@@ -20,9 +20,10 @@ public class ArticleValidator {
       return errors;
     }
 
-    if (!StringUtils.hasLength(dto.getCodeArticle())) {
-      errors.add("Veuillez renseigner le code de l'article");
-    }
+    // Code genere automatiquement par le backend (CodeGenerator) : plus obligatoire
+    // if (!StringUtils.hasLength(dto.getCodeArticle())) {
+    //   errors.add("Veuillez renseigner le code de l'article");
+    // }
     if (!StringUtils.hasLength(dto.getDesignation())) {
       errors.add("Veuillez renseigner la designation de l'article");
     }

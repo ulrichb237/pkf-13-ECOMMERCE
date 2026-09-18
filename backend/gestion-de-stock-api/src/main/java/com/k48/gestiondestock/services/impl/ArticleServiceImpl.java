@@ -23,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import com.k48.gestiondestock.utils.CodeGenerator;
+import com.k48.gestiondestock.model.Article;
 
 @Service
 @Slf4j
@@ -50,6 +52,14 @@ public class ArticleServiceImpl implements ArticleService {
     if (!errors.isEmpty()) {
       log.error("Article is not valid {}", dto);
       throw new InvalidEntityException("L'article n'est pas valide", ErrorCodes.ARTICLE_NOT_VALID, errors);
+    }
+
+    // Code auto-genre si absent (ART-2026-0001) : l'utilisateur n'a plus a le
+    // saisir, ce qui evite les codes non uniformes ou en double.
+    if (!CodeGenerator.estFourni(dto.getCodeArticle())) {
+      String dernier = articleRepository.findTopByCodeArticleStartingWithOrderByIdDesc("ART-")
+          .map(Article::getCodeArticle).orElse(null);
+      dto.setCodeArticle(CodeGenerator.nextArticleCode(dernier));
     }
 
     return ArticleDto.fromEntity(

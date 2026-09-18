@@ -15,9 +15,10 @@ public class VentesValidator {
       return errors;
     }
 
-    if (!StringUtils.hasLength(dto.getCode())) {
-      errors.add("Veuillez renseigner le code de la commande");
-    }
+    // Code genere automatiquement par le backend (CodeGenerator) : plus obligatoire
+    // if (!StringUtils.hasLength(dto.getCode())) {
+    //   errors.add("Veuillez renseigner le code de la vente");
+    // }
     if (dto.getDateVente() == null) {
       errors.add("Veuillez renseigner la date de la commande");
     }

@@ -10,4 +10,7 @@ public interface CommandeFournisseurRepository extends JpaRepository<CommandeFou
   Optional<CommandeFournisseur> findCommandeFournisseurByCode(String code);
 
   List<CommandeFournisseur> findAllByFournisseurId(Integer id);
+
+  /** Dernier code insere, pour le sequenceur des codes auto-genres */
+  Optional<CommandeFournisseur> findTopByCodeStartingWithOrderByIdDesc(String prefixe);
 }

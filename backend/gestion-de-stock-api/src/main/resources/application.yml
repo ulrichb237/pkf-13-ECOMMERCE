@@ -49,6 +49,8 @@ jwt:
   # Cle encodee en base64, au moins 32 octets (ex : openssl rand -base64 48)
   secret: ${JWT_SECRET}
   expiration-ms: ${JWT_EXPIRATION_MS:36000000}
+  # Duree du refresh token en jours (revoque a la deconnexion ou rotation)
+  refresh-expiration-days: ${JWT_REFRESH_EXPIRATION_DAYS:7}
 
 app:
   # Remplace par la version du pom.xml lors du build Maven

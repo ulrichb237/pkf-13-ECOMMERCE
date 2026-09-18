@@ -11,5 +11,7 @@ public interface ArticleRepository extends JpaRepository<Article, Integer> {
 
   List<Article> findAllByCategoryId(Integer idCategory);
 
+  /** Dernier code insere, pour le sequenceur des codes auto-genres */
+  Optional<Article> findTopByCodeArticleStartingWithOrderByIdDesc(String prefixe);
 
 }

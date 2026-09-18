@@ -42,7 +42,10 @@ public class SecurityConfiguration {
         .csrf(csrf -> csrf.disable())
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers(HttpMethod.POST, AUTHENTIFICATION_ENDPOINT + "/connexion", ENTREPRISES_ENDPOINT).permitAll()
+            .requestMatchers(HttpMethod.POST, AUTHENTIFICATION_ENDPOINT + "/connexion",
+                AUTHENTIFICATION_ENDPOINT + "/refresh", AUTHENTIFICATION_ENDPOINT + "/deconnexion",
+                AUTHENTIFICATION_ENDPOINT + "/mot-de-passe-oublie", AUTHENTIFICATION_ENDPOINT + "/reinitialisation",
+                ENTREPRISES_ENDPOINT).permitAll()
             .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/error").permitAll()
             .anyRequest().authenticated())
         // Sans jeton valide, l'API repond 401 (et non 403)

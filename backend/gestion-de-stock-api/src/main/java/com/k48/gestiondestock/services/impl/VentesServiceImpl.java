@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import com.k48.gestiondestock.utils.CodeGenerator;
 
 @Service
 @Slf4j
@@ -50,6 +51,13 @@ public class VentesServiceImpl implements VentesService {
 
   @Override
   public VentesDto save(VentesDto dto) {
+    // Code auto-genre si absent (VEN-2026-0001)
+    if (!CodeGenerator.estFourni(dto.getCode())) {
+      String dernier = ventesRepository.findTopByCodeStartingWithOrderByIdDesc("VEN-")
+          .map(Ventes::getCode).orElse(null);
+      dto.setCode(CodeGenerator.nextVenteCode(dernier));
+    }
+
     List<String> errors = VentesValidator.validate(dto);
     if (!errors.isEmpty()) {
       log.error("Ventes n'est pas valide");

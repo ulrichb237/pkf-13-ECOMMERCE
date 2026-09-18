@@ -12,6 +12,7 @@ import com.k48.gestiondestock.services.EntrepriseService;
 import com.k48.gestiondestock.services.UtilisateurService;
 import com.k48.gestiondestock.validator.EntrepriseValidator;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import jakarta.transaction.Transactional;
@@ -19,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Transactional(rollbackOn = Exception.class)
 @Service
@@ -48,6 +50,7 @@ public class EntrepriseServiceImpl implements EntrepriseService {
       throw new InvalidEntityException("L'entreprise n'est pas valide", ErrorCodes.ENTREPRISE_NOT_VALID, errors);
     }
     final boolean creation = dto.getId() == null;
+    final String motDePasseChoisi = dto.getMotDePasseAdmin();
     EntrepriseDto savedEntreprise = EntrepriseDto.fromEntity(
         entrepriseRepository.save(EntrepriseDto.toEntity(dto))
     );
@@ -58,6 +61,17 @@ public class EntrepriseServiceImpl implements EntrepriseService {
     }
 
     UtilisateurDto utilisateur = fromEntreprise(savedEntreprise);
+
+    // Inscription : l'utilisateur definit lui-meme son mot de passe (minimum 6 caracteres).
+    // Absent => repli sur l'ancien comportement (mot de passe par defaut) pour ne pas casser les appels existants.
+    if (StringUtils.hasLength(motDePasseChoisi)) {
+      if (motDePasseChoisi.length() < 6) {
+        throw new InvalidEntityException("Le mot de passe administrateur doit contenir au moins 6 caracteres",
+            ErrorCodes.ENTREPRISE_NOT_VALID,
+            Collections.singletonList("motDePasseAdmin : 6 caracteres minimum"));
+      }
+      utilisateur.setMoteDePasse(motDePasseChoisi);
+    }
 
     UtilisateurDto savedUser = utilisateurService.save(utilisateur);
 

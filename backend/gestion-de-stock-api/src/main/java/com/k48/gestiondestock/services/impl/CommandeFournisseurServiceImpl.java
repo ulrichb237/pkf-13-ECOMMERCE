@@ -35,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import com.k48.gestiondestock.utils.CodeGenerator;
 
 @Service
 @Slf4j
@@ -59,6 +60,13 @@ public class CommandeFournisseurServiceImpl implements CommandeFournisseurServic
 
   @Override
   public CommandeFournisseurDto save(CommandeFournisseurDto dto) {
+
+    // Code auto-genre si absent (CF-2026-0001)
+    if (!CodeGenerator.estFourni(dto.getCode())) {
+      String dernier = commandeFournisseurRepository.findTopByCodeStartingWithOrderByIdDesc("CF-")
+          .map(CommandeFournisseur::getCode).orElse(null);
+      dto.setCode(CodeGenerator.nextCommandeFournisseurCode(dernier));
+    }
 
     List<String> errors = CommandeFournisseurValidator.validate(dto);
 
