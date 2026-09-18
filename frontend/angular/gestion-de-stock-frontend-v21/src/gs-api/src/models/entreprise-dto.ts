@@ -10,4 +10,6 @@ export interface EntrepriseDto {
   email?: string;
   numTel?: string;
   steWeb?: string;
+  /** Transitoire : mot de passe choisi par l'utilisateur pour le compte admin a l'inscription */
+  motDePasseAdmin?: string;
 }

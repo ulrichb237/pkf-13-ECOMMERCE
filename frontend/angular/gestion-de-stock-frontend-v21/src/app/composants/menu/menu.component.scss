@@ -1,4 +1,17 @@
 /* Menu lateral design system */
+.menu-logout {
+  margin-top: var(--sp-lg);
+}
+
+.menu-title-logout {
+  color: var(--clr-danger, #b3261e);
+}
+
+.menu-title-logout .menu-icon {
+  background: rgba(179, 38, 30, 0.08);
+  color: var(--clr-danger, #b3261e);
+}
+
 .menu-title {
   display: flex;
   align-items: center;

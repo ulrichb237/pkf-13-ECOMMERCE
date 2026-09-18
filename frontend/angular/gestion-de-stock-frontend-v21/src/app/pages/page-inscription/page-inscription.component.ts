@@ -17,6 +17,10 @@ export class PageInscriptionComponent {
   entrepriseDto: EntrepriseDto = {};
   adresse: AdresseDto = {};
 
+  /** Mot de passe choisi par l'utilisateur pour son compte admin (envoye via motDePasseAdmin) */
+  motDePasse = '';
+  confirmation = '';
+
   /** Erreurs de validation backend — signal : ecrit depuis un callback HTTP (zoneless-safe) */
   readonly errorsMsg = signal<Array<string>>([]);
 
@@ -26,14 +30,20 @@ export class PageInscriptionComponent {
   ) { }
 
   inscrire(): void {
+    if (this.motDePasse.length < 6) {
+      this.errorsMsg.set(['Le mot de passe doit contenir au moins 6 caracteres']);
+      return;
+    }
+    if (this.motDePasse !== this.confirmation) {
+      this.errorsMsg.set(['Les deux mots de passe ne correspondent pas']);
+      return;
+    }
     this.entrepriseDto.adresse = this.adresse;
+    this.entrepriseDto.motDePasseAdmin = this.motDePasse;
     this.entrepriseService.sinscrire(this.entrepriseDto)
     .subscribe(entrepriseDto => {
-      // Inscription reussie : le backend a cree l'entreprise et son compte admin.
-      // Le mot de passe initial du compte admin est defini par le backend
-      // (ENTREPRISE_DEFAULT_PASSWORD du fichier .env) : l'utilisateur se connecte
-      // ensuite via la page de login, puis peut changer son mot de passe
-      // depuis la page "changermotdepasse".
+      // Inscription reussie : le backend a cree l'entreprise et le compte admin
+      // avec le mot de passe choisi par l'utilisateur (champ motDePasseAdmin).
       this.router.navigate(['login']);
     }, error => {
       // Le backend renvoie une ErrorDto { code, httpCode, message, errors[] } :

@@ -2,6 +2,7 @@ import { NgClass, NgFor, NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {Menu} from './menu';
 import {Router} from '@angular/router';
+import {UserService} from '../../services/user/user.service';
 
 @Component({
   imports: [NgFor, NgClass, NgIf],
@@ -135,7 +136,8 @@ export class MenuComponent {
   private lastSelectedMenu: Menu | undefined;
 
   constructor(
-    private router: Router
+    private router: Router,
+    private userService: UserService
   ) { }
 
   /** Ouvre/ferme un groupe de menu (remplace data-toggle=collapse) */
@@ -156,5 +158,10 @@ export class MenuComponent {
     menu.active = true;
     this.lastSelectedMenu = menu;
     this.router.navigate([menu.url]);
+  }
+
+  /** Deconnexion : revoque le refresh token cote backend puis purge la session locale */
+  deconnexion(): void {
+    this.userService.logout();
   }
 }

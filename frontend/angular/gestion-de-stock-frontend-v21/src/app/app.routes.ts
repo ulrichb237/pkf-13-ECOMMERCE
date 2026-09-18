@@ -21,6 +21,7 @@ export const authGuard = (): boolean | ReturnType<Router['parseUrl']> => {
  */
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./pages/page-login/page-login.component').then(m => m.PageLoginComponent) },
+  { path: 'motdepasseoublie', loadComponent: () => import('./pages/page-mot-de-passe-oublie/page-mot-de-passe-oublie.component').then(m => m.PageMotDePasseOublieComponent) },
   { path: 'inscrire', loadComponent: () => import('./pages/page-inscription/page-inscription.component').then(m => m.PageInscriptionComponent) },
   {
     path: '',
@@ -52,7 +53,9 @@ export const routes: Routes = [
       { path: 'nouvelutilisateur/:idUtilisateur', loadComponent: () => import('./pages/utilisateur/nouvel-utilisateur/nouvel-utilisateur.component').then(m => m.NouvelUtilisateurComponent), canActivate: [authGuard] },
       { path: 'profil', loadComponent: () => import('./pages/profil/page-profil/page-profil.component').then(m => m.PageProfilComponent), canActivate: [authGuard] },
       { path: 'changermotdepasse', loadComponent: () => import('./pages/profil/changer-mot-de-passe/changer-mot-de-passe.component').then(m => m.ChangerMotDePasseComponent), canActivate: [authGuard] },
-      { path: 'entreprise', loadComponent: () => import('./pages/entreprise/page-entreprise/page-entreprise.component').then(m => m.PageEntrepriseComponent), canActivate: [authGuard] }
+      { path: 'entreprise', loadComponent: () => import('./pages/entreprise/page-entreprise/page-entreprise.component').then(m => m.PageEntrepriseComponent), canActivate: [authGuard] },
+      { path: 'accueil', loadComponent: () => import('./pages/page-accueil/page-accueil.component').then(m => m.PageAccueilComponent), canActivate: [authGuard] },
+      { path: '', pathMatch: 'full', redirectTo: 'accueil' }
     ]
   }
 ];

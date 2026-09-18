@@ -1,0 +1,50 @@
+<div class="mesh-hero">
+  <div class="auth-card">
+    <span class="pill-tag-soft">Gestion de stock</span>
+    <h2>Mot de passe oublie</h2>
+
+    @if (message()) {
+      <div class="alert alert-success">{{ message() }}</div>
+    }
+    @if (erreur()) {
+      <div class="alert alert-danger">{{ erreur() }}</div>
+    }
+    @if (codeAffiche()) {
+      <div class="alert alert-info">
+        Serveur mail non configure : voici votre code de reinitialisation —
+        <strong>{{ codeAffiche() }}</strong>
+      </div>
+    }
+
+    @if (etape() === 1) {
+      <label class="caption" for="forgot-email">E-mail</label>
+      <input id="forgot-email" type="email" class="form-control" placeholder="E-mail du compte"
+             [(ngModel)]="email" autocomplete="email">
+      <button type="button" class="btn btn-primary" (click)="demanderCode()" [disabled]="chargement()">
+        Recevoir un code
+      </button>
+    }
+
+    @if (etape() === 2) {
+      <label class="caption" for="forgot-code">Code de reinitialisation</label>
+      <input id="forgot-code" type="text" class="form-control" placeholder="Code a 6 chiffres"
+             [(ngModel)]="code" inputmode="numeric">
+
+      <label class="caption" for="forgot-password">Nouveau mot de passe</label>
+      <input id="forgot-password" type="password" class="form-control" placeholder="Nouveau mot de passe (6 caracteres minimum)"
+             [(ngModel)]="nouveauMotDePasse" autocomplete="new-password">
+
+      <label class="caption" for="forgot-confirm">Confirmer</label>
+      <input id="forgot-confirm" type="password" class="form-control" placeholder="Confirmer le mot de passe"
+             [(ngModel)]="confirmation" autocomplete="new-password">
+
+      <button type="button" class="btn btn-primary" (click)="reinitialiser()" [disabled]="chargement()">
+        Reinitialiser le mot de passe
+      </button>
+    }
+
+    <p class="text-muted text-center auth-alt">
+      <a [routerLink]="['/login']" class="btn-link">Retour a la connexion</a>
+    </p>
+  </div>
+</div>

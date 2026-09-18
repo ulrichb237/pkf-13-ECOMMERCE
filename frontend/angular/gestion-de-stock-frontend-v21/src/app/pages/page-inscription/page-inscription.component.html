@@ -33,6 +33,14 @@
     <textarea id="description" class="form-control" placeholder="Description" rows="3"
               [(ngModel)]="entrepriseDto.description"></textarea>
 
+    <h3>Compte administrateur</h3>
+    <div class="form-grid">
+      <input id="inscription-password" type="password" class="form-control" placeholder="Mot de passe (6 caracteres minimum)"
+             [(ngModel)]="motDePasse" autocomplete="new-password">
+      <input type="password" class="form-control" placeholder="Confirmer le mot de passe"
+             [(ngModel)]="confirmation" autocomplete="new-password">
+    </div>
+
     <button type="button" class="btn btn-primary" (click)="inscrire()">S'inscrire</button>
     <p class="text-muted text-center auth-alt">Deja un compte ?
       <a [routerLink]="['/login']" class="btn-link">Se connecter</a>

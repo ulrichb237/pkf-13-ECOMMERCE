@@ -15,6 +15,9 @@
            [(ngModel)]="authenticationRequest.password" autocomplete="current-password">
 
     <button type="button" class="btn btn-primary" (click)="login()">Se connecter</button>
+    <p class="text-muted text-center auth-alt">
+      <a [routerLink]="['/motdepasseoublie']" class="btn-link">Mot de passe oublie ?</a>
+    </p>
     <p class="text-muted text-center auth-alt">Pas encore de compte ?
       <a [routerLink]="['/inscrire']" class="btn-link">S'inscrire</a>
     </p>

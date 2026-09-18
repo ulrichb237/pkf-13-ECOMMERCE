@@ -1,0 +1,28 @@
+/* Reprend les tokens du systeme d'auth (mesh-hero / auth-card definis globalement) */
+:host {
+  display: block;
+}
+
+.alert-success {
+  background: rgba(46, 125, 50, 0.1);
+  border: 1px solid rgba(46, 125, 50, 0.35);
+  color: #2e7d32;
+  border-radius: var(--radius-md);
+  padding: var(--sp-sm) var(--sp-md);
+}
+
+.alert-info {
+  background: var(--clr-primary-subdued, rgba(25, 118, 210, 0.08));
+  border: 1px solid rgba(25, 118, 210, 0.35);
+  color: var(--clr-primary-deep, #1565c0);
+  border-radius: var(--radius-md);
+  padding: var(--sp-sm) var(--sp-md);
+}
+
+.alert-danger {
+  background: rgba(179, 38, 30, 0.08);
+  border: 1px solid rgba(179, 38, 30, 0.35);
+  color: #b3261e;
+  border-radius: var(--radius-md);
+  padding: var(--sp-sm) var(--sp-md);
+}
