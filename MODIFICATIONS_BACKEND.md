@@ -99,7 +99,71 @@ envoie ses dates au format ISO-8601.
 
 ---
 
-## Règles métier backend constatées (à respecter par le frontend — comportements normaux, non bugs)
+## 6. Bugs backend découverts lors des tests E2E (2026-09-18) — ⚠️ À VALIDER avant correction
+
+Conformément à la règle du projet, ces deux anomalies nécessitent une **validation avant toute modification backend**.
+Le frontend est blanchi : les mêmes appels reproduits avec `curl` (JSON strictement numérique) produisent les mêmes symptômes.
+
+### 6.1 `VentesServiceImpl.save` — lignes de vente et mouvements créés sans `idEntreprise` (données invisibles)
+
+**Symptômes observés**
+- `POST /api/v1/ventes` répond 200, la vente est créée, mais `GET /api/v1/ventes/{id}`, `GET /api/v1/ventes` et
+  `GET /api/v1/articles/{id}/historique-ventes` ne renvoient **jamais les lignes** (`ligneVentes: null` / `[]`).
+- Les sorties de stock `sourcemvt = VENTE` existent en base mais le stock réel les ignore
+  (article 157 : `-13` affiché au lieu de `-20`).
+
+**Preuves en base (MySQL, table `lignevente` / `mvtstk`)**
+
+| id | idvente | idarticle | quantite | identreprise |
+|----|---------|-----------|----------|--------------|
+| 159 | 158 | 157 | 3.00 | **NULL** |
+| 173 | 172 | 157 | 2.00 | **NULL** |
+| 183 | 182 | 157 | 2.00 | **NULL** |
+
+→ mouvements `mvtstk` correspondants (ids 160, 174, 184, `sourcemvt=VENTE`) : `identreprise = NULL` également.
+
+**Cause** : le `StatementInspector` multi-entreprise (`EntrepriseStatementInspector`) ajoute
+`identreprise = <JWT>` à chaque SELECT. Les lignes insérées avec `identreprise NULL` sont donc
+exclues de **toutes** les lectures. `VentesServiceImpl.save` oublie la propagation :
+
+```java
+// CommandeClientServiceImpl.save (correct) :
+ligneCommandeClient.setIdEntreprise(dto.getIdEntreprise());
+
+// VentesServiceImpl.save (bug) — setIdEntreprise absent :
+LigneVente ligneVente = LigneVenteDto.toEntity(ligneVenteDto);
+ligneVente.setVente(savedVentes);
+ligneVenteRepository.save(ligneVente);   // identreprise jamais renseigné
+```
+
+**Correction proposée** (1 ligne, symétrique du flow commandes) :
+```java
+ligneVente.setIdEntreprise(dto.getIdEntreprise());
+```
++ rétro-patcher en base les lignes/mouvements existants :
+`update lignevente set identreprise = (select identreprise from ventes v where v.id = idvente) where identreprise is null;`
+(idem sur `mvtstk` pour `sourcemvt = 'VENTE'`).
+
+### 6.2 Double comptabilisation du stock sur les commandes clients (et symétrique fournisseurs)
+
+**Symptôme** : une commande client génère une **sortie de stock à la création**
+(`CommandeClientServiceImpl.save` → `effectuerSortie(savedLigneCmd)`) **et** une seconde à la livraison
+(`updateEtatCommande` → `updateMvtStk(idCommande)`). Article 157 : commande de 5 puis livraison →
+mouvements `-5` (id 167) **et** `-8` (id 171, quantité modifiée entre-temps) pour une seule commande.
+Le stock part donc en double négatif.
+
+**Symétrique** : `CommandeFournisseurServiceImpl` fait de même avec `effectuerEntree` à la création
+(ligne 110) + `updateMvtStk` à la réception (ligne 184) → double entrée.
+
+**Correction proposée** : choisir **un seul point de comptabilisation**. Option A (recommandée,
+cohérente avec le message UI actuel « la livraison génère une sortie de stock ») :
+supprimer `effectuerSortie(...)` / `effectuerEntree(...)` de `save` et ne comptabiliser qu'à la
+transition d'état (LIVREE / réception selon le workflow). Option B : garder la comptabilisation à la
+création et supprimer l'appel dans `updateEtatCommande` — auquel cas le frontend ne doit plus
+afficher l'avertissement de livraison (déjà documenté côté UI).
+
+**À valider** : quelle option retenir (A ou B) avant toute modification.
+
 
 | Règle | Comportement API |
 |---|---|

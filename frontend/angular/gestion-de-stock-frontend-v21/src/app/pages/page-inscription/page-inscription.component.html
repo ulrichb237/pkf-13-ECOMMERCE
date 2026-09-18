@@ -4,9 +4,13 @@
     <h2>S'inscrire</h2>
     <p class="text-muted">Creez votre entreprise et votre compte administrateur.</p>
 
-    <div class="alert alert-danger" *ngIf="errorsMsg.length > 0">
-      <div *ngFor="let msg of errorsMsg"><span>{{ msg }}</span></div>
-    </div>
+    @if (errorsMsg().length > 0) {
+      <div class="alert alert-danger">
+        @for (msg of errorsMsg(); track $index) {
+          <div><span>{{ msg }}</span></div>
+        }
+      </div>
+    }
 
     <h3>Entreprise</h3>
     <div class="form-grid">

@@ -10,7 +10,7 @@
 
   <div class="page-content">
     <app-detail-utilisateur
-      *ngFor="let utilisateur of listUtilisateur(); track utilisateur.id"
+      *ngFor="let utilisateur of listUtilisateur()"
       [utilisateur]="utilisateur"
     ></app-detail-utilisateur>
   </div>

@@ -10,7 +10,7 @@
 
   <div class="page-content">
     <app-detail-clt-frs
-      *ngFor="let client of listClient(); track client.id"
+      *ngFor="let client of listClient()"
       [clientFournisseur]="client"
       [origin]="'client'"
       (suppressionResult)="handleSuppression($event)"

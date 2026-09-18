@@ -51,7 +51,7 @@
   </div>
 
   <div class="card custom-border p-3 mt-2 lignes-scroll">
-    <app-detail-cmd *ngFor="let ligne of lignesCommande(); track ligne.article?.codeArticle"
+    <app-detail-cmd *ngFor="let ligne of lignesCommande()"
                     [ligneCommande]="ligne"
                     (suppressionLigne)="retirerLigne($event)"
                     (quantiteModifiee)="majQuantiteLigne($event)"></app-detail-cmd>

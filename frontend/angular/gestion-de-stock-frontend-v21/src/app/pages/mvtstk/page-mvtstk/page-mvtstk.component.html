@@ -8,7 +8,7 @@
 
   <div class="empty-state" *ngIf="!listArticle().length && !errorMsg()">Aucun article enregistre</div>
 
-  <div *ngFor="let article of listArticle(); track article.id" class="card">
+  <div *ngFor="let article of listArticle()" class="card">
     <button type="button" class="card-cmd-header" (click)="basculerArticle(article.id)"
             [attr.aria-expanded]="articlesOuverts().has(article.id!)">
       <div class="mvt-article-head">
@@ -27,7 +27,7 @@
       <table class="data-table" *ngIf="mapMvtstk().get(article.id!)?.length">
         <thead><tr><th>Date</th><th>Quantite</th><th>Type</th><th>Source</th></tr></thead>
         <tbody>
-          <tr *ngFor="let mvt of mapMvtstk().get(article.id!); track mvt.id">
+          <tr *ngFor="let mvt of mapMvtstk().get(article.id!)">
             <td>{{ mvt.dateMvt | date:'dd/MM/yyyy HH:mm' }}</td>
             <td class="tnum">{{ mvt.quantite }}</td>
             <td>
@@ -48,7 +48,7 @@
         <label class="caption" for="articleMvt">Article</label>
         <select id="articleMvt" name="articleMvt" [(ngModel)]="selectedArticle">
           <option [ngValue]="null" disabled>Choisir un article</option>
-          <option *ngFor="let article of listArticle(); track article.id" [ngValue]="article">
+          <option *ngFor="let article of listArticle()" [ngValue]="article">
             {{ article.codeArticle }} — {{ article.designation }}
           </option>
         </select>

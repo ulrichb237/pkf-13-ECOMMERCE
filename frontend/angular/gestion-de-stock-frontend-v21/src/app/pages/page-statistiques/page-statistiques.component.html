@@ -5,7 +5,7 @@
       <label class="caption" for="article-stats">Article analyse</label>
       <select id="article-stats" class="input" [(ngModel)]="articleSelectionneId" (ngModelChange)="chargerStatistiques()">
         <option [ngValue]="null">— Choisir un article —</option>
-        <option *ngFor="let a of listArticle(); track a.id" [ngValue]="a.id">{{ a.designation }}</option>
+        <option *ngFor="let a of listArticle()" [ngValue]="a.id">{{ a.designation }}</option>
       </select>
     </div>
   </div>
@@ -33,7 +33,7 @@
     <table class="data-table" *ngIf="lignesVentes().length">
       <thead><tr><th>Vente</th><th>Date</th><th>Quantite</th><th>Prix unitaire</th><th>Total</th></tr></thead>
       <tbody>
-        <tr *ngFor="let l of lignesVentes(); track l.id">
+        <tr *ngFor="let l of lignesVentes()">
           <td>{{ l.vente?.code }}</td>
           <td>{{ l.vente?.dateVente ? (l.vente?.dateVente | date:'dd/MM/yyyy') : '—' }}</td>
           <td class="tnum">{{ l.quantite }}</td>

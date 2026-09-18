@@ -1,4 +1,4 @@
-import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { NgIf, NgFor } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, signal } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {CmdcltfrsService} from '../../services/cmdcltfrs/cmdcltfrs.service';
@@ -19,7 +19,7 @@ import { PaginationComponent } from '../../composants/pagination/pagination.comp
 type EtatCommande = 'EN_PREPARATION' | 'VALIDEE' | 'LIVREE';
 
 @Component({
-  imports: [NgIf, NgFor, DatePipe, BouttonActionComponent, DetailCmdComponent, DetailCmdCltFrsComponent, PaginationComponent],
+  imports: [NgIf, NgFor, BouttonActionComponent, DetailCmdComponent, DetailCmdCltFrsComponent, PaginationComponent],
   selector: 'app-page-cmd-clt-frs',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './page-cmd-clt-frs.component.html',

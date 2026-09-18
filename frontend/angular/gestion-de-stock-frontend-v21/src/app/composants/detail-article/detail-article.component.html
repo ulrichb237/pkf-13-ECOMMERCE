@@ -20,16 +20,15 @@
 
   <div class="article-card-actions">
     <button type="button" class="btn-link" (click)="modifierArticle()">Modifier</button>
-    <ng-container *ngIf="!confirmationVisible; else confirmBloc">
+    @if (!confirmationVisible) {
       <button type="button" class="btn-link btn-link-danger" (click)="demanderConfirmation()">Supprimer</button>
-    </ng-container>
-    <ng-template #confirmBloc>
+    } @else {
       <span class="cmd-ligne-confirm">
         Supprimer ?
         <button type="button" class="btn-link" (click)="annulerConfirmation()">Non</button>
         <button type="button" class="btn-link btn-link-danger" (click)="confirmerEtSupprimerArticle()">Oui</button>
       </span>
-    </ng-template>
+    }
     <button type="button" class="btn-link" (click)="detailsResult.emit(articleDto())">Details</button>
   </div>
 </div>

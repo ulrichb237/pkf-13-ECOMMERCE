@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { NgClass, NgFor } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { NotificationService } from '../../services/notification/notification.service';
 
 /**
@@ -8,7 +8,7 @@ import { NotificationService } from '../../services/notification/notification.se
  * y sont affichees comme messages actionnables.
  */
 @Component({
-  imports: [NgFor, NgClass],
+  imports: [NgClass],
   selector: 'app-toasts',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `

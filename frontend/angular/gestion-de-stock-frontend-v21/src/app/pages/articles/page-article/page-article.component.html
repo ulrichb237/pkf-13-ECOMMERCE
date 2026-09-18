@@ -12,7 +12,7 @@
 
   <div class="page-content">
     <app-detail-article
-      *ngFor="let article of listArticle(); track article.id"
+      *ngFor="let article of listArticle()"
       [articleDto]="article"
       (suppressionResult)="handleSuppression($event)"
       (detailsResult)="voirDetails($event)"

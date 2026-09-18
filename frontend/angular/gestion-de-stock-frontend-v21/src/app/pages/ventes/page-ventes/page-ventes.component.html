@@ -16,7 +16,7 @@
       <span>Total lignes</span>
       <span></span>
     </div>
-    <div class="card ventes-row" *ngFor="let vente of listVentes(); track vente.id">
+    <div class="card ventes-row" *ngFor="let vente of listVentes()">
       <div class="ventes-grid">
         <span class="tnum">{{ vente.code }}</span>
         <span class="tnum">{{ vente.dateVente | date:'dd/MM/yyyy HH:mm' }}</span>

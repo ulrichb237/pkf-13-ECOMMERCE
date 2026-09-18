@@ -8,7 +8,7 @@
 
   <div class="empty-state" *ngIf="!listCategories().length && !errorMsgs()">Aucune categorie enregistree</div>
 
-  <div class="card custom-border cat-row" *ngFor="let cat of listCategories(); track cat.id">
+  <div class="card custom-border cat-row" *ngFor="let cat of listCategories()">
     <span class="tnum cat-code">{{ cat.code }}</span>
     <span class="cat-designation">{{ cat.designation }}</span>
     <span class="cat-actions">

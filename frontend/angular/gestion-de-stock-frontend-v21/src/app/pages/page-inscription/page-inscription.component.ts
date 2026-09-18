@@ -1,31 +1,29 @@
-import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { RouterLink, Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import {EntrepriseDto} from '../../../gs-api/src/models/entreprise-dto';
 import {EntrepriseService} from '../../services/entreprise/entreprise.service';
 import {AdresseDto} from '../../../gs-api/src/models/adresse-dto';
-import {Router} from '@angular/router';
 
 @Component({
-  imports: [NgIf, NgFor, FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink],
   selector: 'app-page-inscription',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './page-inscription.component.html',
   styleUrls: ['./page-inscription.component.scss']
 })
-export class PageInscriptionComponent implements OnInit {
+export class PageInscriptionComponent {
 
   entrepriseDto: EntrepriseDto = {};
   adresse: AdresseDto = {};
-  errorsMsg: Array<string> = [];
+
+  /** Erreurs de validation backend — signal : ecrit depuis un callback HTTP (zoneless-safe) */
+  readonly errorsMsg = signal<Array<string>>([]);
 
   constructor(
     private entrepriseService: EntrepriseService,
     private router: Router
   ) { }
-
-  ngOnInit(): void {
-  }
 
   inscrire(): void {
     this.entrepriseDto.adresse = this.adresse;
@@ -38,14 +36,14 @@ export class PageInscriptionComponent implements OnInit {
       // depuis la page "changermotdepasse".
       this.router.navigate(['login']);
     }, error => {
-      // Le backend renvoie soit une liste de violations de validation (errors),
-      // soit un ErrorDto avec message unique — les deux cas sont couverts.
+      // Le backend renvoie une ErrorDto { code, httpCode, message, errors[] } :
+      // soit une liste de violations de validation, soit un message unique.
       const errors = error?.error?.errors;
-      if (Array.isArray(errors) && errors.length) {
-        this.errorsMsg = errors;
-      } else {
-        this.errorsMsg = [error?.error?.message || 'Erreur lors de l inscription'];
-      }
-      });
+      this.errorsMsg.set(
+        Array.isArray(errors) && errors.length
+          ? errors
+          : [error?.error?.message || 'Erreur lors de l inscription']
+      );
+    });
   }
 }

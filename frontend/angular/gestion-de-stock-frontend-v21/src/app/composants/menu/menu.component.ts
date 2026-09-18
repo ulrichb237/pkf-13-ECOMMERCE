@@ -1,10 +1,10 @@
-import { NgClass, NgFor } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {Menu} from './menu';
 import {Router} from '@angular/router';
 
 @Component({
-  imports: [NgFor, NgClass],
+  imports: [NgFor, NgClass, NgIf],
   selector: 'app-menu',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './menu.component.html',

@@ -17,22 +17,22 @@
 
   <div class="cltfrs-actions">
     <button type="button" class="btn-link" (click)="modifierClientFournisseur()">Modifier</button>
-    <ng-container *ngIf="!confirmationVisible; else confirmBloc">
+    @if (!confirmationVisible) {
       <button type="button" class="btn-link btn-link-danger" (click)="demanderConfirmation()">Supprimer</button>
-    </ng-container>
-    <ng-template #confirmBloc>
+    } @else {
       <span class="cmd-ligne-confirm">
-        Supprimer ce {{ origin }} ?
+        Supprimer ce {{ origin() }} ?
         <button type="button" class="btn-link" (click)="annulerConfirmation()">Non</button>
         <button type="button" class="btn-link btn-link-danger" (click)="confirmerEtSupprimer()">Oui</button>
       </span>
-    </ng-template>
+    }
     <button type="button" class="btn-link" (click)="detailsVisibles = true">Details</button>
   </div>
 </div>
 
 <!-- Panneau details (remplace la modale Bootstrap) -->
-<div class="dialog-backdrop" *ngIf="detailsVisibles" (click)="detailsVisibles = false">
+@if (detailsVisibles) {
+  <div class="dialog-backdrop" (click)="detailsVisibles = false">
   <div class="dialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
     <div class="dialog-header">
       <h3 class="dialog-title">{{ clientFournisseur().nom }} {{ clientFournisseur().prenom }}</h3>
@@ -50,3 +50,4 @@
     </div>
   </div>
 </div>
+}

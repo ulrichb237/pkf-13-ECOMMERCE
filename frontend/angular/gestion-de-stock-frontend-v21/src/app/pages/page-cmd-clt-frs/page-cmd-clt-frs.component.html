@@ -11,7 +11,7 @@
     Aucune commande
   </div>
 
-  <div *ngFor="let cmd of listeCommandes(); track cmd.id" class="card card-cmd">
+  <div *ngFor="let cmd of listeCommandes()" class="card card-cmd">
     <button type="button" class="card-cmd-header" (click)="basculerAccordeon(cmd.id)"
             [attr.aria-expanded]="commandesOuvertes().has(cmd.id)">
       <app-detail-cmd-clt-frs
@@ -24,7 +24,7 @@
     <div class="card-cmd-body" *ngIf="commandesOuvertes().has(cmd.id)">
       <div class="empty-state empty-state-sm" *ngIf="chargementLignes().has(cmd.id)">Chargement des lignes…</div>
       <app-detail-cmd
-        *ngFor="let ligne of mapLignesCommande().get(cmd.id); track ligne.id"
+        *ngFor="let ligne of mapLignesCommande().get(cmd.id)"
         #ligneRef
         [ligneCommande]="ligne"
         [origin]="origin"
