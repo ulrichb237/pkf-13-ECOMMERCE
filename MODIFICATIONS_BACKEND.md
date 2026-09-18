@@ -251,3 +251,46 @@ backend ; parcours liste → création → suppression d'une catégorie validé 
 4. Il change ensuite son mot de passe via `/changermotdepasse`
    (`PATCH /api/v1/utilisateurs/mot-de-passe`, champs `id`, `motDePasse`,
    `confirmMotDePasse` — les deux mots de passe doivent être identiques).
+
+---
+
+## 7. Entrées de stock invisibles : mouvements manuels sans `idEntreprise` — ✅ CORRIGÉ (2026-09-18)
+
+**Symptôme** : `POST /api/v1/mouvements-stock/entree` créait le mouvement avec
+`identreprise = NULL`. Le filtre multi-entreprise (`EntrepriseStatementInspector`)
+rendait ensuite ce mouvement invisible à toutes les lectures : le stock réel de
+l'article restait faux (les sorties comptaient, pas les entrées) et le mouvement
+n'apparaissait pas dans l'historique. Les sorties étaient épargnées car générées
+par des chemins de code qui propagent déjà l'entreprise (ventes, commandes).
+
+**Cause** : `MvtStkServiceImpl.entreePositive` / `sortieNegative` ne renseignaient
+jamais `dto.setIdEntreprise(...)` et l'endpoint ne l'exige pas dans le payload.
+
+**Correctif** (`MvtStkServiceImpl`) : si `idEntreprise` est absent du mouvement,
+l'article lié est rechargé en base (`articleService.findById`) et l'entreprise
+propriétaire de l'article est appliquée au mouvement — symétrique de 6.1.
+
+**Rétro-patch SQL appliqué** :
+```sql
+update mvtstk set identreprise = 1
+ where idarticle in (<ids articles entreprise 1>) and identreprise is null;
+```
+
+**Vérification** : entrée de +25 sur l'article 217 puis lecture du stock réel →
+la valeur reflète l'entrée ; le dashboard affiche une valeur de stock positive
+et cohérente.
+
+---
+
+## 8. Amélioration suggérée (non appliquée — à valider)
+
+`POST /api/v1/clients` et `POST /api/v1/fournisseurs` acceptent de créer un tiers
+**sans entreprise** (`identreprise = NULL` en base) : le tiers devient alors
+invisible pour l'entreprise qui vient de le créer (même filtre multi-entreprise).
+Reproduit pendant la préparation des données de démo ; contourné par rétro-patch
+SQL (`client/fournisseur.identreprise = 1`).
+
+**Suggestion** : dans `ClientServiceImpl.save` / `FournisseurServiceImpl.save`,
+propager `idEntreprise` (champ explicite du DTO, ou entreprise de l'utilisateur
+authentifié) comme le font déjà les articles et les ventes. À appliquer après
+votre validation.

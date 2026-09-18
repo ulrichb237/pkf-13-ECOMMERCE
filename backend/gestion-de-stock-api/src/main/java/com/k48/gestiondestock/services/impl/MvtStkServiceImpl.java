@@ -1,5 +1,6 @@
 package com.k48.gestiondestock.services.impl;
 
+import com.k48.gestiondestock.dto.ArticleDto;
 import com.k48.gestiondestock.dto.MvtStkDto;
 import com.k48.gestiondestock.exception.ErrorCodes;
 import com.k48.gestiondestock.exception.InvalidEntityException;
@@ -73,6 +74,16 @@ public class MvtStkServiceImpl implements MvtStkService {
       log.error("Article is not valid {}", dto);
       throw new InvalidEntityException("Le mouvement du stock n'est pas valide", ErrorCodes.MVT_STK_NOT_VALID, errors);
     }
+    // Propagation de l'entreprise : sans elle, le filtre multi-entreprise
+    // (EntrepriseStatementInspector) rend le mouvement invisible a toutes les
+    // lectures (stock reel faux, historique vide). L'article lie au mouvement
+    // est recharge en base pour retrouver l'entreprise qui le possede.
+    if (dto.getIdEntreprise() == null && dto.getArticle() != null && dto.getArticle().getId() != null) {
+      final ArticleDto article = articleService.findById(dto.getArticle().getId());
+      if (article != null && article.getIdEntreprise() != null) {
+        dto.setIdEntreprise(article.getIdEntreprise());
+      }
+    }
     dto.setQuantite(
         BigDecimal.valueOf(
             Math.abs(dto.getQuantite().doubleValue())
@@ -89,6 +100,13 @@ public class MvtStkServiceImpl implements MvtStkService {
     if (!errors.isEmpty()) {
       log.error("Article is not valid {}", dto);
       throw new InvalidEntityException("Le mouvement du stock n'est pas valide", ErrorCodes.MVT_STK_NOT_VALID, errors);
+    }
+    // Symetrique de l'entree : cf. commentaire ci-dessus (filtre multi-entreprise)
+    if (dto.getIdEntreprise() == null && dto.getArticle() != null && dto.getArticle().getId() != null) {
+      final ArticleDto article = articleService.findById(dto.getArticle().getId());
+      if (article != null && article.getIdEntreprise() != null) {
+        dto.setIdEntreprise(article.getIdEntreprise());
+      }
     }
     dto.setQuantite(
         BigDecimal.valueOf(
